@@ -1,2 +1,50 @@
 # scrobblerad.io
-A website to listen to cool radio stations and scrobble to LastFM with Web Scrobbler
+A PWA and website to listen to cool radio stations and scrobble to LastFM with Web Scrobbler
+
+[![HTML5](https://img.shields.io/badge/HTML-FF4500?style=for-the-badge&logo=html5&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/CSS-0077B5?&style=for-the-badge&logo=css3&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](#)
+
+![image](https://github.com/jbwharris/scrobblerad.io/assets/2962327/9deb33e5-eb4e-4313-a412-ce1fbce95a1a)
+
+
+## Features 
+- A diverse set of over 30 different online radio stations from around the world. Featuring [KEXP](https://kexp.org), [BBC6](https://www.bbc.co.uk/sounds/play/live:bbc_6music), various NPR stations and many more...
+- MediaSession controls, so you can easily switch between stations using the media controls on your keyboard
+- Song and artist data filtered using Web Scrobbler's [Metadata Filter](https://github.com/web-scrobbler/metadata-filter)
+- Album data from LastFM API
+- Apple CarPlay support
+
+## FAQ
+### Why another radio streaming app?
+There are a zillion radio streaming apps out there, but there really aren’t any that did so with a scrobbling first focus. That was my primary goal, to gather a bunch of great radio stations that have publicly accessible API metadata and make an app that could scrobble the songs to LastFM, Listenbrainz and LibreFM. For years I had struggled with the idea of finding a reliable way to scrobble radio on the go. There had been an early iOS app that did it pretty well, but as LastFM had faded in popularity there just never seemed to be any apps that focused on being able to accurately scrobble online radio.
+
+### How does the scrobbling work?
+Currently it doesn’t scrobble directly from the app and relies on [Web Scrobbler](https://web-scrobbler.com) to handle sending to LastFM, MusicBrainz and LibreFM. You just need to login to each platform. I have submitted a connector to Web Scrobbler for this site, but it may take a bit for the connector to make it into the various extension builds for each browser.
+
+### Is this a progressive web app (PWA)?
+Yes and no. Unfortunately due to limitations with iOS and Safari browser extensions won’t work in a standalone PWA, which means scrobbling won’t work. But if you wanted to just listen to some radio, knock yourself out. I don't have any Android devices to test against, but I suspect it's possible to use this as a PWA and use [Pano Scrobbler](https://github.com/kawaiiDango/pano-scrobbler) to track what you're listening to. 
+
+### How did you choose the stations?
+Part of my motivation was to add Canadian and local stations to my rotation. So there are some pretty niche and deep cut stations in there. Most are Indie and Alternative stations, and some stations that will play a bit of everything. I’ve tried to steer clear of corporate radio stations with lots of commercials, but that doesn’t mean there aren’t some stations with them. My criteria was typically whether they played a decent variety of music. And they needed to have a public API that I could pull the data from.
+
+### Why isn’t the station showing any data?
+There are a few different factors that can cause a site to not have streaming data.
+1. The station is on a commercial break. Some stations pause their info during commercials or put a station ID into their meta data. I’ve tried to minimize that where possible. 
+2. The station is playing a syndicated show, which will typically not have the song data split up. You may just get the last song played before the show started, or the name of the show in the data. 
+3. The API might have stopped updating for some reason. I have a check in there with some stations to check for stale API data, but it's not with all stations. It all depends on whether they have a timestamp on when a track is played in their API. 
+
+### Why doesn’t BBC6 work?
+It does, though only in browsers that support HLS playback. I could have added a 3rd party JavaScript library for that, but it was literally the only station with that problem. BBC streams will work in Safari on macOS and iOS. Beyond that there are browser extensions that can enable HLS. I honestly don’t know how compatibility might fare on Windows/Linux/Android, as my primary focus was on macOS/iOS/iPadOS. 
+
+### Does this work with Apple CarPlay?
+Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping between stations is something I’ve tried to get working without luck. I’ve had it work, but not consistently. I suspect this may work with Android Auto, but don't have a device to test this theory. 
+
+## To-Do List
+- [ ] Add native scrobbling to make this a complete PWA solution.
+- [ ] Add a filter for if the station name is in the metadata and not scrobble it. Sometimes a station will throw in a station ID or commercial into their API metadata.
+- [ ] Add SongWhip links to add to various streaming platforms.
+- [ ] Get station skipping working in iOS for Apple CarPlay.
+- [ ] Add recently scrobbled data to the page, so you could have a local indication of what has scrobbled.
+- [ ] Fix responsive styling and breakpoints.
+
+## Acknowledgements
+- This project was originally forked from [PWA RadioKing Player](https://github.com/lunar-d/PWA-RadioKing-Player). When I started this project, I didn't know much about radio APIs or progressive web apps and this project offered me a good introduction while giving me a structure I needed. It was originally for playing a single radio station and I was able to make an extensible structure where I could add tons of radio stations. 
