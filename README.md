@@ -1,5 +1,5 @@
-# scrobblerad.io
-A PWA and website to listen to cool radio stations and scrobble to LastFM with Web Scrobbler
+# [scrobblerad.io](https://scrobblerad.io)
+A PWA and website to listen to cool radio stations and easily scrobble to [LastFM](https://last.fm) with [Web Scrobbler](https://web-scrobbler.com)
 
 [![HTML5](https://img.shields.io/badge/HTML-FF4500?style=for-the-badge&logo=html5&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/CSS-0077B5?&style=for-the-badge&logo=css3&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](#)
 
