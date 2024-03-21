@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>scrobblerad.io</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="icon" href="img/icons/icon.svg" />
+
+  <!-- pwa support -->
+  <link rel="manifest" href="manifest.json" />
+  <!-- ios support -->
+  <meta name="apple-mobile-web-app-status-bar" content="black-translucent" />
+  <!-- The page color schemes -->
+  <meta name="color-scheme" content="light dark">
+  <!-- Optional Meta Theme Color is also supported on Safari and Chrome -->
+  <meta name="theme-color" content="#eeeeee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+
+  <!-- Bootstrap CSS v5.0.2 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-dark.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css" integrity="sha256-XoaMnoYC5TH6/+ihMEnospgm0J1PM/nioxbOUdnM8HY=" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+  <header class="fixed-lg-top sticky-top">
+    <h1 class="siteName">scrobblerad.io</h1>
+    <input type="checkbox" id="openSideMenu" class="openSideMenu">
+    <label for="openSideMenu" class="menuIconToggle">
+      <div class="hamb-line dia part-1"></div>
+      <div class="hamb-line hor"></div>
+      <div class="hamb-line dia part-2"></div>
+    </label>
+
+    <nav class="stationNav">
+      <div class="d-flex flex-column" id="stationSelect">
+        <span class="navbar-text p-0 fw-bold h5 ps-2">Choose A Station</span>
+      </div>
+    </nav>
+
+  </header>
+
+  <div class="container" id="mainWrapper">
+    <div class="row">
+      <main class="flex-shrink-0 col">
+        <div class="container px-0" id="metadata">
+          <div id="player" class="row row-cols-1 album-controls px-0">
+            <div class="col offset-md-2 col-md-6 pt-3 player px-0" id="webamp">
+
+              <img id="albumArt" src="img/defaultArt.webp" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
+
+              <div class="media-controls">
+                <button id="skipBackButton" type="button" class="btn btn-dark btn-lg mt-3">
+                  <i class="fa fa-backward"></i>
+                </button>
+                <button id="playerButton" type="button" class="btn btn-dark btn-lg mt-3">
+                  <i class="fa fa-play"></i>
+                </button>
+                <button id="skipForwardButton" type="button" class="btn btn-dark btn-lg mt-3">
+                  <i class="fa fa-forward"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col col-md-4 pt-3 p-4 metainfo">
+              <h4 id="title" class="card-title"></h4>
+              <p id="artist" class="card-text"></p>
+              <p id="album" class="card-text"></p>
+              <p id="noalbum" class="card-text invisible"></p>
+              <a href="" id="radioName" class="" target="_blank"></a>
+              <p id="stationLocation" class="fs-6"></p>
+            </div>
+          </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Bootstrap JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha256-cMPWkL3FzjuaFSfEYESYmjF25hCIL6mfRSPnW8OVvM4=" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@web-scrobbler/metadata-filter@latest/dist/filter.min.js"></script>
+
+  <script src="js/stations.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+
+</html>

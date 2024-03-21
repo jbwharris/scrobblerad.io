@@ -1,0 +1,49 @@
+{
+    "manifest_version": 3,
+    "name": "scrobblerad.io",
+    "short_name": "scrobblerad.io",
+    "start_url": "index.html",
+    "display": "standalone",
+    "description": "Scrobble Indie Radio to last.fm",
+    "lang": "en",
+    "categories": "entertainment,music,news",
+    "background_color": "#fdfdfd",
+    "theme_color": "#111111",
+    "orientation": "portrait-primary",
+    "icons": [
+    {
+        "src": "/img/icons/icon_48x48.png",
+        "type": "image/png",
+        "sizes": "48x48"
+    },
+    {
+        "src": "/img/icons/icon_72x72.png",
+        "sizes": "72x72",
+        "type": "image/png"
+    },
+    {
+        "src": "/img/icons/icon_96x96.png",
+        "sizes": "96x96",
+        "type": "image/png"
+    },
+    {
+        "src": "/img/icons/icon_144x144.png",
+        "sizes": "144x144",
+        "type": "image/png"
+    },
+    {
+        "src": "/img/icons/icon_168x168.png",
+        "sizes": "168x168",
+        "type": "image/png"
+    },
+    {
+        "src": "/img/icons/icon_192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    },
+    {
+        "src": "/img/icons/icon_512x512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+    }]
+}
