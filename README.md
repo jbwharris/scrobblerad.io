@@ -47,4 +47,4 @@ Yes it does. I originally started this project with the goal of being able to sc
 - [ ] Fix responsive styling and breakpoints.
 
 ## Acknowledgements
-- This project was originally forked from [PWA RadioKing Player](https://github.com/lunar-d/PWA-RadioKing-Player). When I started this project, I didn't know much about radio APIs or progressive web apps and this project offered me a good introduction while giving me a structure I needed. It was originally for playing a single radio station and I was able to make an extensible structure where I could add tons of radio stations. 
+- This project was originally forked from [PWA RadioKing Player](https://github.com/lunar-d/PWA-RadioKing-Player). When I started this project, I didn't know much about radio APIs or progressive web apps and this project offered me a good introduction while giving me a foundation to build from. It was originally for playing a single radio station and I was able to make an extensible structure where I could add tons of radio stations. 
