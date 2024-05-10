@@ -365,14 +365,6 @@ const stations = {
     timestamp: "updated",
     orbPath: true,
   },
-  // radiofreefedi: {
-  //   stationName: "Radio Free Fedi",
-  //   location: "Fediverse",
-  //   webUrl: "https://radiofreefedi.net/",
-  //   streamUrl: "http://relay.radiofreefedi.net/listen/rff/rff.mp3",
-  //   apiUrl: "https://radiofreefedi.net/np/recent.txt",
-  //   htmlResponse: true,
-  // },
   radioparadisemain: {
     stationName: "Radio Paradise Main Mix",
     albumArt: "iImg",
