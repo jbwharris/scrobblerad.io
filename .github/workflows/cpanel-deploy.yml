@@ -13,6 +13,7 @@ jobs:
         uses: pinkasey/cpanel-deploy-action@v1.0.0
         with:
           hostname: '${{ secrets.CPANEL_HOSTING_URL }}'
+          cpanel_username: '${{ secrets.CPANEL_USERNAME }}'
           repository_root: '${{ secrets.CPANEL_REMOTE_PATH }}'
           branch: main
           cpanel_token: '${{ secrets.CPANEL_API_TOKEN }}'
