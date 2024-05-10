@@ -36,7 +36,7 @@ There are a few different factors that can cause a site to not have streaming da
 It does, though only in browsers that support HLS playback. I could have added a 3rd party JavaScript library for that, but it was literally the only station with that problem. BBC streams will work in Safari on macOS and iOS. Beyond that there are browser extensions that can enable HLS. I honestly don’t know how compatibility might fare on Windows/Linux/Android, as my primary focus was on macOS/iOS/iPadOS. 
 
 ### Does this work with Apple CarPlay?
-Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping between stations is something I’ve tried to get working without luck. I’ve had it work, but not consistently. I had a couple people test Android Auto and the app didn't work. I am going to get an Android phone and try testing this myself soon. 
+Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping between stations is something that does work, but it's imperfect at this point, but does work. I had a couple people test Android Auto and the app didn't work. I am going to get an Android phone and try testing this myself soon. 
 
 ## To-Do List
 - [ ] Add native scrobbling to make this a complete PWA solution.
@@ -45,6 +45,7 @@ Yes it does. I originally started this project with the goal of being able to sc
 - [X] Get station skipping working in iOS for Apple CarPlay.
 - [ ] Add recently scrobbled data to the page, so you could have a local indication of what has scrobbled.
 - [ ] Fix responsive styling and breakpoints.
+- [X] Add lastfm listeners and total listens.
 
 ## Acknowledgements
 - This project was originally forked from [PWA RadioKing Player](https://github.com/lunar-d/PWA-RadioKing-Player). When I started this project, I didn't know much about radio APIs or progressive web apps and this project offered me a good introduction while giving me a foundation to build from. It was originally for playing a single radio station and I was able to make an extensible structure where I could add tons of radio stations. 
