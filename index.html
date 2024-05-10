@@ -25,10 +25,11 @@
 
 </head>
 
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column">
 
-  <header class="fixed-lg-top sticky-top">
+  <header class="fixed-top">
     <h1 class="siteName">scrobblerad.io</h1>
+    <a href="https://github.com/jbwharris/scrobblerad.io" class="gitLink" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
     <input type="checkbox" id="openSideMenu" class="openSideMenu">
     <label for="openSideMenu" class="menuIconToggle">
       <div class="hamb-line dia part-1"></div>
@@ -49,9 +50,9 @@
       <main class="flex-shrink-0 col">
         <div class="container px-0" id="metadata">
           <div id="player" class="row row-cols-1 album-controls px-0">
-            <div class="col offset-md-2 col-md-6 pt-3 player px-0" id="webamp">
+            <div class="col offset-md-2 col-md-6 player px-0 mt-0" id="webamp">
 
-              <img id="albumArt" src="img/defaultArt.webp" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
+              <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
 
               <div class="media-controls">
                 <button id="skipBackButton" type="button" class="btn btn-dark btn-lg mt-3">
@@ -66,11 +67,11 @@
               </div>
             </div>
             <div class="col col-md-4 pt-3 p-4 metainfo">
-              <h4 id="title" class="card-title"></h4>
-              <p id="artist" class="card-text"></p>
-              <p id="album" class="card-text"></p>
-              <p id="noalbum" class="card-text invisible"></p>
-              <a href="" id="radioName" class="" target="_blank"></a>
+              <h4 id="title" class="text-capitalize h3"></h4>
+              <p id="artist" class="text-capitalize h4"></p>
+              <p id="album" class="text-capitalize"></p>
+              <p id="listeners" class="text-capitalize"></p>
+              <a href="" id="radioName" class="btn btn-info mb-1" target="_blank"></a>
               <p id="stationLocation" class="fs-6"></p>
             </div>
           </div>

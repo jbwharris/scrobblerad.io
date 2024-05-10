@@ -4,7 +4,7 @@ const assets = [
   "/css/style.css",
   "/js/main.js",
   "/js/stations.js",
-  "/img/defaultArt.webp",
+  "/img/defaultArt.png",
 ]
 
 self.addEventListener("install", installEvent => {
