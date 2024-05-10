@@ -36,13 +36,13 @@ There are a few different factors that can cause a site to not have streaming da
 It does, though only in browsers that support HLS playback. I could have added a 3rd party JavaScript library for that, but it was literally the only station with that problem. BBC streams will work in Safari on macOS and iOS. Beyond that there are browser extensions that can enable HLS. I honestly don’t know how compatibility might fare on Windows/Linux/Android, as my primary focus was on macOS/iOS/iPadOS. 
 
 ### Does this work with Apple CarPlay?
-Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping between stations is something I’ve tried to get working without luck. I’ve had it work, but not consistently. I suspect this may work with Android Auto, but don't have a device to test this theory. 
+Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping between stations is something I’ve tried to get working without luck. I’ve had it work, but not consistently. I had a couple people test Android Auto and the app didn't work. I am going to get an Android phone and try testing this myself soon. 
 
 ## To-Do List
 - [ ] Add native scrobbling to make this a complete PWA solution.
-- [ ] Add a filter for if the station name is in the metadata and not scrobble it. Sometimes a station will throw in a station ID or commercial into their API metadata.
+- [X] Add a filter for if the station name is in the metadata and not scrobble it. Sometimes a station will throw in a station ID or commercial into their API metadata.
 - [ ] Add SongWhip links to add to various streaming platforms.
-- [ ] Get station skipping working in iOS for Apple CarPlay.
+- [X] Get station skipping working in iOS for Apple CarPlay.
 - [ ] Add recently scrobbled data to the page, so you could have a local indication of what has scrobbled.
 - [ ] Fix responsive styling and breakpoints.
 
