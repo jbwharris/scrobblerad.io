@@ -8,7 +8,7 @@ const stations = {
     location: "Newcastle, United Kingdom",
     webUrl: "https://amazingradio.com",
     streamUrl: "https://stream.amazingradio.com:8443/stream.mp3?ngsw-bypass",
-    apiUrl: "https://storage.googleapis.com/chirpradio-public/playlist.json",
+    apiUrl: "https://api.amazingtunes.com/radio/uk/airplays?page[size]=1&include[]=tune&include[]=tune.artist",
     needPath: true,
   },  
   amazingradious: {
