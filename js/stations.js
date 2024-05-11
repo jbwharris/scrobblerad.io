@@ -136,6 +136,17 @@ const stations = {
     orbPath: true,
     filter: ["Sensoria Radio"],
   },
+  funkymoose: {
+    stationName: "Funky Moose Radio",
+    albumArt: "iImg",
+    location: "Price Albert, Saskatchewan, Canada",
+    webUrl: "https://funkymooseradio.ca/",
+    streamUrl: "https://listen.funkymooseradio.ca/radio/8000/radio.aac",
+    apiUrl: "https://scraper2.onlineradiobox.com/ca.funkymoose?l=0",
+    timestamp: "updated",
+    orbPath: true,
+    filter: ["Funky Moose", "funkymoosedigital.ca"],
+  },
   gorillafm: {
     stationName: "Gorilla FM",
     location: "Zug, Switzerland",
