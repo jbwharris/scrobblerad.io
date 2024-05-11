@@ -439,7 +439,6 @@ const stations = {
     apiUrl: "https://scraper2.onlineradiobox.com/us.kcsn?l=0",
     timestamp: "updated",
     orbPath: true,
-    flipMeta: true,
     filter: ["The SoCal Sound"],
   },
   thecurrent: {
