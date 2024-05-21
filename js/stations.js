@@ -81,6 +81,18 @@ const stations = {
     orbPath: true,
     flipMeta: true,
   },
+  cjmt: {
+    stationName: "CJMT",
+    artist: "current.metadata.artist_name",
+    song: "current.metadata.track_title",
+    album: "current.metadata.album_title",
+    location: "Toronto, Ontario, Canada",
+    webUrl: "https://metradio.ca/",
+    streamUrl: "https://ryerson.out.airtime.pro/ryerson_a",
+    apiUrl: "https://ryerson.airtime.pro/api/live-info/",
+    timestamp: "current.metadata.lptime",
+    needPath: true,
+  },
   ckua: {
     artist: "0.TPE1",
     song: "0.TIT2",

@@ -1,10 +1,9 @@
 const urlCoverArt = "../img/defaultArt.png";
-
 const stationKeys = Object.keys(stations);
 
 function generateRadioButtons() {
     const stationSelectDiv = document.getElementById('stationSelect');
-    const elements = [];
+    const fragment = document.createDocumentFragment();
 
     stationKeys.forEach((stationKey) => {
         const station = stations[stationKey];
@@ -14,29 +13,22 @@ function generateRadioButtons() {
         input.id = stationKey;
         input.name = 'station';
         input.value = stationKey;
-
-        if (stationKey === radioPlayer.stationName) {
-            input.checked = true;
-        }
+        input.checked = stationKey === radioPlayer.stationName;
 
         const textNode = document.createTextNode(station.stationName);
         label.appendChild(input);
         label.appendChild(textNode);
-        elements.push(label);
+        fragment.appendChild(label);
     });
 
-    // Append all elements to the stationSelectDiv once
-    stationSelectDiv.append(...elements);
+    stationSelectDiv.appendChild(fragment);
 }
 
-// Define the animateElement function
 function animateElement(element, duration = 2000) {
-  element.classList.add("animated", "fadeIn");
-
-  // Remove the class after the specified duration
-  setTimeout(() => {
-    element.classList.remove("animated", "fadeIn");
-  }, duration);
+    element.classList.add("animated", "fadeIn");
+    setTimeout(() => {
+        element.classList.remove("animated", "fadeIn");
+    }, duration);
 }
 
 class Page {
@@ -45,7 +37,11 @@ class Page {
         this.title = stations[this.stationName].stationName;
         this.radioPlayer = radioPlayer;
 
-        // Cache DOM elements
+        this.cacheDOMElements();
+        this.setupMediaSession('', '', '');
+    }
+
+    cacheDOMElements() {
         this.currentSongElement = document.getElementById("title");
         this.currentArtistElement = document.getElementById("artist");
         this.currentAlbumElement = document.getElementById("album");
@@ -53,9 +49,6 @@ class Page {
         this.coverArtElement = document.getElementById("albumArt");
         this.radioNameElement = document.getElementById("radioName");
         this.stationLocationElement = document.getElementById("stationLocation");
-
-        // Setup media session
-        this.setupMediaSession('', '', ''); // Pass initial values for song, artist, and artwork URL
     }
 
     changeTitlePage() {
@@ -64,32 +57,25 @@ class Page {
 
     refreshCurrentData(values) {
         const [song, artist, album, artworkUrl, listeners, playcount, updateArt] = values;
+        const nf = new Intl.NumberFormat('en-US');
 
-        let nf = new Intl.NumberFormat('en-US');
-
-        // Delay cover art update to ensure animation completes
         setTimeout(() => {
-            // Update cover art
             this.coverArtElement.onload = () => {
-                // Update background and animate cover art
                 document.documentElement.style.setProperty("--albumArt", `url("${artworkUrl}")`);
                 animateElement(this.coverArtElement);
 
-                // Set radio station name and location
                 this.radioNameElement.href = stations[this.stationName].webUrl;
                 animateElement(this.radioNameElement);
                 this.radioNameElement.innerHTML = this.title;
                 this.stationLocationElement.innerHTML = stations[this.stationName].location;
 
-                // Animate and update metadata
                 this.animateAndUpdateElement(this.currentSongElement, song);
                 this.animateAndUpdateElement(this.currentArtistElement, artist);
                 this.animateAndUpdateElement(this.currentAlbumElement, album);
                 if (listeners && playcount) {
-                    this.animateAndUpdateElement(this.currentListenersElement, `Listeners: ${nf.format(listeners)} | Playcount: ${nf.format(playcount)}`);
+                    this.animateAndUpdateElement(this.currentListenersElement, `Listeners: ${nf.format(listeners)} | Plays: ${nf.format(playcount)}`);
                 }
 
-                // Configure media session with the latest information
                 this.setupMediaSession(song, artist, artworkUrl);
             };
             this.coverArtElement.src = artworkUrl;
@@ -113,62 +99,59 @@ class Page {
                 album: `Now playing on ${stations[this.stationName].stationName}` || '',
                 duration: Infinity,
                 startTime: 0,
-                artwork: [
-                    {
-                        src: artworkUrl,
-                    },
-                ],
+                artwork: [{ src: artworkUrl }],
             });
 
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                console.log('User clicked "Next Track" icon.');
-                this.radioPlayer.skipForward();
-            });
+            const actionHandlers = {
+                nexttrack: () => this.radioPlayer.skipForward(),
+                previoustrack: () => this.radioPlayer.skipBackward(),
+                play: () => this.radioPlayer.togglePlay(),
+                pause: () => this.radioPlayer.togglePlay(),
+            };
 
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                console.log('User clicked "Previous Track" icon.');
-                this.radioPlayer.skipBackward();
-            });
-
-            navigator.mediaSession.setActionHandler('play', async () => {
-                console.log('User clicked "Play" icon.');
-                this.radioPlayer.togglePlay();
-            });
-
-            navigator.mediaSession.setActionHandler('pause', () => {
-                console.log('User clicked "Pause" icon.');
-                this.radioPlayer.togglePlay();
-            });
+            for (const [action, handler] of Object.entries(actionHandlers)) {
+                navigator.mediaSession.setActionHandler(action, handler);
+            }
         }
     }
 }
 
-
-
 class RadioPlayer {
     constructor(buttonElement, skipForwardButton, skipBackButton) {
         this.audio = new Audio();
-        this.button = buttonElement;
+        this.playButton = buttonElement;
         this.skipForwardButton = skipForwardButton;
         this.skipBackButton = skipBackButton;
         this.isPlaying = false;
-        this.artworkUrl = "";
-        this.updateArt = "";
         this.stationName = "";
         this.previousDataResponse = null;
 
-        // Bind methods to ensure proper 'this' reference
+        this.bindMethods();
+        this.addEventListeners();
+        this.init();
+    }
+
+    bindMethods() {
         this.handleStationSelect = this.handleStationSelect.bind(this);
         this.getLfmMeta = this.getLfmMeta.bind(this);
         this.getStreamingData = this.getStreamingData.bind(this);
         this.extractSongAndArtist = this.extractSongAndArtist.bind(this);
         this.getPath = this.getPath.bind(this);
-        this.togglePlay = this.togglePlay.bind(this); // Add this line
-        this.button.addEventListener("click", this.togglePlay);
+        this.togglePlay = this.togglePlay.bind(this);
         this.skipForward = this.skipForward.bind(this);
-        this.audio.addEventListener('ended', () => {console.log('Audio playback ended');});
+        this.skipBackward = this.skipBackward.bind(this);
+    }
 
-        this.init();
+    addEventListeners() {
+        this.playButton.addEventListener("click", this.togglePlay);
+        this.skipForwardButton.addEventListener("click", this.skipForward);
+        this.skipBackButton.addEventListener("click", this.skipBackward);
+
+        document.getElementById("stationSelect").addEventListener("click", (event) => {
+            if (event.target && event.target.matches("input[name='station']")) {
+                this.handleStationSelect(event, event.target.value);
+            }
+        });
     }
 
     init() {
@@ -177,22 +160,9 @@ class RadioPlayer {
                 navigator.serviceWorker
                     .register("serviceWorker.js")
                     .then(() => console.log("Service worker registered"))
-                    .catch((err) =>
-                        console.log("Service worker not registered", err),
-                    );
+                    .catch((err) => console.log("Service worker not registered", err));
             });
         }
-
-        document.getElementById("stationSelect").addEventListener("click", (event) => {
-        if (event.target && event.target.matches("input[name='station']")) {
-                const newStationName = event.target.value;
-                radioPlayer.handleStationSelect(event, newStationName); // Pass the event and station name
-            }
-        });
-        this.skipForwardButton.addEventListener("click", this.skipForward);
-        this.skipBackButton = document.getElementById("skipBackButton");
-        this.skipBackButton.addEventListener("click", this.skipBackward.bind(this));
-        this.calculateNextAndPreviousIndices();
     }
 
     calculateNextAndPreviousIndices() {
@@ -202,302 +172,135 @@ class RadioPlayer {
     }
 
     handleStationSelect(event, stationName) {
-        let newStationName = stationName;
+        if (!stationName) return;
 
-        if (!newStationName && event.target && event.target.matches("input[name='station']")) {
-            newStationName = event.target.value;
+        console.log(stationName);
+        this.stationName = stationName;
+        this.updateArt = true;
+
+        if (this.streamingInterval) {
+            clearInterval(this.streamingInterval);
         }
 
-        if (newStationName) {
-            console.log(newStationName);
-            this.stationName = newStationName;
+        const newAudio = new Audio(stations[stationName].streamUrl);
+        newAudio.onloadedmetadata = () => {
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
-            this.updateArt = true;
-            this.artworkUrl = "";
-            this.album = "";
-            this.staleData = "";
-
-            // Clear existing interval to avoid multiple setInterval calls
-            if (this.streamingInterval) {
-                clearInterval(this.streamingInterval);
+            console.log('lfmMetaChanged:', this.lfmMetaChanged);
+            if (this.audio) {
+                this.audio.pause();
+                this.audio = null;
             }
+            this.audio = newAudio;
+            this.play();
 
-            // Create a new Audio object for the selected station
-            const newAudio = new Audio(stations[newStationName].streamUrl);
-            newAudio.onloadedmetadata = () => {
-                // Audio loaded, now delete previous audio and update reference
-                if (this.audio) {
-                    this.audio = null; // Delete previous audio
-                }
-                this.audio = newAudio; // Update reference to new audio
-                this.play(); // Start playback
+            const fetchDataAndRefreshPage = () => this.getStreamingData();
+            fetchDataAndRefreshPage();
+            this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000);
+        };
 
-                fetchDataAndRefreshPage();
-                this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000); // Set new interval
-            };
+        newAudio.onerror = (error) => {
+            console.error('Error loading audio:', error);
+        };
 
-            newAudio.onerror = (error) => {
-                // Handle audio loading error
-                console.error('Error loading audio:', error);
-                // You can add code here to display a message to the user or take other appropriate actions.
-            };
+        newAudio.load();
+        const page = new Page(this.stationName, this);
+        page.changeTitlePage();
 
-            this.audio.pause(); // Pause the previous audio
-
-            // Start loading audio (metadata will trigger the rest)
-            newAudio.load();
-
-            const fetchDataAndRefreshPage = () => {
-                this.getStreamingData();
-            };
-
-            const page = new Page(this.stationName, this);
-            page.changeTitlePage();
-
-            // Check the radio button associated with the selected station
-            const radioInput = document.querySelector(`input[name='station'][value='${newStationName}']`);
-            if (radioInput) {
-                radioInput.checked = true;
-            }
+        const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
+        if (radioInput) {
+            radioInput.checked = true;
         }
     }
 
     extractSongAndArtist(data, stationName) {
-        let song = (
-            this.getPath(data, stations[stationName].song) || ""
-        ).replace(/&apos;/g, "'");
-        let artist = (
-            this.getPath(data, stations[stationName].artist) || ""
-        ).replace(/&apos;/g, "'");
-        let album = (
-            this.getPath(data, stations[stationName].album) || ""
-        ).replace(/&apos;/g, "'");
+        let song = this.getPath(data, stations[stationName].song)?.replace(/&apos;/g, "'") || '';
+        let artist = this.getPath(data, stations[stationName].artist)?.replace(/&apos;/g, "'") || '';
+        let album = this.getPath(data, stations[stationName].album)?.replace(/&apos;/g, "'") || '';
 
-
-            // If the primary paths don't yield results, try the secondary paths
-            if (stations[stationName].nprPath && song === '') {
-                song = (
-                    this.getPath(data, stations[stationName].song2) || ""
-                ).replace(/&apos;/g, "'");
-                artist = (
-                    this.getPath(data, stations[stationName].artist2) || ""
-                ).replace(/&apos;/g, "'");
-                console.log('NPR second try');
-            }
-
-            let regexPattern = /^(.*) \- (.*)/;
-            
-            if (stations[stationName].pathRegex) {
-                regexPattern = stations[stationName].pathRegex;
-            }
-
-            // The song and artist data from OnlineRadioBox is inconsistent, sometimes it's not there in the path, but the combined 'artist - song title' is more reliable, so we need to parse the response 
-            if (stations[stationName].orbPath === true) { 
-                if (stations[stationName].pathRegex) {
-                    regexPattern = stations[stationName].pathRegex;
-                }
-
-                const match = regexPattern.exec(data.title);
-
-                if (match) {
-                    song = match[2].trim();
-                    artist = match[1].trim();
-                    if (match[3]) {
-                        album = match[3].trim();
-                    }
-
-                    // some stations have their meta data formatted as 'song title - artist', so this flips those items
-                    if (stations[stationName].flipMeta === true) {
-                        song = match[1].trim();
-                        artist = match[2].trim();
-                    }
-                } else {
-                    song = 'No streaming data currently available';
-                    artist = '';
-                }
-            }
-
-            // stringPath handles feeds that aren't JSON responses. There are a few stations that have just the data, or an HTML response that can still be parsed
-            if (stations[stationName].stringPath === true) { 
-                const match = regexPattern.exec(data);
-
-                if (match) {
-                    song = match[1].trim();
-                    artist = match[2].trim();
-                } else {
-                    song = 'No streaming data currently available';
-                    artist = '';
-                }
-            }
-
-            if (stations[stationName].htmlResponse === true) { 
-
-                // Assuming the HTML response is stored in a variable named 'response'
-                let htmlParser = new DOMParser();
-                let doc = htmlParser.parseFromString(data, 'text/html');
-
-                // Get src from img tag
-                let imgSrc = doc.querySelector('#rff-main-np-cover').getAttribute('src');
-
-                // Get contents of div.trackName
-                let trackName = doc.querySelector('.trackName').textContent.trim();
-
-                // Get album from span#rff-comfy-np-album
-                let album = doc.querySelector('#rff-comfy-np-album').textContent.trim();
-
-                console.log("Image source:", imgSrc);
-                console.log("Track name:", trackName);
-                console.log("Album:", album);
-
-            }
-
-
-
-        // Check if any filtered values are present in the song or artist
-        const filteredValues = stations[stationName].filter || [];
-
-        console.log("filtered values:", filteredValues, "song:", song, "artist:", artist, "album:", album);
-
-        const hasFilteredValue = filteredValues.some(value => {
-            return song.includes(value) || artist.includes(value);
-        });
-
-       console.log("song or artist has filtered term?", hasFilteredValue);
-
-        // Check if the stationName or a phone number exists in the match data
-        const stationNameExists = String(song).includes(stationName) || String(artist).includes(stationName);
-        const phoneNumberExists = /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(song) || /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(artist);
-
-        // If either filteredValues, stationName, a phone number exists or there is no value for song, set song and artist accordingly
-        if (stationNameExists || phoneNumberExists || hasFilteredValue ) {
-            song = 'Station data is taking a break';
-            artist = '';
-        } else if (!song || !artist) {
-            song = 'Station data is currently missing';
-            artist = '';
+        if (stations[stationName].nprPath && !song) {
+            song = this.getPath(data, stations[stationName].song2)?.replace(/&apos;/g, "'") || '';
+            artist = this.getPath(data, stations[stationName].artist2)?.replace(/&apos;/g, "'") || '';
         }
 
-        let currentSong = song.replace(/&amp;/g, "&");
-        let currentArtist = artist.replace(/&amp;/g, "&");
-        currentArtist = currentArtist.replace("  ", " ");
-        let currentAlbum = album.replace(/&amp;/g, "&");
+        if (stations[stationName].orbPath) {
+            const regexPattern = stations[stationName].pathRegex || /^(.*) \- (.*)/;
+            const match = regexPattern.exec(data.title);
 
-        if (/([^a-zA-Z0-9])single([^a-zA-Z0-9])/i.test(currentAlbum)) {
-            currentAlbum = currentSong;
-            console.log("changed from single to currentSong", currentAlbum);
-        }   
+            if (match) {
+                [artist, song, album] = match.slice(1, 4).map((str) => str?.trim());
+                if (stations[stationName].flipMeta) {
+                    [song, artist] = [artist, song];
+                }
+            } else {
+                song = 'No streaming data currently available';
+                artist = '';
+            }
+        }
 
-        console.log("currentSong", currentSong, "currentArtist", currentArtist, "currentAlbum", currentAlbum);
-        return { song: currentSong, artist: currentArtist, album: currentAlbum };
+        if (stations[stationName].stringPath) {
+            const regexPattern = stations[stationName].pathRegex || /^(.*) \- (.*)/;
+            const match = regexPattern.exec(data);
+
+            if (match) {
+                [song, artist] = match.slice(1, 3).map((str) => str?.trim());
+                if (stations[stationName].flipMeta) {
+                    [song, artist] = [artist, song];
+                }
+            } else {
+                song = 'No streaming data currently available';
+                artist = '';
+            }
+        }
+
+        return [song, artist, album];
     }
 
-    getLfmMeta(currentSong, currentArtist, currentAlbum, callback) {
-    if (currentSong !== '' && currentArtist !== '') {
-            const filterSet = {
-                artist: [MetadataFilter.normalizeFeature],
-                track: [MetadataFilter.removeRemastered, MetadataFilter.removeFeature, MetadataFilter.removeLive, MetadataFilter.removeCleanExplicit, MetadataFilter.removeVersion],
-                album: [MetadataFilter.removeRemastered, MetadataFilter.removeFeature, MetadataFilter.removeLive, MetadataFilter.removeCleanExplicit, MetadataFilter.removeVersion],
-            };
+    getLfmMeta(song, artist) {
+        if (!song || !artist) return Promise.resolve(null);
+        const apiKey = '09498b5daf0eceeacbcdc8c6a4c01ccb';
 
-            const filter = MetadataFilter.createFilter(filterSet);
-            let lfmMethod = '';
-            let lfmQueryField = '';
-            let lfmDataField = '';
+        const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${apiKey}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(song)}&format=json`;
 
-            console.log("currentAlbum:", currentAlbum);
+        return fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+                const track = data.track;
+                if (!track) return null;
 
-            if (currentAlbum) {
-                lfmMethod = 'album.getInfo';
-                lfmQueryField = 'album';
-                lfmDataField = currentAlbum;
-            } else {
-                lfmMethod = 'track.getInfo';
-                lfmQueryField = 'track';
-                lfmDataField = currentSong;
-            }
+                const album = track.album?.title || '';
+                const artworkUrl = track.album?.image?.[3]?.['#text'] || urlCoverArt;
+                const playcount = track.playcount || 0;
+                const listeners = track.listeners || 0;
 
-            const lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(
-                filter.filterField('artist', currentArtist),
-            )}&${lfmQueryField}=${encodeURIComponent(
-                filter.filterField(lfmQueryField, lfmDataField),
-            )}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&&autocorrect=1&format=json&limit=1`;
-
-            console.log("lfmQueryUrl:", lfmQueryUrl);
-
-            const lfmxhr = new XMLHttpRequest();
-            const lfmQuery = new URL(lfmQueryUrl);
-
-            lfmxhr.open("GET", lfmQuery, true);
-            lfmxhr.onreadystatechange = () => {
-                if (lfmxhr.readyState === 4) {
-                    if (lfmxhr.status === 200) {
-                        const lfmData = JSON.parse(lfmxhr.responseText);
-                        let lfmArt = '';
-                        let lfmAlbum = '';
-                        let lfmSong = '';
-                        let lfmArtist = '';
-                        let lfmListeners = 0;
-                        let lfmPlaycount = 0;
-
-
-                        if (lfmData.error !== 6) {
-                            if (currentAlbum) {
-                                lfmArt = lfmData.album?.image[3]["#text"] || urlCoverArt;
-                                lfmAlbum = filter.filterField('album', lfmData.album?.name || '');
-                                lfmSong = filter.filterField('track', currentSong) || 'No streaming data currently available';
-                                lfmArtist = filter.filterField('artist', lfmData.album?.artist) || filter.filterField('artist', currentArtist) || '';
-                                lfmListeners = lfmData.album.listeners;
-                                lfmPlaycount = lfmData.album.playcount;
-                            } else {
-                                lfmArt = lfmData.track?.album?.image[3]["#text"] || urlCoverArt;
-                                lfmAlbum = filter.filterField('album', lfmData.track?.album?.title || '');
-                                lfmSong = filter.filterField('track', lfmData.track?.name) || filter.filterField('track', currentSong) || 'No streaming data currently available';
-                                lfmArtist = filter.filterField('artist', lfmData.track?.artist?.name) || filter.filterField('artist', currentArtist) || '';
-                                lfmListeners = lfmData.track.listeners || '';
-                                lfmPlaycount = lfmData.track.playcount || '';
-                            }
-                        } else {
-                            // If album.getInfo failed, retry with track.getInfo
-                            if (lfmMethod === 'album.getInfo') {
-                                getLfmMeta(currentSong, currentArtist, currentSong, callback);
-                                return;
-                            } else {
-                                lfmArt = urlCoverArt;
-                                lfmAlbum = '';
-                            }
-                        }
-
-                        // Call the callback function with the retrieved values
-                        callback([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount]);
-
-                    } else if (lfmxhr.status === 404 && lfmMethod === 'album.getInfo') {
-                        // If album.getInfo returns 404, retry with track.getInfo
-                        getLfmMeta(currentSong, currentArtist, currentSong, callback);
-                    } else {
-                        console.error("Error: ", lfmxhr.statusText);
-                        // Optionally call the callback with null values or an error message
-                        callback(null);
-                    }
-                }
-            };
-            lfmxhr.onerror = function() {
-                console.error("Request failed");
-                callback(null);
-            };
-            lfmxhr.send(null);
-        }
+                return [album, artworkUrl, playcount, listeners];
+            })
+            .catch((error) => {
+                console.error('Error fetching Last.fm metadata:', error);
+                return null;
+            });
     }
 
     getStreamingData() {
-        if (this.isPlaying) {
-            fetch(stations[this.stationName].apiUrl, {
-                mode: "cors",
-                headers: {
-                    Accept: "application/json",
-                },
+        if (!this.stationName) return;
+
+        const stationUrl = stations[this.stationName].apiUrl;
+
+        const fetchOptions = {
+            method: stations[this.stationName].method || 'GET',
+            headers: stations[this.stationName].headers || {},
+        };
+
+        fetch(stationUrl, fetchOptions)
+            .then((response) => {
+                const contentType = response.headers.get('content-type');
+                return response.json();
             })
-            .then((response) => response.json())
             .then((data) => {
+                const [song, artist, album] = this.extractSongAndArtist(data, this.stationName);
+
+                if (song === "No streaming data currently available" && this.previousDataResponse) {
+                    return;
+                }
 
                 // Compare the current data response with the previous one
                 if (this.isDataSameAsPrevious(data)) {
@@ -505,18 +308,28 @@ class RadioPlayer {
                     return;
                 }
 
-                // Store the current data response for future comparison
                 this.previousDataResponse = data;
 
                 // Process the new data response
                 this.processData(data);
+
+
+                this.getLfmMeta(song, artist).then((lfmData) => {
+                    const [lfmAlbum, artworkUrl, playcount, listeners] = lfmData || [album, urlCoverArt, 0, 0];
+                    const updateArt = this.updateArt;
+
+                    this.updateArt = false;
+
+                    const page = new Page(this.stationName, this);
+                    page.refreshCurrentData([song, artist, lfmAlbum || album, artworkUrl, listeners, playcount, updateArt]);
+                });
             })
-            .catch((error) => console.error("Error fetching streaming data:", error));
-        }
+            .catch((error) => {
+                console.error('Error fetching streaming data:', error);
+            });
     }
 
-
-    // Function to compare the current data response with the previous one
+   // Function to compare the current data response with the previous one
     isDataSameAsPrevious(data) {
         // Compare data with previousDataResponse and return true if they are the same, false otherwise
         return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
@@ -550,7 +363,7 @@ class RadioPlayer {
         // If the song is 'No streaming data currently available', refresh the page with default values
         if (song === 'No streaming data currently available' || song === 'Station data is taking a break' || song === 'Station data is currently missing' || staleData) {
             const page = new Page(this.stationName, this);
-            page.refreshCurrentData([staleData || song, '', '', urlCoverArt, true]);
+            page.refreshCurrentData([staleData || song, '', '', urlCoverArt, '', '', true]);
             return;
         }
 
@@ -618,61 +431,49 @@ class RadioPlayer {
     }
 
     play() {
-        this.audio
-            .play()
-            .catch((error) => console.error("Error playing audio:", error));
-        this.isPlaying = true;
-        navigator.mediaSession.playbackState = 'playing';
-        this.updateButtonIcon();
+        if (!this.audio.src) return;
+        this.audio.play().then(() => {
+            this.isPlaying = true;
+            this.playButton.lastElementChild.className = "fa fa-pause";
+            document.getElementById("metadata").classList.add("playing");
+        }).catch((error) => {
+            console.error('Error playing audio:', error);
+        });
     }
 
     pause() {
         this.audio.pause();
         this.isPlaying = false;
-        navigator.mediaSession.playbackState = 'paused';
-        this.updateButtonIcon();
+        this.playButton.lastElementChild.className = "fa fa-play";
+        document.getElementById("metadata").classList.remove("playing");
     }
 
     togglePlay() {
-        if (this.isPlaying) {
-            this.pause();
-        } else {
-            this.play();
-        }
+        this.isPlaying ? this.pause() : this.play();
     }
 
     skipForward() {
-        this.calculateNextAndPreviousIndices(); // Recalculate indices
+        this.calculateNextAndPreviousIndices();
         const nextStationName = stationKeys[this.nextIndex];
-        this.handleStationSelect(null, nextStationName); // For skipForward
+        this.handleStationSelect(null, nextStationName);
     }
 
     skipBackward() {
-        this.calculateNextAndPreviousIndices(); // Recalculate indices
+        this.calculateNextAndPreviousIndices();
         const previousStationName = stationKeys[this.previousIndex];
-        this.handleStationSelect(null, previousStationName); // For skipForward
-    }
-
-    updateButtonIcon() {
-        this.button.lastElementChild.className = this.isPlaying
-            ? "fa fa-pause"
-            : "fa fa-play";
-
-        const metadataDiv = document.getElementById("metadata");
-        if (this.isPlaying) {
-            metadataDiv.classList.add("playing");
-        } else {
-            metadataDiv.classList.remove("playing");
-        }
+        this.handleStationSelect(null, previousStationName);
     }
 }
 
+// Initialize radio buttons and radio player
+const radioPlayer = new RadioPlayer(
+    document.getElementById("playButton"),
+    document.getElementById("skipForward"),
+    document.getElementById("skipBack")
+);
 
-// Call the function to generate radio buttons when the page loads
-window.addEventListener('DOMContentLoaded', generateRadioButtons);
+generateRadioButtons();
 
-// Initialization code
-const playButton = document.querySelector("button#playerButton");
-const skipForwardButton = document.querySelector("button#skipForwardButton");
-const skipBackButton = document.querySelector("button#skipBackButton");
-const radioPlayer = new RadioPlayer(playButton, skipForwardButton, skipBackButton);
+// Load the default station
+const defaultStation = stationKeys[0];
+radioPlayer.handleStationSelect(null, defaultStation);
