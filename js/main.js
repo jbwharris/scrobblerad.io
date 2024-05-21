@@ -281,7 +281,12 @@ class RadioPlayer {
     }
 
     getStreamingData() {
+
+        if (this.isPlaying) {
+        
         if (!this.stationName) return;
+
+        
 
         const stationUrl = stations[this.stationName].apiUrl;
 
@@ -327,6 +332,7 @@ class RadioPlayer {
             .catch((error) => {
                 console.error('Error fetching streaming data:', error);
             });
+        }
     }
 
    // Function to compare the current data response with the previous one
