@@ -217,6 +217,10 @@ class RadioPlayer {
         let artist = this.getPath(data, stations[stationName].artist)?.replace(/&apos;/g, "'") || '';
         let album = this.getPath(data, stations[stationName].album)?.replace(/&apos;/g, "'") || '';
 
+            console.log('Song:', song);  // Log extracted song
+    console.log('Artist:', artist);  // Log extracted artist
+    console.log('Album:', album);  // Log extracted album
+
         if (stations[stationName].nprPath && !song) {
             song = this.getPath(data, stations[stationName].song2)?.replace(/&apos;/g, "'") || '';
             artist = this.getPath(data, stations[stationName].artist2)?.replace(/&apos;/g, "'") || '';
@@ -255,85 +259,119 @@ class RadioPlayer {
         return [song, artist, album];
     }
 
-    getLfmMeta(song, artist) {
-        if (!song || !artist) return Promise.resolve(null);
-        const apiKey = '09498b5daf0eceeacbcdc8c6a4c01ccb';
+    getLfmMeta(currentSong, currentArtist, currentAlbum) {
+        return new Promise((resolve, reject) => {
+            if (currentSong !== '' && currentArtist !== '') {
+                const filterSet = {
+                    artist: [MetadataFilter.normalizeFeature],
+                    track: [MetadataFilter.removeRemastered, MetadataFilter.removeFeature, MetadataFilter.removeLive, MetadataFilter.removeCleanExplicit, MetadataFilter.removeVersion],
+                    album: [MetadataFilter.removeRemastered, MetadataFilter.removeFeature, MetadataFilter.removeLive, MetadataFilter.removeCleanExplicit, MetadataFilter.removeVersion],
+                };
 
-        const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${apiKey}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(song)}&format=json`;
+                const filter = MetadataFilter.createFilter(filterSet);
+                let lfmMethod = '';
+                let lfmQueryField = '';
+                let lfmDataField = '';
 
-        return fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                const track = data.track;
-                if (!track) return null;
+                if (currentAlbum) {
+                    lfmMethod = 'album.getInfo';
+                    lfmQueryField = 'album';
+                    lfmDataField = currentAlbum;
+                } else {
+                    lfmMethod = 'track.getInfo';
+                    lfmQueryField = 'track';
+                    lfmDataField = currentSong;
+                }
 
-                const album = track.album?.title || '';
-                const artworkUrl = track.album?.image?.[3]?.['#text'] || urlCoverArt;
-                const playcount = track.playcount || 0;
-                const listeners = track.listeners || 0;
+                const lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(filter.filterField('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(filter.filterField(lfmQueryField, lfmDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
 
-                return [album, artworkUrl, playcount, listeners];
-            })
-            .catch((error) => {
-                console.error('Error fetching Last.fm metadata:', error);
-                return null;
-            });
+                fetch(lfmQueryUrl)
+                    .then(response => response.json())
+                    .then(lfmData => {
+                        let lfmArt = '';
+                        let lfmAlbum = '';
+                        let lfmSong = '';
+                        let lfmArtist = '';
+                        let lfmListeners = 0;
+                        let lfmPlaycount = 0;
+
+                        if (lfmData.error !== 6) {
+                            if (currentAlbum) {
+                                lfmArt = lfmData.album?.image[3]["#text"] || urlCoverArt;
+                                lfmAlbum = filter.filterField('album', lfmData.album?.name || '');
+                                lfmSong = filter.filterField('track', currentSong) || 'No streaming data currently available';
+                                lfmArtist = filter.filterField('artist', lfmData.album?.artist) || filter.filterField('artist', currentArtist) || '';
+                                lfmListeners = lfmData.album.listeners;
+                                lfmPlaycount = lfmData.album.playcount;
+                            } else {
+                                lfmArt = lfmData.track?.album?.image[3]["#text"] || urlCoverArt;
+                                lfmAlbum = filter.filterField('album', lfmData.track?.album?.title || '');
+                                lfmSong = filter.filterField('track', lfmData.track?.name) || filter.filterField('track', currentSong) || 'No streaming data currently available';
+                                lfmArtist = filter.filterField('artist', lfmData.track?.artist?.name) || filter.filterField('artist', currentArtist) || '';
+                                lfmListeners = lfmData.track.listeners || '';
+                                lfmPlaycount = lfmData.track.playcount || '';
+                            }
+                        } else if (lfmMethod === 'album.getInfo') {
+                            // Retry with track.getInfo if album.getInfo fails
+                            this.getLfmMeta(currentSong, currentArtist, '').then(resolve).catch(reject);
+                            return;
+                        } else {
+                            lfmArt = urlCoverArt;
+                            lfmAlbum = '';
+                        }
+
+
+                        console.log('lfmdata:', lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount);
+
+                        resolve([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount]);
+                    })
+                    .catch(error => {
+                        console.error("Error fetching Last.fm metadata:", error);
+                        reject(error);
+                    });
+            } else {
+                resolve(null);
+            }
+        });
     }
 
     getStreamingData() {
-
         if (this.isPlaying) {
-        
-        if (!this.stationName) return;
+            if (!this.stationName) return;
 
-        
+            const stationUrl = stations[this.stationName].apiUrl;
 
-        const stationUrl = stations[this.stationName].apiUrl;
+            const fetchOptions = {
+                method: stations[this.stationName].method || 'GET',
+                headers: stations[this.stationName].headers || {},
+            };
 
-        const fetchOptions = {
-            method: stations[this.stationName].method || 'GET',
-            headers: stations[this.stationName].headers || {},
-        };
+            fetch(stationUrl, fetchOptions)
+                .then((response) => response.json())
+                .then((data) => {
+                    const [song, artist, album] = this.extractSongAndArtist(data, this.stationName);
 
-        fetch(stationUrl, fetchOptions)
-            .then((response) => {
-                const contentType = response.headers.get('content-type');
-                return response.json();
-            })
-            .then((data) => {
-                const [song, artist, album] = this.extractSongAndArtist(data, this.stationName);
+                    if (song === "No streaming data currently available") {
+                        return; // No need to process further if no data is available
+                    }
 
-                if (song === "No streaming data currently available" && this.previousDataResponse) {
-                    return;
-                }
-
-                // Compare the current data response with the previous one
-                if (this.isDataSameAsPrevious(data)) {
-                    // Data response is the same as the previous one, no need to process further
-                    return;
-                }
-
-                this.previousDataResponse = data;
-
-                // Process the new data response
-                this.processData(data);
-
-
-                this.getLfmMeta(song, artist).then((lfmData) => {
-                    const [lfmAlbum, artworkUrl, playcount, listeners] = lfmData || [album, urlCoverArt, 0, 0];
-                    const updateArt = this.updateArt;
-
-                    this.updateArt = false;
-
-                    const page = new Page(this.stationName, this);
-                    page.refreshCurrentData([song, artist, lfmAlbum || album, artworkUrl, listeners, playcount, updateArt]);
+                    // Retrieve metadata from Last.fm
+                    this.getLfmMeta(song, artist, album).then((lfmData) => {
+                        const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmData || [urlCoverArt, '', song, artist, 0, 0];
+                        
+                        // Update the current page data with the retrieved metadata
+                        const page = new Page(this.stationName, this);
+                        page.refreshCurrentData([lfmSong, lfmArtist, lfmAlbum, lfmArt, lfmListeners, lfmPlaycount, true]);
+                    }).catch(error => {
+                        console.error('Error processing data:', error);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error fetching streaming data:', error);
                 });
-            })
-            .catch((error) => {
-                console.error('Error fetching streaming data:', error);
-            });
         }
     }
+
 
    // Function to compare the current data response with the previous one
     isDataSameAsPrevious(data) {
@@ -341,71 +379,55 @@ class RadioPlayer {
         return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
     }
 
-    // Function to process the data response
     processData(data) {
         const { song, artist, album } = this.extractSongAndArtist(data, this.stationName);
-
         let staleData = '';
         const currentTimeMillis = new Date().getTime();
         let epochTimeString = this.getPath(data, stations[this.stationName].timestamp) || "";
 
         let epochTimeMillis;
         if (String(epochTimeString).includes('T')) {
-            // Timestamp contains timezone information, parse it directly
             epochTimeMillis = Date.parse(epochTimeString);
         } else {
-            // Timestamp doesn't contain timezone information, treat it as Unix timestamp
             epochTimeMillis = parseInt(epochTimeString) * 1000;
         }
 
-        // Calculate the difference in milliseconds
         const timeDifference = currentTimeMillis - epochTimeMillis;
-
-        // Check if the time difference is greater than 15 minutes
-        if (timeDifference > 900000 && epochTimeString !== "") { // Changed to 900000 (15 minutes in milliseconds)
+        if (timeDifference > 900000 && epochTimeString !== "") {
             staleData = 'Streaming data is stale';
         }
 
-        // If the song is 'No streaming data currently available', refresh the page with default values
-        if (song === 'No streaming data currently available' || song === 'Station data is taking a break' || song === 'Station data is currently missing' || staleData) {
+        if (song === 'No streaming data currently available' || staleData) {
             const page = new Page(this.stationName, this);
             page.refreshCurrentData([staleData || song, '', '', urlCoverArt, '', '', true]);
             return;
         }
 
-        // If metadata hasn't changed and lfmMetaChanged is true, return
-        if (this.lfmMetaChanged && song === this.song) {
+        if (this.isDataSameAsPrevious(data) && this.lfmMetaChanged && song === this.song) {
             return;
         }
 
-        // Always call getLfmMeta the first time or if the song has changed
-        if (!this.lfmMetaChanged || song !== this.song) {
-            this.getLfmMeta(song, artist, album, (lfmValues) => {
-                if (!lfmValues) {
-                    // Handle error or null case from getLfmMeta
-                    console.error("Error fetching lfm data");
-                    return;
-                }
+        this.previousDataResponse = data;
 
-                // Assuming artwork retrieval was successful
-                this.artworkUrl = this.getPath(data, stations[this.stationName].albumArt) || lfmValues[0] || urlCoverArt;
-                this.album = this.getPath(data, stations[this.stationName].album) || lfmValues[1] || '';
-                this.song = lfmValues[2] || song;
-                this.artist = lfmValues[3] || artist;
-                this.listeners = lfmValues[4] || ''; 
-                this.playcount = lfmValues[5] || ''; 
+        this.getLfmMeta(song, artist, album).then(lfmValues => {
+            const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, 0, 0];
+            
+            this.song = lfmSong;
+            this.artist = lfmArtist;
+            this.album = lfmAlbum;
+            this.artworkUrl = lfmArt;
+            this.listeners = lfmListeners;
+            this.playcount = lfmPlaycount;
+            
+            this.lfmMetaChanged = true;
 
-                console.log("listeners:", this.listeners, "playcount:", this.playcount);
-
-                this.lfmMetaChanged = true;
-
-                document.title = `${this.song} - ${this.artist} | ${this.stationName}`;
-                
-                // Refresh data and update metadata
-                const page = new Page(this.stationName, this);
-                page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true]);
-            });
-        }
+            document.title = `${this.song} - ${this.artist} | ${this.stationName}`;
+            
+            const page = new Page(this.stationName, this);
+            page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true]);
+        }).catch(error => {
+            console.error('Error processing data:', error);
+        });
     }
 
 
