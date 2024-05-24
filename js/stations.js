@@ -191,6 +191,16 @@ const stations = {
     orbPath: true,
     flipMeta: true,
   },
+  indiediscotheque: {
+    stationName: "Indie Discotheque",
+    albumArt: "iImg",
+    location: "Detroit, Michigan, USA",
+    webUrl: "https://indiediscotheque.com/",
+    streamUrl: "https://radio.howtojointheindiediscothequewaitlist.com/stream.ogg",
+    apiUrl: "https://scraper2.onlineradiobox.com/us.indiediscotheque?l=0",
+    timestamp: "updated",
+    orbPath: true,
+  },
   indieradio: {
     artist: "data.0.artist",
     song: "data.0.title",
