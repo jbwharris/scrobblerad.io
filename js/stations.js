@@ -338,6 +338,16 @@ const stations = {
     orbPath: true,
     filter: ["MegaShuffle"],
   },
+  metradio: {
+    stationName: "Met Radio",
+    location: "Toronto, Ontario, Canada",
+    webUrl: "https://metradio.ca",
+    streamUrl: "https://ryerson.out.airtime.pro/ryerson_a",
+    apiUrl: "https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron05891577247031242171657762111&station=cjru&num=0&sharing=0&player=0&cover=0&merch=0&meta=0",
+    pathRegex: /^(.*?)\s*\-\s*(.*?)\s*(?:-\s*(.*))?$/g,
+    stringPath: true,
+    filter: ["Met Radio"],
+  },
   mtpr: {
     artist: "onNow.song.artistName",
     song: "onNow.song.trackName",
@@ -351,6 +361,7 @@ const stations = {
     streamUrl: "https://25053.live.streamtheworld.com/KUFMFM.mp3",
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/5182a6b1e1c8386dfc2a9880/tracks?format=json",
+    timestamp: 'tracklist.results.0.song._end_time',
     needPath: true,
     nprPath: true,
   },
@@ -621,6 +632,16 @@ const stations = {
     timestamp: "timestamp",
     needPath: true,
   },
+  wkpn: {
+    stationName: "WKPN",
+    location: "Bridgeport, Conneticut, USA",
+    webUrl: "https://wpkn.org/",
+    streamUrl: "http://live.adsciconsolidated.com/wpknhigh.mp3",
+    apiUrl: "https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron206170750999458&station=wpkn&num=0&sharing=0&player=0&cover=0&merch=0&meta=0",
+    pathRegex: /^(.*?)\s*\-\s*(.*?)\s*(?:-\s*(.*))?$/g,
+    stringPath: true,
+    filter: ["WKPN"],
+  },
   wmse: {
     stationName: "WMSE Radio",
     albumArt: "iImg",
@@ -646,6 +667,16 @@ const stations = {
       "https://api.tunegenie.com/v2/brand/nowplaying/?apiid=m2g_bar&b=wnxp&format=json",
     timestamp: "0.played_at",
     needPath: true,
+  },
+  wrir: {
+    stationName: "WRIR",
+    location: "Richmond, Virginia, USA",
+    webUrl: "https://wrir.org/",
+    streamUrl: "https://live.wrir.org/",
+    apiUrl: "https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron206170750999458&station=wrir&num=0&sharing=0&player=0&cover=0&merch=0&meta=0",
+    pathRegex: /^(.*?)\s*\-\s*(.*?)\s*(?:-\s*(.*))?$/g,
+    stringPath: true,
+    filter: ["WRIR"],
   },
   wyomingsounds: {
     albumArt: "iImg",
