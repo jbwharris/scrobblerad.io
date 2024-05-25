@@ -185,7 +185,6 @@ class RadioPlayer {
         const newAudio = new Audio(stations[stationName].streamUrl);
         newAudio.onloadedmetadata = () => {
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
-            console.log('lfmMetaChanged:', this.lfmMetaChanged);
             if (this.audio) {
                 this.audio.pause();
                 this.audio = null;
@@ -216,10 +215,6 @@ class RadioPlayer {
         let song = this.getPath(data, stations[stationName].song)?.replace(/&apos;/g, "'") || '';
         let artist = this.getPath(data, stations[stationName].artist)?.replace(/&apos;/g, "'") || '';
         let album = this.getPath(data, stations[stationName].album)?.replace(/&apos;/g, "'") || '';
-
-            console.log('Song:', song);  // Log extracted song
-    console.log('Artist:', artist);  // Log extracted artist
-    console.log('Album:', album);  // Log extracted album
 
         if (stations[stationName].nprPath && !song) {
             song = this.getPath(data, stations[stationName].song2)?.replace(/&apos;/g, "'") || '';
@@ -259,13 +254,9 @@ class RadioPlayer {
         // Check if any filtered values are present in the song or artist
         const filteredValues = stations[stationName].filter || [];
 
-        console.log("filtered values:", filteredValues, "song:", song, "artist:", artist, "album:", album);
-
         const hasFilteredValue = filteredValues.some(value => {
             return song.includes(value) || artist.includes(value);
         });
-
-       console.log("song or artist has filtered term?", hasFilteredValue);
 
         // Check if the stationName or a phone number exists in the match data
         const stationNameExists = String(song).includes(stationName) || String(artist).includes(stationName);
@@ -280,7 +271,6 @@ class RadioPlayer {
             artist = '';
         }
 
-        console.log("extractSongAndArtist - song, artist, album:", song, artist, album);
         return [song, artist, album];
     }
 
@@ -310,8 +300,6 @@ class RadioPlayer {
 
                 const lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(filter.filterField('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(filter.filterField(lfmQueryField, lfmDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
 
-                console.log("lfmQueryUrl:", lfmQueryUrl);
-
                 fetch(lfmQueryUrl)
                     .then(response => response.json())
                     .then(lfmData => {
@@ -330,8 +318,6 @@ class RadioPlayer {
                                 lfmArtist = filter.filterField('artist', lfmData.album?.artist) || filter.filterField('artist', currentArtist) || '';
                                 lfmListeners = lfmData.album.listeners;
                                 lfmPlaycount = lfmData.album.playcount;
-
-                                console.log('lfmdata album api call:', lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount);
                             } else {
                                 lfmArt = lfmData.track?.album?.image[3]["#text"] || urlCoverArt;
                                 lfmAlbum = filter.filterField('album', lfmData.track?.album?.title || '');
@@ -339,7 +325,6 @@ class RadioPlayer {
                                 lfmArtist = filter.filterField('artist', lfmData.track?.artist?.name) || filter.filterField('artist', currentArtist) || '';
                                 lfmListeners = lfmData.track.listeners || '';
                                 lfmPlaycount = lfmData.track.playcount || '';
-                                console.log('lfmdata track api call:', lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount);
                             }
                         } else if (lfmMethod === 'album.getInfo') {
                             // Retry with track.getInfo if album.getInfo fails
@@ -353,10 +338,6 @@ class RadioPlayer {
                             lfmListeners = '';
                             lfmPlaycount = '';
                         }
-
-
-                        console.log('lfmdata:', lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount);
-
                         resolve([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount]);
                     })
                     .catch(error => {
@@ -369,43 +350,87 @@ class RadioPlayer {
         });
     }
 
-    getStreamingData() {
+getStreamingData() {
+    if (this.isPlaying) {
+        if (!this.stationName) return;
 
-        if (this.isPlaying) {
+        const stationUrl = stations[this.stationName].apiUrl;
+        const fetchOptions = {
+            method: stations[this.stationName].method || 'GET',
+            headers: stations[this.stationName].headers || {},
+        };
 
-            if (!this.stationName) return;
+        fetch(stationUrl, fetchOptions)
+            .then((response) => {
+                const contentType = response.headers.get('content-type');
 
-            const stationUrl = stations[this.stationName].apiUrl;
-
-            const fetchOptions = {
-                method: stations[this.stationName].method || 'GET',
-                headers: stations[this.stationName].headers || {},
-            };
-
-            fetch(stationUrl, fetchOptions)
-                .then((response) => {
-                    const contentType = response.headers.get('content-type');
-                    return response.json();
-                })
-                .then((data) => {
-                    // Compare the current data response with the previous one
-                    if (this.isDataSameAsPrevious(data)) {
-                        // Data response is the same as the previous one, no need to process further
-                        return;
+                if (contentType.includes('application/json')) {
+                    return response.json().then((data) => ({ data, contentType }));
+                } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
+                    return response.text().then((data) => ({ data, contentType }));
+                } else {
+                    throw new Error(`Unsupported content type: ${contentType}`);
+                }
+            })
+            .then(({ data, contentType }) => {
+                if (typeof data === 'string') {
+                    if (contentType.includes('text/html')) {
+                        // Parse the HTML response
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(data, 'text/html');
+                        data = this.extractDataFromHTML(doc);
+                    } else if (contentType.includes('application/javascript')) {
+                        // Extract the HTML content from the JavaScript response
+                        const htmlContent = this.extractHTMLFromJS(data);
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(htmlContent, 'text/html');
+                        data = this.extractDataFromHTML(doc);
                     }
+                }
 
-                    // Store the current data response for future comparison
-                    this.previousDataResponse = data;
+                // Compare the current data response with the previous one
+                if (this.isDataSameAsPrevious(data)) {
+                    // Data response is the same as the previous one, no need to process further
+                    return;
+                }
 
-                    // Process the new data response
-                    this.processData(data);
+                // Store the current data response for future comparison
+                this.previousDataResponse = data;
 
-                })
-                .catch((error) => {
-                    console.error('Error fetching streaming data:', error);
-                });
-        }
+                // Process the new data response
+                this.processData(data);
+            })
+            .catch((error) => {
+                console.error('Error fetching streaming data:', error);
+            });
     }
+}
+
+// Helper function to extract HTML content from a JavaScript response
+extractHTMLFromJS(js) {
+    const match = js.match(/_spinitron\d+\("(.+)"\);/s);
+    if (match && match[1]) {
+        return match[1].replace(/\\"/g, '"'); // Unescape double quotes
+    } else {
+        throw new Error('Unable to extract HTML content from JavaScript response');
+    }
+}
+
+// Helper function to extract necessary data from HTML response
+extractDataFromHTML(doc) {
+    const song = doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available';
+    const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
+    const album = doc.querySelector('span.release')?.textContent.trim() || '';
+
+    // Return the extracted data in the format expected by processData
+   return `${song} - ${artist} - ${album}`;
+}
+
+
+
+
+
+
 
    // Function to compare the current data response with the previous one
     isDataSameAsPrevious(data) {
@@ -416,7 +441,6 @@ class RadioPlayer {
     processData(data) {
         const [ song, artist, album ] = this.extractSongAndArtist(data, this.stationName);
 
-        console.log("processData song, artist, album:", song, artist, album);
         let staleData = '';
         const currentTimeMillis = new Date().getTime();
         let epochTimeString = this.getPath(data, stations[this.stationName].timestamp) || "";
@@ -448,10 +472,6 @@ class RadioPlayer {
         if (!this.lfmMetaChanged || song !== this.song) {
             this.getLfmMeta(song, artist, album).then(lfmValues => {
             const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
-            
-
-            console.log('lfmSong:', lfmSong);
-
 
             this.song = lfmSong;
             this.artist = lfmArtist;
