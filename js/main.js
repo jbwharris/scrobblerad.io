@@ -191,6 +191,7 @@ class RadioPlayer {
             }
             this.audio = newAudio;
             this.play();
+            this.isPlaying = true;
 
             const fetchDataAndRefreshPage = () => this.getStreamingData();
             fetchDataAndRefreshPage();
@@ -230,9 +231,6 @@ class RadioPlayer {
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
                 }
-            } else {
-                song = 'No streaming data currently available';
-                artist = '';
             }
         }
 
@@ -245,9 +243,6 @@ class RadioPlayer {
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
                 }
-            } else {
-                song = 'No streaming data currently available';
-                artist = '';
             }
         }
 
@@ -266,10 +261,9 @@ class RadioPlayer {
         if (stationNameExists || phoneNumberExists || hasFilteredValue ) {
             song = 'Station data is taking a break';
             artist = '';
-        } else if (!song || !artist) {
-            song = 'Station data is currently missing';
-            artist = '';
         }
+
+        console.log('extractsongandartist: ', song, artist, album);
 
         return [song, artist, album];
     }
@@ -350,87 +344,91 @@ class RadioPlayer {
         });
     }
 
-getStreamingData() {
-    if (this.isPlaying) {
-        if (!this.stationName) return;
+    getStreamingData() {
+        if (this.isPlaying) {
+            if (!this.stationName) return;
 
-        const stationUrl = stations[this.stationName].apiUrl;
-        const fetchOptions = {
-            method: stations[this.stationName].method || 'GET',
-            headers: stations[this.stationName].headers || {},
-        };
+            let stationUrl = stations[this.stationName].apiUrl;
 
-        fetch(stationUrl, fetchOptions)
-            .then((response) => {
-                const contentType = response.headers.get('content-type');
+            // Add a cache-busting parameter
+            const timestamp = new Date().getTime();
+            if (stationUrl.includes('?')) {
+                stationUrl += `&t=${timestamp}`;
+            } else {
+                stationUrl += `?t=${timestamp}`;
+            }
 
-                if (contentType.includes('application/json')) {
-                    return response.json().then((data) => ({ data, contentType }));
-                } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
-                    return response.text().then((data) => ({ data, contentType }));
-                } else {
-                    throw new Error(`Unsupported content type: ${contentType}`);
-                }
-            })
-            .then(({ data, contentType }) => {
-                if (typeof data === 'string') {
-                    if (contentType.includes('text/html')) {
-                        // Parse the HTML response
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(data, 'text/html');
-                        data = this.extractDataFromHTML(doc);
-                    } else if (contentType.includes('application/javascript')) {
-                        // Extract the HTML content from the JavaScript response
-                        const htmlContent = this.extractHTMLFromJS(data);
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(htmlContent, 'text/html');
-                        data = this.extractDataFromHTML(doc);
+            const fetchOptions = {
+                method: stations[this.stationName].method || 'GET',
+                headers: stations[this.stationName].headers || {},
+            };
+
+            fetch(stationUrl, fetchOptions)
+                .then((response) => {
+                    const contentType = response.headers.get('content-type');
+
+                    if (contentType.includes('application/json')) {
+                        return response.json().then((data) => ({ data, contentType }));
+                    } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
+                        return response.text().then((data) => ({ data, contentType }));
+                    } else {
+                        throw new Error(`Unsupported content type: ${contentType}`);
                     }
-                }
+                })
+                .then(({ data, contentType }) => {
+                    if (typeof data === 'string') {
+                        if (contentType.includes('text/html')) {
+                            // Parse the HTML response
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(data, 'text/html');
+                            data = this.extractDataFromHTML(doc);
+                        } else if (contentType.includes('application/javascript')) {
+                            // Extract the HTML content from the JavaScript response
+                            const htmlContent = this.extractHTMLFromJS(data);
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(htmlContent, 'text/html');
+                            data = this.extractDataFromHTML(doc);
+                        }
+                    }
 
-                // Compare the current data response with the previous one
-                if (this.isDataSameAsPrevious(data)) {
-                    // Data response is the same as the previous one, no need to process further
-                    return;
-                }
+                    // Compare the current data response with the previous one
+                    if (this.isDataSameAsPrevious(data)) {
+                        // Data response is the same as the previous one, no need to process further
+                        return;
+                    }
 
-                // Store the current data response for future comparison
-                this.previousDataResponse = data;
+                    // Store the current data response for future comparison
+                    this.previousDataResponse = data;
 
-                // Process the new data response
-                this.processData(data);
-            })
-            .catch((error) => {
-                console.error('Error fetching streaming data:', error);
-            });
+                    // Process the new data response
+                    this.processData(data);
+                })
+                .catch((error) => {
+                    console.error('Error fetching streaming data:', error);
+                });
+        }
     }
-}
 
-// Helper function to extract HTML content from a JavaScript response
-extractHTMLFromJS(js) {
-    const match = js.match(/_spinitron\d+\("(.+)"\);/s);
-    if (match && match[1]) {
-        return match[1].replace(/\\"/g, '"'); // Unescape double quotes
-    } else {
-        throw new Error('Unable to extract HTML content from JavaScript response');
+    // Helper function to extract HTML content from a JavaScript response
+    extractHTMLFromJS(js) {
+        const match = js.match(/_spinitron\d+\("(.+)"\);/s);
+        if (match && match[1]) {
+            return match[1].replace(/\\"/g, '"'); // Unescape double quotes
+        } else {
+            throw new Error('Unable to extract HTML content from JavaScript response');
+        }
     }
-}
 
-// Helper function to extract necessary data from HTML response
-extractDataFromHTML(doc) {
-    const song = doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available';
-    const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
-    const album = doc.querySelector('span.release')?.textContent.trim() || '';
+    // Helper function to extract necessary data from HTML response
+    extractDataFromHTML(doc) {
+        const song = doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available';
+        const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
+        const album = doc.querySelector('span.release')?.textContent.trim() || '';
+      //  const albumArt = doc.querySelector('.spin-art-container > img.src')?.textContent.trim() || '';
 
     // Return the extracted data in the format expected by processData
-   return `${song} - ${artist} - ${album}`;
-}
-
-
-
-
-
-
+       return `${song} - ${artist} - ${album}`;
+    }
 
    // Function to compare the current data response with the previous one
     isDataSameAsPrevious(data) {
