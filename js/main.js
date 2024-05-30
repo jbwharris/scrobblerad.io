@@ -182,7 +182,7 @@ class RadioPlayer {
             clearInterval(this.streamingInterval);
         }
 
-        const newAudio = new Audio(stations[stationName].streamUrl);
+        const newAudio = new Audio(this.addCacheBuster(stations[stationName].streamUrl));
         newAudio.onloadedmetadata = () => {
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
             if (this.audio) {
@@ -235,16 +235,25 @@ class RadioPlayer {
         }
 
         if (stations[stationName].stringPath) {
-            const regexPattern = stations[stationName].pathRegex || /^(.*) \- (.*)/;
+            const regexPattern = stations[stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+(.*))?$/;
             const match = regexPattern.exec(data);
 
             if (match) {
-                [song, artist] = match.slice(1, 3).map((str) => str?.trim());
+                // Extract and trim the matched groups
+                song = match[1]?.trim() || '';
+                artist = match[2]?.trim() || '';
+                album = match[3]?.trim() || '';
+
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
                 }
+
+                // Now you can use song, artist, and album as needed
+            } else {
+                console.log('No match found');
             }
         }
+
 
         // Check if any filtered values are present in the song or artist
         const filteredValues = stations[stationName].filter || [];
@@ -262,8 +271,6 @@ class RadioPlayer {
             song = 'Station data is taking a break';
             artist = '';
         }
-
-        console.log('extractsongandartist: ', song, artist, album);
 
         return [song, artist, album];
     }
@@ -307,14 +314,14 @@ class RadioPlayer {
                         if (lfmData.error !== 6) {
                             if (currentAlbum) {
                                 lfmArt = lfmData.album?.image[3]["#text"] || urlCoverArt;
-                                lfmAlbum = filter.filterField('album', lfmData.album?.name || '');
+                                lfmAlbum = filter.filterField('album', lfmData.album?.name) || filter.filterField('album', currentAlbum) || '';
                                 lfmSong = filter.filterField('track', currentSong) || 'No streaming data currently available';
                                 lfmArtist = filter.filterField('artist', lfmData.album?.artist) || filter.filterField('artist', currentArtist) || '';
                                 lfmListeners = lfmData.album.listeners;
                                 lfmPlaycount = lfmData.album.playcount;
                             } else {
                                 lfmArt = lfmData.track?.album?.image[3]["#text"] || urlCoverArt;
-                                lfmAlbum = filter.filterField('album', lfmData.track?.album?.title || '');
+                                lfmAlbum = filter.filterField('album', lfmData.track?.album?.title) || filter.filterField('album', currentAlbum) || '';
                                 lfmSong = filter.filterField('track', lfmData.track?.name) || filter.filterField('track', currentSong) || 'No streaming data currently available';
                                 lfmArtist = filter.filterField('artist', lfmData.track?.artist?.name) || filter.filterField('artist', currentArtist) || '';
                                 lfmListeners = lfmData.track.listeners || '';
@@ -326,7 +333,7 @@ class RadioPlayer {
                             return;
                         } else {
                             lfmArt = urlCoverArt;
-                            lfmAlbum = '';
+                            lfmAlbum = filter.filterField('track', currentAlbum) || '';
                             lfmSong = filter.filterField('track', currentSong) || 'No streaming data currently available';
                             lfmArtist = filter.filterField('artist', currentArtist) || '';
                             lfmListeners = '';
@@ -348,15 +355,7 @@ class RadioPlayer {
         if (this.isPlaying) {
             if (!this.stationName) return;
 
-            let stationUrl = stations[this.stationName].apiUrl;
-
-            // Add a cache-busting parameter
-            const timestamp = new Date().getTime();
-            if (stationUrl.includes('?')) {
-                stationUrl += `&t=${timestamp}`;
-            } else {
-                stationUrl += `?t=${timestamp}`;
-            }
+            let stationUrl = this.addCacheBuster(stations[this.stationName].apiUrl);
 
             const fetchOptions = {
                 method: stations[this.stationName].method || 'GET',
@@ -376,7 +375,6 @@ class RadioPlayer {
                     }
                 })
                 .then(({ data, contentType }) => {
-                    if (typeof data === 'string') {
                         if (contentType.includes('text/html')) {
                             // Parse the HTML response
                             const parser = new DOMParser();
@@ -389,7 +387,6 @@ class RadioPlayer {
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
                         }
-                    }
 
                     // Compare the current data response with the previous one
                     if (this.isDataSameAsPrevious(data)) {
@@ -399,6 +396,8 @@ class RadioPlayer {
 
                     // Store the current data response for future comparison
                     this.previousDataResponse = data;
+
+
 
                     // Process the new data response
                     this.processData(data);
@@ -438,7 +437,6 @@ class RadioPlayer {
 
     processData(data) {
         const [ song, artist, album ] = this.extractSongAndArtist(data, this.stationName);
-
         let staleData = '';
         const currentTimeMillis = new Date().getTime();
         let epochTimeString = this.getPath(data, stations[this.stationName].timestamp) || "";
@@ -550,6 +548,11 @@ class RadioPlayer {
         this.calculateNextAndPreviousIndices();
         const previousStationName = stationKeys[this.previousIndex];
         this.handleStationSelect(null, previousStationName);
+    }
+
+    addCacheBuster(url) {
+        const timestamp = new Date().getTime();
+        return url.includes('?') ? `${url}&t=${timestamp}` : `${url}?t=${timestamp}`;
     }
 }
 
