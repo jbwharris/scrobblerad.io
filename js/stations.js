@@ -248,7 +248,7 @@ const stations = {
     timestamp: "updated",
     pathRegex: /^(.*?)s*-s*(.*)$/,
     orbPath: true,
-    filter: ["Inhailer", "WGUC", "Brady Music Center", "InLocal", "@INHAILERradio", "Taylor Fox", "Friday Vibe w", "Week-ender", "DJ Lou Freeman", "@Rootin", "Sledge, Sundays", "Elvis - "],
+    filter: ["Inhailer", "WGUC", "Brady Music Center", "InLocal", "@INHAILERradio", "Taylor Fox", "Friday Vibe w", "Week-ender", "DJ Lou Freeman", "@Rootin", "Sledge, Sundays", "Elvis - ", "RareTodd", "Pete Riddle", "Music Festival", "Overtime With Jake", "Hitt List", " Ad"],
   },
   kexp: {
     artist: "results.0.artist",
@@ -272,6 +272,15 @@ const stations = {
     streamUrl: "https://kcrw.streamguys1.com/kcrw_192k_mp3_e24",
     apiUrl: "https://tracklist-api.kcrw.com/music",
     timestamp: "datetime",
+  },
+  krsm: {
+    stationName: "KRSM",
+    location: "Minneapolis, Minnesota, USA",
+    webUrl: "https://www.krsmradio.org/",
+    streamUrl: "https://noasrv.caster.fm:10069/live",
+    apiUrl: "https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron05891577247031242171657762111&station=krsm&num=0&sharing=0&player=0&cover=0&merch=0&meta=0",
+    stringPath: true,
+    filter: ["KRSM"],
   },
   // Removing until they can actually put an SSL cert on their api, otherwise it doesn't work without the user enabling a security exemption
   // kusf: {
