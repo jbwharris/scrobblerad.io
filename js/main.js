@@ -165,13 +165,13 @@ class RadioPlayer {
         }
     }
 
-    calculateNextAndPreviousIndices() {
+    calculateNextAndPreviousIndices(direction) {
         this.currentIndex = stationKeys.indexOf(this.stationName);
         this.nextIndex = (this.currentIndex + 1) % stationKeys.length;
         this.previousIndex = (this.currentIndex - 1 + stationKeys.length) % stationKeys.length;
     }
 
-    handleStationSelect(event, stationName) {
+     handleStationSelect(direction, stationName) {
         if (!stationName) return;
 
         console.log(stationName);
@@ -199,7 +199,12 @@ class RadioPlayer {
         };
 
         newAudio.onerror = (error) => {
-            console.error('Error loading audio:', error);
+            console.warn('Error loading audio:', error);
+            if (direction == true) {
+                this.skipBackward();
+            } else {
+                this.skipForward();
+            }
         };
 
         newAudio.load();
@@ -223,7 +228,7 @@ class RadioPlayer {
         }
 
         if (stations[stationName].orbPath) {
-            const regexPattern = stations[stationName].pathRegex || /^(.*) \- (.*)/;
+            const regexPattern = stations[stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+(.*))?$/;
             const match = regexPattern.exec(data.title);
 
             if (match) {
@@ -267,8 +272,8 @@ class RadioPlayer {
         const phoneNumberExists = /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(song) || /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(artist);
 
         // If either filteredValues, stationName, a phone number exists or there is no value for song, set song and artist accordingly
-        if (stationNameExists || phoneNumberExists || hasFilteredValue ) {
-            song = 'Station data is taking a break';
+        if (stationNameExists || phoneNumberExists || hasFilteredValue || (!song && !artist) ) {
+            song = 'Station may be taking a break';
             artist = '';
         }
 
@@ -366,7 +371,7 @@ class RadioPlayer {
                 .then((response) => {
                     const contentType = response.headers.get('content-type');
 
-                    if (contentType.includes('application/json')) {
+                    if (contentType.includes('application/json') || contentType.includes('application/vnd.api+json')) {
                         return response.json().then((data) => ({ data, contentType }));
                     } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
                         return response.text().then((data) => ({ data, contentType }));
@@ -383,6 +388,7 @@ class RadioPlayer {
                         } else if (contentType.includes('application/javascript')) {
                             // Extract the HTML content from the JavaScript response
                             const htmlContent = this.extractHTMLFromJS(data);
+                            console.log('excaped HTML', htmlContent);
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
@@ -396,8 +402,6 @@ class RadioPlayer {
 
                     // Store the current data response for future comparison
                     this.previousDataResponse = data;
-
-
 
                     // Process the new data response
                     this.processData(data);
@@ -423,6 +427,7 @@ class RadioPlayer {
         const song = doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available';
         const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
         const album = doc.querySelector('span.release')?.textContent.trim() || '';
+        const albumArt = doc.querySelector('img.release')?.textContent.trim() || '';
       //  const albumArt = doc.querySelector('.spin-art-container > img.src')?.textContent.trim() || '';
 
     // Return the extracted data in the format expected by processData
@@ -439,7 +444,7 @@ class RadioPlayer {
         const [ song, artist, album ] = this.extractSongAndArtist(data, this.stationName);
         let staleData = '';
         const currentTimeMillis = new Date().getTime();
-        let epochTimeString = this.getPath(data, stations[this.stationName].timestamp) || "";
+        let epochTimeString = this.getPath(data, stations[this.stationName].timestamp) || this.getPath(data, stations[this.stationName].timestamp2) || "";
 
         let epochTimeMillis;
         if (String(epochTimeString).includes('T')) {
@@ -453,7 +458,7 @@ class RadioPlayer {
             staleData = 'Streaming data is stale';
         }
 
-        if (song === 'No streaming data currently available' || song === 'Station data is taking a break' || song === 'Station data is currently missing' || staleData) {
+        if (song === 'No streaming data currently available' || song === 'Station may be taking a break' || song === 'Station data is currently missing' || staleData) {
             const page = new Page(this.stationName, this);
             page.refreshCurrentData([staleData || song, '', '', urlCoverArt, '', '', true]);
             return;
@@ -538,16 +543,22 @@ class RadioPlayer {
         this.isPlaying ? this.pause() : this.play();
     }
 
-    skipForward() {
+    skipToNextStation() {
         this.calculateNextAndPreviousIndices();
-        const nextStationName = stationKeys[this.nextIndex];
-        this.handleStationSelect(null, nextStationName);
+        const nextStationKey = stationKeys[this.nextIndex];
+        this.handleStationSelect(null, nextStationKey);
     }
 
     skipBackward() {
         this.calculateNextAndPreviousIndices();
-        const previousStationName = stationKeys[this.previousIndex];
-        this.handleStationSelect(null, previousStationName);
+        const prevStationKey = stationKeys[this.previousIndex];
+        this.handleStationSelect(true, prevStationKey);
+    }
+
+    skipForward() {
+        this.calculateNextAndPreviousIndices();
+        const nextStationKey = stationKeys[this.nextIndex];
+        this.handleStationSelect(null, nextStationKey);
     }
 
     addCacheBuster(url) {
@@ -561,7 +572,7 @@ const radioPlayer = new RadioPlayer(
     document.getElementById("playButton"),
     document.getElementById("skipForward"),
     document.getElementById("skipBack")
-);
+); 
 
 generateRadioButtons();
 
