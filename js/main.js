@@ -480,14 +480,11 @@ class RadioPlayer {
             this.song = lfmSong;
             this.artist = lfmArtist;
             this.album = lfmAlbum;
-            console.log('did we get albumArt in processData?', albumArt);
-            console.log('what is lfmArt set to?', lfmArt);
             if (lfmArt == urlCoverArt) {
                 this.artworkUrl = this.upsizeImgUrl(albumArt) || this.upsizeImgUrl(this.getPath(data, stations[this.stationName].albumArt)) || urlCoverArt;
             } else {    
                 this.artworkUrl = this.upsizeImgUrl(lfmArt);
             }
-            console.log('what is artworkUrl assigned to?', this.artworkUrl);
             this.listeners = lfmListeners;
             this.playcount = lfmPlaycount;
             
