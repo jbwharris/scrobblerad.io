@@ -137,6 +137,7 @@ class RadioPlayer {
         this.getStreamingData = this.getStreamingData.bind(this);
         this.extractSongAndArtist = this.extractSongAndArtist.bind(this);
         this.getPath = this.getPath.bind(this);
+        this.upsizeImgUrl = this.upsizeImgUrl.bind(this);
         this.togglePlay = this.togglePlay.bind(this);
         this.skipForward = this.skipForward.bind(this);
         this.skipBackward = this.skipBackward.bind(this);
@@ -221,6 +222,7 @@ class RadioPlayer {
         let song = this.getPath(data, stations[stationName].song)?.replace(/&apos;/g, "'") || '';
         let artist = this.getPath(data, stations[stationName].artist)?.replace(/&apos;/g, "'") || '';
         let album = this.getPath(data, stations[stationName].album)?.replace(/&apos;/g, "'") || '';
+        let albumArt = this.getPath(data, stations[stationName].albumArt)?.replace(/&apos;/g, "'") || '';
 
         if (stations[stationName].nprPath && !song) {
             song = this.getPath(data, stations[stationName].song2)?.replace(/&apos;/g, "'") || '';
@@ -228,7 +230,7 @@ class RadioPlayer {
         }
 
         if (stations[stationName].orbPath) {
-            const regexPattern = stations[stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+(.*))?$/;
+            const regexPattern = stations[stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
             const match = regexPattern.exec(data.title);
 
             if (match) {
@@ -240,7 +242,7 @@ class RadioPlayer {
         }
 
         if (stations[stationName].stringPath) {
-            const regexPattern = stations[stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+(.*))?$/;
+            const regexPattern = stations[stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
             const match = regexPattern.exec(data);
 
             if (match) {
@@ -248,6 +250,7 @@ class RadioPlayer {
                 song = match[1]?.trim() || '';
                 artist = match[2]?.trim() || '';
                 album = match[3]?.trim() || '';
+                albumArt = match[4]?.trim() || '';
 
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -277,7 +280,7 @@ class RadioPlayer {
             artist = '';
         }
 
-        return [song, artist, album];
+        return [song, artist, album, albumArt];
     }
 
     getLfmMeta(currentSong, currentArtist, currentAlbum) {
@@ -388,11 +391,12 @@ class RadioPlayer {
                         } else if (contentType.includes('application/javascript')) {
                             // Extract the HTML content from the JavaScript response
                             const htmlContent = this.extractHTMLFromJS(data);
-                            console.log('excaped HTML', htmlContent);
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
+                            console.log('data from JS', data);
                         }
+
 
                     // Compare the current data response with the previous one
                     if (this.isDataSameAsPrevious(data)) {
@@ -427,11 +431,10 @@ class RadioPlayer {
         const song = doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available';
         const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
         const album = doc.querySelector('span.release')?.textContent.trim() || '';
-        const albumArt = doc.querySelector('img.release')?.textContent.trim() || '';
-      //  const albumArt = doc.querySelector('.spin-art-container > img.src')?.textContent.trim() || '';
+        const albumArt = doc.querySelector('img')?.src || '';
 
     // Return the extracted data in the format expected by processData
-       return `${song} - ${artist} - ${album}`;
+       return `${song} - ${artist} - ${album} - ${albumArt}`;
     }
 
    // Function to compare the current data response with the previous one
@@ -441,7 +444,8 @@ class RadioPlayer {
     }
 
     processData(data) {
-        const [ song, artist, album ] = this.extractSongAndArtist(data, this.stationName);
+        const [ song, artist, album, albumArt ] = this.extractSongAndArtist(data, this.stationName);
+
         let staleData = '';
         const currentTimeMillis = new Date().getTime();
         let epochTimeString = this.getPath(data, stations[this.stationName].timestamp) || this.getPath(data, stations[this.stationName].timestamp2) || "";
@@ -468,7 +472,6 @@ class RadioPlayer {
             return;
         }
 
-
         // Always call getLfmMeta the first time or if the song has changed
         if (!this.lfmMetaChanged || song !== this.song) {
             this.getLfmMeta(song, artist, album).then(lfmValues => {
@@ -477,7 +480,14 @@ class RadioPlayer {
             this.song = lfmSong;
             this.artist = lfmArtist;
             this.album = lfmAlbum;
-            this.artworkUrl = lfmArt;
+            console.log('did we get albumArt in processData?', albumArt);
+            console.log('what is lfmArt set to?', lfmArt);
+            if (lfmArt == urlCoverArt) {
+                this.artworkUrl = this.upsizeImgUrl(albumArt) || this.upsizeImgUrl(this.getPath(data, stations[this.stationName].albumArt)) || urlCoverArt;
+            } else {    
+                this.artworkUrl = this.upsizeImgUrl(lfmArt);
+            }
+            console.log('what is artworkUrl assigned to?', this.artworkUrl);
             this.listeners = lfmListeners;
             this.playcount = lfmPlaycount;
             
@@ -493,7 +503,13 @@ class RadioPlayer {
         }
     }
 
-
+    upsizeImgUrl(url) {
+        if (url) {
+            return url.replace(/170x170|360x360|300x300/g, '500x500');
+        } else {
+            return;
+        }
+    }
 
     getPath(obj, prop) {
         if (!obj || typeof obj !== 'object' || !prop) {
