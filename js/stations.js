@@ -33,18 +33,12 @@ const stations = {
     orbPath: true,
   },
   bbcradio6: {
-    combined: "title",
-    artist: "iArtist",
-    song: "iName",
-    album: "",
-    albumArt: "iImg",
     stationName: "BBC6 Radio",
     location: "London, UK",
     webUrl: "https://www.bbc.co.uk/sounds/play/live:bbc_6music",
     streamUrl: "https://a.files.bbci.co.uk/ms6/live/3441A116-B12E-4D2F-ACA8-C1984642FA4B/audio/simulcast/hls/nonuk/audio_syndication_low_sbr_v1/cfs/bbc_6music.m3u8",
     apiUrl: "https://scraper2.onlineradiobox.com/uk.bbcradio6?l=0",
     timestamp: "updated",
-    pathRegex: /^(.*?)s*-s*(.*?)$/,
     orbPath: true,
   },  
   birchstreet: {
@@ -160,12 +154,15 @@ const stations = {
     artist: "0.artist",
     song: "0.title",
     album: "0.album",
+    artist2: "1.artist",
+    song2: "1.title",
     stationName: "Indie 102.3",
     location: "Denver, Colorado, USA",
     webUrl: "https://indie1023.org",
     streamUrl: "https://stream1.cprnetwork.org/cpr3_lo",
     apiUrl: "https://playlist.cprnetwork.org/won_plus3/KVOQ.json",
     needPath: true,
+    altPath: true,
   },
   indie617: {
     stationName: "indie617",
@@ -305,7 +302,7 @@ const stations = {
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/50ef24ebe1c8a1369593d032/tracks?format=json",
     needPath: true,
-    nprPath: true,
+    altPath: true,
   },
   kxt: {
     artist: "0.artist",
@@ -370,7 +367,7 @@ const stations = {
     timestamp: 'onNow.song._end_time',
     timestamp2: 'tracklist.results.0.song._end_time',
     needPath: true,
-    nprPath: true,
+    altPath: true,
   },
   plazaone: {
     artist: "song.artist",
@@ -560,7 +557,7 @@ const stations = {
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/5a679ab2e4b0f3ec69154c59/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
     needPath: true,
-    nprPath: true,
+    altPath: true,
     streamNotes: "This api is super tempermental. I've observed it stop working on Saturday night at midnight, then resume on Monday a couple times. Not sure if it's a bug on their part."
   },
   wbru: {
@@ -599,7 +596,7 @@ const stations = {
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/51929bfde1c8886d5ccfb1d9/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
     needPath: true,
-    nprPath: true,
+    altPath: true,
     filter: ["WFPK"],
   },
   wfmu: {
@@ -707,7 +704,7 @@ const stations = {
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/50e451b6a93e91ee0a00028e/tracks?format=json&limit=1",
     needPath: true,
-    nprPath: true,
+    altPath: true,
     filter: ["WYEP"],
   },
   wyms: {

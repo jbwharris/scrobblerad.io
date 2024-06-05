@@ -224,7 +224,7 @@ class RadioPlayer {
         let album = this.getPath(data, stations[stationName].album)?.replace(/&apos;/g, "'") || '';
         let albumArt = this.getPath(data, stations[stationName].albumArt)?.replace(/&apos;/g, "'") || '';
 
-        if (stations[stationName].nprPath && !song) {
+        if (stations[stationName].altPath && !song) {
             song = this.getPath(data, stations[stationName].song2)?.replace(/&apos;/g, "'") || '';
             artist = this.getPath(data, stations[stationName].artist2)?.replace(/&apos;/g, "'") || '';
         }
@@ -251,6 +251,8 @@ class RadioPlayer {
                 artist = match[2]?.trim() || '';
                 album = match[3]?.trim() || '';
                 albumArt = match[4]?.trim() || '';
+
+                console.log('song and artist from string', song, artist)
 
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
