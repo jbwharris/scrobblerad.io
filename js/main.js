@@ -173,7 +173,7 @@ class RadioPlayer {
     }
 
      handleStationSelect(direction, stationName) {
-        if (!stationName) return;
+        if (!stationName || direction == false) return;
 
         console.log(stationName);
         this.stationName = stationName;
@@ -251,8 +251,6 @@ class RadioPlayer {
                 artist = match[2]?.trim() || '';
                 album = match[3]?.trim() || '';
                 albumArt = match[4]?.trim() || '';
-
-                console.log('song and artist from string', song, artist)
 
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -376,7 +374,7 @@ class RadioPlayer {
                 .then((response) => {
                     const contentType = response.headers.get('content-type');
 
-                    if (contentType.includes('application/json') || contentType.includes('application/vnd.api+json')) {
+                    if (contentType.includes('application/json') || contentType.includes('application/vnd.api+json' || stations[this.stationName].phpString )) {
                         return response.json().then((data) => ({ data, contentType }));
                     } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
                         return response.text().then((data) => ({ data, contentType }));
@@ -385,7 +383,7 @@ class RadioPlayer {
                     }
                 })
                 .then(({ data, contentType }) => {
-                        if (contentType.includes('text/html')) {
+                        if (contentType.includes('text/html') && !stations[this.stationName].phpString) {
                             // Parse the HTML response
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(data, 'text/html');
@@ -398,7 +396,6 @@ class RadioPlayer {
                             data = this.extractDataFromHTML(doc);
                             console.log('data from JS', data);
                         }
-
 
                     // Compare the current data response with the previous one
                     if (this.isDataSameAsPrevious(data)) {
@@ -593,4 +590,4 @@ generateRadioButtons();
 
 // Load the default station
 const defaultStation = stationKeys[0];
-radioPlayer.handleStationSelect(null, defaultStation);
+radioPlayer.handleStationSelect(false, defaultStation);
