@@ -3,6 +3,7 @@
     "name": "scrobblerad.io",
     "short_name": "scrobblerad.io",
     "start_url": "index.html",
+    "id": "App",
     "display": "standalone",
     "description": "Scrobble Indie Radio to last.fm",
     "lang": "en",
