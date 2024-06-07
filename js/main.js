@@ -52,7 +52,7 @@ class Page {
     }
 
     changeTitlePage() {
-        document.title = this.title;
+        document.title = `${this.title} currently loading`;
     }
 
     refreshCurrentData(values) {
@@ -94,7 +94,7 @@ class Page {
     setupMediaSession(song, artist, artworkUrl) {
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: song || 'No streaming data currently available',
+                title: song ||  `${stations[this.stationName].stationName} currently loading`,
                 artist: artist || '',
                 album: `Now playing on ${stations[this.stationName].stationName}` || '',
                 duration: Infinity,
@@ -122,9 +122,11 @@ class RadioPlayer {
         this.playButton = buttonElement;
         this.skipForwardButton = skipForwardButton;
         this.skipBackButton = skipBackButton;
-        this.isPlaying = false;
+        this.isPlaying = null;
         this.stationName = "";
         this.previousDataResponse = null;
+        this.pauseTimeout = null; // Timer for pause duration
+        this.shouldReloadStream = false; // Flag to indicate if the stream should be reloaded
 
         this.bindMethods();
         this.addEventListeners();
@@ -172,7 +174,7 @@ class RadioPlayer {
         this.previousIndex = (this.currentIndex - 1 + stationKeys.length) % stationKeys.length;
     }
 
-     handleStationSelect(direction, stationName) {
+    handleStationSelect(direction, stationName) {
         if (!stationName || direction == false) return;
 
         console.log(stationName);
@@ -184,21 +186,26 @@ class RadioPlayer {
         }
 
         const newAudio = new Audio(this.addCacheBuster(stations[stationName].streamUrl));
+        
         newAudio.onloadedmetadata = () => {
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
             if (this.audio) {
                 this.audio.pause();
                 this.audio = null;
             }
-            this.audio = newAudio;
-            this.play();
-            this.isPlaying = true;
+
+            // add a timeout so it doesn't skip immediately if a stream is a little slow to load
+            setTimeout(() => {
+                this.audio = newAudio;
+                this.play();
+                this.isPlaying = true;
+            }, 2000);
 
             const fetchDataAndRefreshPage = () => this.getStreamingData();
             fetchDataAndRefreshPage();
             this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000);
-        };
-
+        }; 
+        
         newAudio.onerror = (error) => {
             console.warn('Error loading audio:', error);
             if (direction == true) {
@@ -304,7 +311,7 @@ class RadioPlayer {
                 } else {
                     lfmMethod = 'track.getInfo';
                     lfmQueryField = 'track';
-                    lfmDataField = currentSong;
+                    lfmDataField = currentSong.replace(/\s*\(.*?version.*?\)/gi, '');
                 }
 
                 const lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(filter.filterField('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(filter.filterField(lfmQueryField, lfmDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
@@ -346,6 +353,7 @@ class RadioPlayer {
                             lfmArtist = filter.filterField('artist', currentArtist) || '';
                             lfmListeners = '';
                             lfmPlaycount = '';
+                            console.log('got info from station api');
                         }
                         resolve([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount]);
                     })
@@ -360,7 +368,7 @@ class RadioPlayer {
     }
 
     getStreamingData() {
-        if (this.isPlaying) {
+        if (this.isPlaying || this.isPlaying == null) {
             if (!this.stationName) return;
 
             let stationUrl = this.addCacheBuster(stations[this.stationName].apiUrl);
@@ -535,10 +543,22 @@ class RadioPlayer {
 
     play() {
         if (!this.audio.src) return;
+
+        if (this.shouldReloadStream) {
+            this.handleStationSelect(); // Reload the stream
+            this.shouldReloadStream = false; // Reset the flag
+        }
         this.audio.play().then(() => {
             this.isPlaying = true;
             this.playButton.lastElementChild.className = "fa fa-pause";
             document.getElementById("metadata").classList.add("playing");
+
+
+            if (this.pauseTimeout) {
+                clearTimeout(this.pauseTimeout);
+                this.pauseTimeout = null;
+            }
+
         }).catch((error) => {
             console.error('Error playing audio:', error);
         });
@@ -549,6 +569,15 @@ class RadioPlayer {
         this.isPlaying = false;
         this.playButton.lastElementChild.className = "fa fa-play";
         document.getElementById("metadata").classList.remove("playing");
+
+        if (this.pauseTimeout) {
+            clearTimeout(this.pauseTimeout);
+        }
+
+        // Set a timeout to mark stream reload after 30 seconds
+        this.pauseTimeout = setTimeout(() => {
+            this.shouldReloadStream = true;
+        }, 30000);
     }
 
     togglePlay() {
