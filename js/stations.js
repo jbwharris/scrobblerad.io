@@ -84,7 +84,6 @@ const stations = {
     apiUrl: "https://scraper2.onlineradiobox.com/ca.cjmp",
     timestamp: "updated",
     orbPath: true,
-    flipMeta: true,
     filter: ["CJMP"],
   },
   ckua: {
