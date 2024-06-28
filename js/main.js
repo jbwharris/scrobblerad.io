@@ -221,9 +221,12 @@ class RadioPlayer {
       // Use the debounced function to handle audio playback
       this.debouncedPlayAudio(newAudio);
 
-      const fetchDataAndRefreshPage = () => this.getStreamingData();
-      fetchDataAndRefreshPage();
-      this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000);
+        // Initial API call without debounce
+        this.getStreamingData();
+
+        // Debounce subsequent API calls to prevent rapid firing
+        const fetchDataAndRefreshPage = this.debounce(() => this.getStreamingData(), 500);
+        this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000);
     };
 
     newAudio.onerror = (error) => {
@@ -636,14 +639,21 @@ const radioPlayer = new RadioPlayer(
 
 generateRadioButtons();
 
-// Load the default station
-const defaultStation = stationKeys[0];
-radioPlayer.handleStationSelect(false, defaultStation);
+document.addEventListener('DOMContentLoaded', function() {
+    // Your code that interacts with the DOM goes here
+    const defaultStation = stationKeys[0];
+    radioPlayer.handleStationSelect(false, defaultStation);
 
-
-// Assuming you have an event listener that triggers handleStationSelect
-document.getElementById('station-select').addEventListener('change', (event) => {
-  const stationName = event.target.value;
-  const direction = true; // Or false, depending on the use case
-  radioPlayer.handleStationSelect(direction, stationName);
+    const stationSelect = document.getElementById('stationSelect');
+    if (stationSelect) {
+        stationSelect.addEventListener('change', (event) => {
+            const stationName = event.target.value;
+            const direction = true; // Or false, depending on the use case
+            radioPlayer.handleStationSelect(direction, stationName);
+        });
+    } else {
+        console.error('Element with ID "station-select" not found.');
+    }
 });
+
+
