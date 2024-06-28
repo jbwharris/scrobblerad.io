@@ -128,8 +128,23 @@ class RadioPlayer {
         this.pauseTimeout = null; // Timer for pause duration
         this.shouldReloadStream = false; // Flag to indicate if the stream should be reloaded
 
+        // Debounce the audio playback
+        this.debouncedPlayAudio = this.debounce((newAudio) => {
+          if (this.audio) {
+            this.audio.pause();
+            this.audio = null;
+          }
+
+          setTimeout(() => {
+            this.audio = newAudio;
+            this.play();
+            this.isPlaying = true;
+          }, 1500);
+        }, 1500);
+
         this.bindMethods();
         this.addEventListeners();
+
         this.init();
     }
 
@@ -174,56 +189,61 @@ class RadioPlayer {
         this.previousIndex = (this.currentIndex - 1 + stationKeys.length) % stationKeys.length;
     }
 
-    handleStationSelect(direction, stationName) {
-        if (!stationName || direction == false) return;
-
-        console.log(stationName);
-        this.stationName = stationName;
-        this.updateArt = true;
-
-        if (this.streamingInterval) {
-            clearInterval(this.streamingInterval);
-        }
-
-        const newAudio = new Audio(this.addCacheBuster(stations[stationName].streamUrl));
-        
-        newAudio.onloadedmetadata = () => {
-            this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
-            if (this.audio) {
-                this.audio.pause();
-                this.audio = null;
-            }
-
-            // add a timeout so it doesn't skip immediately if a stream is a little slow to load
-            setTimeout(() => {
-                this.audio = newAudio;
-                this.play();
-                this.isPlaying = true;
-            }, 2000);
-
-            const fetchDataAndRefreshPage = () => this.getStreamingData();
-            fetchDataAndRefreshPage();
-            this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000);
-        }; 
-        
-        newAudio.onerror = (error) => {
-            console.warn('Error loading audio:', error);
-            if (direction == true) {
-                this.skipBackward();
-            } else {
-                this.skipForward();
-            }
+      // Debounce function
+      debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+          const later = () => {
+            clearTimeout(timeout);
+            func.apply(this, args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
         };
+      }
 
-        newAudio.load();
-        const page = new Page(this.stationName, this);
-        page.changeTitlePage();
+  handleStationSelect(direction, stationName) {
+    if (!stationName || direction == false) return;
 
-        const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
-        if (radioInput) {
-            radioInput.checked = true;
-        }
+    console.log(stationName);
+    this.stationName = stationName;
+    this.updateArt = true;
+
+    if (this.streamingInterval) {
+      clearInterval(this.streamingInterval);
     }
+
+    const newAudio = new Audio(this.addCacheBuster(stations[stationName].streamUrl));
+
+    newAudio.onloadedmetadata = () => {
+      this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
+
+      // Use the debounced function to handle audio playback
+      this.debouncedPlayAudio(newAudio);
+
+      const fetchDataAndRefreshPage = () => this.getStreamingData();
+      fetchDataAndRefreshPage();
+      this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000);
+    };
+
+    newAudio.onerror = (error) => {
+      console.warn('Error loading audio:', error);
+      if (direction == true) {
+        this.skipBackward();
+      } else {
+        this.skipForward();
+      }
+    };
+
+    newAudio.load();
+    const page = new Page(this.stationName, this);
+    page.changeTitlePage();
+
+    const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
+    if (radioInput) {
+      radioInput.checked = true;
+    }
+  }
 
     extractSongAndArtist(data, stationName) {
         let song = this.getPath(data, stations[stationName].song)?.replace(/&apos;/g, "'") || '';
@@ -619,3 +639,11 @@ generateRadioButtons();
 // Load the default station
 const defaultStation = stationKeys[0];
 radioPlayer.handleStationSelect(false, defaultStation);
+
+
+// Assuming you have an event listener that triggers handleStationSelect
+document.getElementById('station-select').addEventListener('change', (event) => {
+  const stationName = event.target.value;
+  const direction = true; // Or false, depending on the use case
+  radioPlayer.handleStationSelect(direction, stationName);
+});
