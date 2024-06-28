@@ -4,10 +4,12 @@ A PWA and website to listen to cool radio stations and easily scrobble to [LastF
 [![HTML5](https://img.shields.io/badge/HTML-FF4500?style=for-the-badge&logo=html5&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/CSS-0077B5?&style=for-the-badge&logo=css3&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](#)
 
 ![image](https://github.com/jbwharris/scrobblerad.io/assets/2962327/9deb33e5-eb4e-4313-a412-ce1fbce95a1a)
+![AA4F7E87-0923-4025-ADA5-C6297216F79F_1_102_o](https://github.com/jbwharris/scrobblerad.io/assets/2962327/d32dcaf7-171e-4899-9fb4-849d61af5a9d)
+
 
 
 ## Features 
-- A diverse set of over 30 different online radio stations from around the world. Featuring [KEXP](https://kexp.org), [BBC6](https://www.bbc.co.uk/sounds/play/live:bbc_6music), various NPR stations and many more...
+- A diverse set of over 75 different online radio stations from around the world. Featuring [KEXP](https://kexp.org), [BBC6](https://www.bbc.co.uk/sounds/play/live:bbc_6music), various NPR stations and many more...
 - MediaSession controls, so you can easily switch between stations using the media controls on your keyboard
 - Song and artist data filtered using Web Scrobbler's [Metadata Filter](https://github.com/web-scrobbler/metadata-filter)
 - Album data from LastFM API
@@ -41,11 +43,13 @@ Yes it does. I originally started this project with the goal of being able to sc
 ## To-Do List
 - [ ] Add native scrobbling to make this a complete PWA solution.
 - [X] Add a filter for if the station name is in the metadata and not scrobble it. Sometimes a station will throw in a station ID or commercial into their API metadata.
-- [ ] Add SongWhip links to add to various streaming platforms.
+- [ ] Add Song.link links to add to various streaming platforms.
 - [X] Get station skipping working in iOS for Apple CarPlay.
 - [ ] Add recently scrobbled data to the page, so you could have a local indication of what has scrobbled.
 - [ ] Fix responsive styling and breakpoints.
 - [X] Add lastfm listeners and total listens.
+- [ ] Randomize station selection.
+- [ ] Choose your favourite stations to play instead of selecting from complete list.
 
 ## Acknowledgements
 - This project was originally forked from [PWA RadioKing Player](https://github.com/lunar-d/PWA-RadioKing-Player). When I started this project, I didn't know much about radio APIs or progressive web apps and this project offered me a good introduction while giving me a foundation to build from. It was originally for playing a single radio station and I was able to make an extensible structure where I could add tons of radio stations. 
