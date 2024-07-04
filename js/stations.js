@@ -274,7 +274,7 @@ const stations = {
     apiUrl: "https://scraper2.onlineradiobox.com/us.inhailer?l=0",
     timestamp: "updated",
     orbPath: true,
-    filter: ["Inhailer", "WGUC", "Brady Music Center", "InLocal", "@INHAILERradio", "Taylor Fox", "Friday Vibe w", "Week-ender", "DJ Lou Freeman", "@Rootin", "Sledge, Sundays", "Elvis - ", "RareTodd", "Pete Riddle", "Music Festival", "Overtime With Jake", "Hitt List", " Ad", "James Burke", "Taft Theatre"],
+    filter: ["Inhailer", "WGUC", "At Brady", "Brady Music", "InLocal", "@INHAILERradio", "Taylor Fox", "Friday Vibe w", "FridayVibe", "Week-ender", "DJ Lou Freeman", "@Rootin", "Sledge, Sundays", "Elvis", "RareTodd", "Pete Riddle", "Music Festival", "Overtime With Jake", "Hitt List", " Ad", "James Burke", "Taft Theatre", " | "],
   },
   kexp: {
     artist: "results.0.artist",

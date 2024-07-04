@@ -8,17 +8,28 @@ function generateRadioButtons() {
     stationKeys.forEach((stationKey) => {
         const station = stations[stationKey];
         const label = document.createElement('label');
+        label.id = stationKey; // Set the label's id to the stationKey
+        label.textContent = station.stationName;
         const input = document.createElement('input');
         input.type = 'radio';
-        input.id = stationKey;
         input.name = 'station';
         input.value = stationKey;
         input.checked = stationKey === radioPlayer.stationName;
+        
+        // Add event listener to update the URL hash
+        input.addEventListener('change', () => {
+            if (input.checked) {
+                window.location.hash = `#${stationKey}`;
+            }
+        });
 
-        const textNode = document.createTextNode(station.stationName);
+        // Create an anchor link to jump to the station
+        const anchor = document.createElement('a');
+        anchor.href = `#${stationKey}`;
+        anchor.appendChild(label);
+        
         label.appendChild(input);
-        label.appendChild(textNode);
-        fragment.appendChild(label);
+        fragment.appendChild(anchor);
     });
 
     stationSelectDiv.appendChild(fragment);
@@ -72,7 +83,8 @@ class Page {
                 this.animateAndUpdateElement(this.currentSongElement, song);
                 this.animateAndUpdateElement(this.currentArtistElement, artist);
                 this.animateAndUpdateElement(this.currentAlbumElement, album);
-                if (listeners !== undefined && playcount !== undefined) {
+                if (listeners !== null  && playcount !== null ) {
+                    console.log('listeners', listeners);
                     this.animateAndUpdateElement(this.currentListenersElement, `Listeners: ${nf.format(listeners)} | Plays: ${nf.format(playcount)}`);
                 }
 
@@ -127,6 +139,10 @@ class RadioPlayer {
         this.previousDataResponse = null;
         this.pauseTimeout = null; // Timer for pause duration
         this.shouldReloadStream = false; // Flag to indicate if the stream should be reloaded
+        this.stations = document.querySelectorAll('.station');
+        this.debounceTimeout = null; // Store debounce timeout ID
+        this.firstRun = true;
+        this.streamingInterval = null; // Initialize streamingInterval here
 
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
@@ -139,7 +155,8 @@ class RadioPlayer {
             this.audio = newAudio;
             this.play();
             this.isPlaying = true;
-          }, 1500);
+            this.getStreamingData()
+          }, 500);
         }, 1500);
 
         this.bindMethods();
@@ -167,8 +184,13 @@ class RadioPlayer {
 
         document.getElementById("stationSelect").addEventListener("click", (event) => {
             if (event.target && event.target.matches("input[name='station']")) {
-                this.handleStationSelect(event, event.target.value);
+                this.handleStationSelect(event, event.target.value, true);
             }
+        });
+
+        // Add event listener for DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            this.jumpToStationFromHash();
         });
     }
 
@@ -189,64 +211,88 @@ class RadioPlayer {
         this.previousIndex = (this.currentIndex - 1 + stationKeys.length) % stationKeys.length;
     }
 
-      // Debounce function
-      debounce(func, wait) {
-        let timeout;
+    // Debounce function
+    debounce(func, wait) {
         return (...args) => {
-          const later = () => {
-            clearTimeout(timeout);
-            func.apply(this, args);
-          };
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
+            if (this.debounceTimeout) {
+                clearTimeout(this.debounceTimeout);
+            }
+            this.debounceTimeout = setTimeout(() => {
+                func.apply(this, args);
+            }, wait);
         };
-      }
-
-  handleStationSelect(direction, stationName) {
-    if (!stationName || direction == false) return;
-
-    console.log(stationName);
-    this.stationName = stationName;
-    this.updateArt = true;
-
-    if (this.streamingInterval) {
-      clearInterval(this.streamingInterval);
     }
 
-    const newAudio = new Audio(this.addCacheBuster(stations[stationName].streamUrl));
-
-    newAudio.onloadedmetadata = () => {
-      this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
-
-      // Use the debounced function to handle audio playback
-      this.debouncedPlayAudio(newAudio);
-
-        // Initial API call without debounce
-        this.getStreamingData();
-
-        // Debounce subsequent API calls to prevent rapid firing
-        const fetchDataAndRefreshPage = this.debounce(() => this.getStreamingData(), 500);
-        this.streamingInterval = setInterval(fetchDataAndRefreshPage, 25000);
-    };
-
-    newAudio.onerror = (error) => {
-      console.warn('Error loading audio:', error);
-      if (direction == true) {
-        this.skipBackward();
-      } else {
-        this.skipForward();
-      }
-    };
-
-    newAudio.load();
-    const page = new Page(this.stationName, this);
-    page.changeTitlePage();
-
-    const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
-    if (radioInput) {
-      radioInput.checked = true;
+    jumpToStationFromHash() {
+        const hash = window.location.hash;
+        if (hash) {
+            const stationName = hash.substring(1); // Remove the '#' character
+            const label = document.getElementById(stationName);
+            if (label) {
+                label.scrollIntoView(); // Scroll to the label
+                // Simulate selecting the station
+                this.handleStationSelect(null, stationName, true);
+            }
+        }
     }
-  }
+
+    handleStationSelect(direction, stationName, firstRun) {
+        if (!stationName || direction == false) return;
+
+
+        if (this.streamingInterval) {
+          clearInterval(this.streamingInterval);
+        }
+
+        if (firstRun) {
+            this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
+            this.getStreamingData();
+            firstRun = false; // Set firstRun to false after first run logic
+
+            console.log(stationName);
+            this.stationName = stationName;
+            this.updateArt = true;
+        }
+
+        const debouncedSetupAudio = this.debounce(() => {
+            const newAudio = new Audio(this.addCacheBuster(stations[stationName].streamUrl));
+
+            newAudio.onloadedmetadata = () => {
+                this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
+
+                // Use the debounced function to handle audio playback
+                this.debouncedPlayAudio(newAudio);
+
+                // Set the streaming interval
+                this.streamingInterval = setInterval(() => {
+                    this.getStreamingData();
+                }, 25000);
+            };
+
+            newAudio.onerror = (error) => {
+              console.warn('Error loading audio:', error);
+              if (direction == true) {
+                this.skipBackward();
+              } else {
+                this.skipForward();
+              }
+            };
+
+            newAudio.load();
+            const page = new Page(this.stationName, this);
+            page.changeTitlePage();
+
+            const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
+            if (radioInput) {
+              radioInput.checked = true;
+            }
+
+            // Update the URL hash
+            window.location.hash = `#${stationName}`;
+        }, 250); // Adjust the debounce delay as needed
+
+        debouncedSetupAudio();
+    }
 
     extractSongAndArtist(data, stationName) {
         let song = this.getPath(data, stations[stationName].song)?.replace(/&apos;/g, "'") || '';
@@ -346,8 +392,8 @@ class RadioPlayer {
                         let lfmAlbum = '';
                         let lfmSong = '';
                         let lfmArtist = '';
-                        let lfmListeners = '';
-                        let lfmPlaycount = '';
+                        let lfmListeners = null;
+                        let lfmPlaycount = null;
 
                         if (lfmData.error !== 6) {
                             if (currentAlbum) {
@@ -355,15 +401,15 @@ class RadioPlayer {
                                 lfmAlbum = filter.filterField('album', lfmData.album?.name) || filter.filterField('album', currentAlbum) || '';
                                 lfmSong = filter.filterField('track', currentSong) || 'No streaming data currently available';
                                 lfmArtist = filter.filterField('artist', lfmData.album?.artist) || filter.filterField('artist', currentArtist) || '';
-                                lfmListeners = lfmData.album.listeners;
-                                lfmPlaycount = lfmData.album.playcount;
+                                lfmListeners = lfmData.album.listeners || null;
+                                lfmPlaycount = lfmData.album.playcount || null;
                             } else {
                                 lfmArt = lfmData.track?.album?.image[3]["#text"] || urlCoverArt;
                                 lfmAlbum = filter.filterField('album', lfmData.track?.album?.title) || filter.filterField('album', currentAlbum) || '';
                                 lfmSong = filter.filterField('track', lfmData.track?.name) || filter.filterField('track', currentSong) || 'No streaming data currently available';
                                 lfmArtist = filter.filterField('artist', lfmData.track?.artist?.name) || filter.filterField('artist', currentArtist) || '';
-                                lfmListeners = lfmData.track.listeners || '';
-                                lfmPlaycount = lfmData.track.playcount || '';
+                                lfmListeners = lfmData.track.listeners || null;
+                                lfmPlaycount = lfmData.track.playcount || null;
                             }
                         } else if (lfmMethod === 'album.getInfo') {
                             // Retry with track.getInfo if album.getInfo fails
@@ -374,8 +420,8 @@ class RadioPlayer {
                             lfmAlbum = filter.filterField('track', currentAlbum) || '';
                             lfmSong = filter.filterField('track', currentSong) || 'No streaming data currently available';
                             lfmArtist = filter.filterField('artist', currentArtist) || '';
-                            lfmListeners = '';
-                            lfmPlaycount = '';
+                            lfmListeners = null;
+                            lfmPlaycount = null;
                             console.log('got info from station api');
                         }
                         resolve([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount]);
@@ -494,7 +540,7 @@ class RadioPlayer {
 
         if (song === 'No streaming data currently available' || song === 'Station may be taking a break' || song === 'Station data is currently missing' || staleData) {
             const page = new Page(this.stationName, this);
-            page.refreshCurrentData([staleData || song, '', '', urlCoverArt, '', '', true]);
+            page.refreshCurrentData([staleData || song, '', '', urlCoverArt, null, null, true]);
             return;
         }
 
@@ -609,19 +655,19 @@ class RadioPlayer {
     skipToNextStation() {
         this.calculateNextAndPreviousIndices();
         const nextStationKey = stationKeys[this.nextIndex];
-        this.handleStationSelect(null, nextStationKey);
+        this.handleStationSelect(null, nextStationKey, true);
     }
 
     skipBackward() {
         this.calculateNextAndPreviousIndices();
         const prevStationKey = stationKeys[this.previousIndex];
-        this.handleStationSelect(true, prevStationKey);
+        this.handleStationSelect(true, prevStationKey, true);
     }
 
     skipForward() {
         this.calculateNextAndPreviousIndices();
         const nextStationKey = stationKeys[this.nextIndex];
-        this.handleStationSelect(null, nextStationKey);
+        this.handleStationSelect(null, nextStationKey, true);
     }
 
     addCacheBuster(url) {
@@ -642,18 +688,16 @@ generateRadioButtons();
 document.addEventListener('DOMContentLoaded', function() {
     // Your code that interacts with the DOM goes here
     const defaultStation = stationKeys[0];
-    radioPlayer.handleStationSelect(false, defaultStation);
+    radioPlayer.handleStationSelect(false, defaultStation, true);
 
     const stationSelect = document.getElementById('stationSelect');
     if (stationSelect) {
         stationSelect.addEventListener('change', (event) => {
             const stationName = event.target.value;
-            const direction = true; // Or false, depending on the use case
-            radioPlayer.handleStationSelect(direction, stationName);
+            const direction = true; 
+            radioPlayer.handleStationSelect(direction, stationName, true);
         });
     } else {
         console.error('Element with ID "station-select" not found.');
     }
 });
-
-
