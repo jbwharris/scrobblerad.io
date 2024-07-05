@@ -84,14 +84,13 @@ class Page {
                 this.animateAndUpdateElement(this.currentArtistElement, artist);
                 this.animateAndUpdateElement(this.currentAlbumElement, album);
                 if (listeners !== null  && playcount !== null ) {
-                    console.log('listeners', listeners);
                     this.animateAndUpdateElement(this.currentListenersElement, `Listeners: ${nf.format(listeners)} | Plays: ${nf.format(playcount)}`);
                 }
 
                 this.setupMediaSession(song, artist, artworkUrl);
             };
             this.coverArtElement.src = artworkUrl;
-        }, 300);
+        }, 1500);
     }
 
     animateAndUpdateElement(element, content) {
@@ -351,10 +350,14 @@ class RadioPlayer {
         const phoneNumberExists = /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(song) || /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(artist);
 
         // If either filteredValues, stationName, a phone number exists or there is no value for song, set song and artist accordingly
-        if (stationNameExists || phoneNumberExists || hasFilteredValue || (!song && !artist) ) {
+        if (!song && !artist) {
+            return;
+        } else if (stationNameExists || phoneNumberExists || hasFilteredValue) {
             song = 'Station may be taking a break';
             artist = '';
         }
+
+
 
         return [song, artist, album, albumArt];
     }
