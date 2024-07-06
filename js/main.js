@@ -113,6 +113,8 @@ class Page {
                 artwork: [{ src: artworkUrl }],
             });
 
+            document.title = `${song} - ${artist} | ${stations[this.stationName].stationName} on scrobblerad.io`;
+
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
                 previoustrack: () => this.radioPlayer.skipBackward(),
@@ -571,7 +573,6 @@ class RadioPlayer {
             
             const page = new Page(this.stationName, this);
             page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true]);
-            document.title = `${this.song} - ${this.artist} | ${this.stationName} on scrobblerad.io`;
         }).catch(error => {
             console.error('Error processing data:', error);
         });
