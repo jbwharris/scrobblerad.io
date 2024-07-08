@@ -113,7 +113,9 @@ class Page {
                 artwork: [{ src: artworkUrl }],
             });
 
-            document.title = `${song} - ${artist} | ${stations[this.stationName].stationName} on scrobblerad.io`;
+            if (song !== '' || artist !== '') {
+                document.title = `${song} - ${artist} | ${stations[this.stationName].stationName} on scrobblerad.io`;
+            }
 
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
