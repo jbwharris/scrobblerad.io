@@ -274,7 +274,7 @@ const stations = {
     apiUrl: "https://scraper2.onlineradiobox.com/us.inhailer?l=0",
     timestamp: "updated",
     orbPath: true,
-    filter: ["Inhailer", "WGUC", "At Brady", "Brady Music", "InLocal", "@INHAILERradio", "Taylor Fox", "Friday Vibe w", "FridayVibe", "Week-ender", "DJ Lou Freeman", "@Rootin", "Sledge, Sundays", "Elvis", "RareTodd", "Pete Riddle", "Music Festival", "Overtime With Jake", "Hitt List", " Ad", "James Burke", "Taft Theatre", " | "],
+    filter: ["Inhailer", "WGUC", "At Brady", "Brady Music", "InLocal", "@INHAILERradio", "Taylor Fox", "Friday Vibe w", "FridayVibe", "Week-ender", "DJ Lou Freeman", "@Rootin", "Sledge, Sundays", "Elvis", "RareTodd", "Pete Riddle", "Music Festival", "Overtime With Jake", "Hitt List", " Ad", "James Burke", "Taft Theatre", " | ", "Ken The Lobby Boy"],
   },
   kexp: {
     artist: "results.0.artist",
@@ -335,6 +335,15 @@ const stations = {
       "https://api.composer.nprstations.org/v1/widget/50ef24ebe1c8a1369593d032/tracks?format=json",
     needPath: true,
     altPath: true,
+  },
+  kxlu: {
+    stationName: "KXLU",
+    location: "Los Angeles, California, USA",
+    webUrl: "https://kxlu.com/",
+    streamUrl: "https://kxlu.streamguys1.com/kxlu-hi",
+    apiUrl: "https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron206170750999458&station=kxlu&num=0&sharing=0&player=0&cover=1&merch=0&meta=0",
+    stringPath: true,
+    filter: ["KXLU"],
   },
   kxt: {
     artist: "0.artist",
