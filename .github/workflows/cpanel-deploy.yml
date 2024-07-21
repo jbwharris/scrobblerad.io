@@ -17,7 +17,7 @@ jobs:
           branch: main
           cpanel_token: '${{ secrets.CPANEL_API_TOKEN }}'
           cpanel_username: '${{ secrets.CPANEL_USERNAME }}'
-      - name: echo deploy-duration
+      - name: echo deploy-duration --exit-zero
         run: echo "Deployment took ${{ steps.deploy.outputs.duration }} milliseconds"
       - name: Purge cache
         uses: jakejarvis/cloudflare-purge-action@master
