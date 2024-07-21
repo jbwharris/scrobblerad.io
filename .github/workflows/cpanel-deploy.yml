@@ -10,7 +10,6 @@ jobs:
     steps:
       - name: cPanel Deploy using API Token
         uses: paxha/cpanel-deploy@v4.0
-        id: deploy
         with:
           host: '${{ secrets.CPANEL_HOSTING_URL }}'
           port: '2083' # Optional. Don't change it unless you know what you're doing
