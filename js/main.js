@@ -318,7 +318,9 @@ class RadioPlayer {
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
                 }
-            }
+            } else {
+                console.log('No match found');
+            } 
         }
 
         if (stations[stationName].stringPath) {
