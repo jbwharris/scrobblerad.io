@@ -251,7 +251,7 @@ const stations = {
     streamUrl: "https://kathy.torontocast.com:2145/stream",
     apiUrl: "https://kathy.torontocast.com:1150/api/v2/history/?limit=1&offset=0&server=1&format=json",
     needPath: true,
-    filter: ["Indie X FM"],
+    filter: ["Indie X FM", "Kenny Arena"],
   },
   indy1033: {
     artist: "data.0.artist",
@@ -550,7 +550,7 @@ const stations = {
     apiUrl: "https://scraper2.onlineradiobox.com/us.ktbg?l=0",
     timestamp: "updated",
     orbPath: true,
-    filter: ["The Bridge"],
+    filter: ["The Bridge", "Sonic Spectrum"],
   },
   // thegamut: {
   //   artist: "data.response.0.data.artist",
@@ -750,7 +750,7 @@ const stations = {
     timestamp: "updated",
     orbPath: true,
     flipMeta: true,
-    filter: ["WTMD"],
+    filter: ["WTMD", "6 Degrees Of Soul"],
   },
   wyomingsounds: {
     albumArt: "iImg",
