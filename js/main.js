@@ -70,6 +70,8 @@ class Page {
         const [song, artist, album, artworkUrl, listeners, playcount, updateArt] = values;
         const nf = new Intl.NumberFormat('en-US');
 
+        this.setupMediaSession(song, artist, artworkUrl);
+
         setTimeout(() => {
             this.coverArtElement.onload = () => {
                 document.documentElement.style.setProperty("--albumArt", `url("${artworkUrl}")`);
@@ -86,8 +88,6 @@ class Page {
                 if (listeners !== null  && playcount !== null ) {
                     this.animateAndUpdateElement(this.currentListenersElement, `Listeners: ${nf.format(listeners)} | Plays: ${nf.format(playcount)}`);
                 }
-
-                this.setupMediaSession(song, artist, artworkUrl);
             };
             this.coverArtElement.src = artworkUrl;
         }, 1500);
@@ -622,7 +622,8 @@ class RadioPlayer {
         if (!this.audio.src) return;
 
         if (this.shouldReloadStream) {
-            this.handleStationSelect(); // Reload the stream
+            console.log("the stream is reloading");
+            this.handleStationSelect(null, this.stationName, true) // Reload the stream
             this.shouldReloadStream = false; // Reset the flag
         }
         this.audio.play().then(() => {
