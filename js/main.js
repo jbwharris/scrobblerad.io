@@ -248,6 +248,7 @@ class RadioPlayer {
         }
 
         if (firstRun) {
+            this.playButton.lastElementChild.className = "fa spinner-grow text-light";
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
             this.getStreamingData();
             firstRun = false; // Set firstRun to false after first run logic
@@ -650,6 +651,7 @@ class RadioPlayer {
 
         // Set a timeout to mark stream reload after 30 seconds
         this.pauseTimeout = setTimeout(() => {
+            console.log("the stream should be reloaded");
             this.shouldReloadStream = true;
         }, 30000);
     }
@@ -665,12 +667,14 @@ class RadioPlayer {
     }
 
     skipBackward() {
+        this.playButton.lastElementChild.className = "fa spinner-grow text-light";
         this.calculateNextAndPreviousIndices();
         const prevStationKey = stationKeys[this.previousIndex];
         this.handleStationSelect(true, prevStationKey, true);
     }
 
     skipForward() {
+        this.playButton.lastElementChild.className = "fa spinner-grow text-light";
         this.calculateNextAndPreviousIndices();
         const nextStationKey = stationKeys[this.nextIndex];
         this.handleStationSelect(null, nextStationKey, true);
