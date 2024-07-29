@@ -113,7 +113,7 @@ class Page {
                 artwork: [{ src: artworkUrl }],
             });
 
-            if (song !== '' || artist !== '') {
+            if (song !== '' || artist !== '' || title !== `${stations[this.stationName].stationName} currently loading`) {
                 document.title = `${song} - ${artist} | ${stations[this.stationName].stationName} on scrobblerad.io`;
             }
 
@@ -362,6 +362,7 @@ class RadioPlayer {
         } else if (stationNameExists || phoneNumberExists || hasFilteredValue) {
             song = 'Station may be taking a break';
             artist = '';
+            return;
         }
 
 
