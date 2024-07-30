@@ -58,6 +58,7 @@ class Page {
         this.currentAlbumElement = document.getElementById("album");
         this.currentListenersElement = document.getElementById("listeners");
         this.coverArtElement = document.getElementById("albumArt");
+        this.radioNameElementLink = document.getElementById("radioNameLink");
         this.radioNameElement = document.getElementById("radioName");
         this.stationLocationElement = document.getElementById("stationLocation");
     }
@@ -77,7 +78,7 @@ class Page {
                 document.documentElement.style.setProperty("--albumArt", `url("${artworkUrl}")`);
                 animateElement(this.coverArtElement);
 
-                this.radioNameElement.href = stations[this.stationName].webUrl;
+                this.radioNameElementLink.href = stations[this.stationName].webUrl;
                 animateElement(this.radioNameElement);
                 this.radioNameElement.innerHTML = this.title;
                 this.stationLocationElement.innerHTML = stations[this.stationName].location;
