@@ -630,7 +630,7 @@ class RadioPlayer {
         }
         this.audio.play().then(() => {
             this.isPlaying = true;
-            this.playButton.lastElementChild.className = "fa fa-pause";
+            this.playButton.lastElementChild.className = "icon-pause";
             document.getElementById("metadata").classList.add("playing");
 
 
@@ -647,7 +647,7 @@ class RadioPlayer {
     pause() {
         this.audio.pause();
         this.isPlaying = false;
-        this.playButton.lastElementChild.className = "fa fa-play";
+        this.playButton.lastElementChild.className = "icon-play";
         document.getElementById("metadata").classList.remove("playing");
 
         if (this.pauseTimeout) {
