@@ -532,6 +532,7 @@ class RadioPlayer {
     }
 
     processData(data) {
+        console.log("this.stationName", this.stationName);
         const [ song, artist, album, albumArt ] = this.extractSongAndArtist(data, this.stationName);
 
         let staleData = '';
