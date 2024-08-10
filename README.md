@@ -20,10 +20,14 @@ A PWA and website to listen to cool radio stations and easily scrobble to [LastF
 There are a zillion radio streaming apps out there, but there really aren’t any that did so with a scrobbling first focus. That was my primary goal, to gather a bunch of great radio stations that have publicly accessible API metadata and make an app that could scrobble the songs to LastFM, Listenbrainz and LibreFM. For years I had struggled with the idea of finding a reliable way to scrobble radio on the go. There had been an early iOS app that did it pretty well, but as LastFM had faded in popularity there just never seemed to be any apps that focused on being able to accurately scrobble online radio. If you'd like to use this with Android and [Pano Scrobbler](https://github.com/kawaiiDango/pano-scrobbler), it should work without much issue. 
 
 ### How does the scrobbling work?
-Currently it doesn’t scrobble directly from the app and relies on [Web Scrobbler](https://web-scrobbler.com) to handle sending to LastFM, MusicBrainz and LibreFM. You just need to login to each platform. I have submitted a connector to Web Scrobbler for this site, but it may take a bit for the connector to make it into the various extension builds for each browser. 
+Currently it doesn’t scrobble directly from the app and relies on [Web Scrobbler](https://web-scrobbler.com) to handle sending to LastFM, MusicBrainz and LibreFM. You just need to login to each platform. This works on desktop with all major browsers (Chrome, Firefox, Safari etc.) on macOS, Windows and Linus, as well as iOS and iPadOS.
+
+![image](https://github.com/user-attachments/assets/14da3e92-ecdf-4669-8e46-d44f83296c4a)
+
+For Android, scrobbling works using [Pano Scrobbler](https://github.com/kawaiiDango/pano-scrobbler), I've tested this a bit and it seems to work well.  
 
 ### Is this a progressive web app (PWA)?
-Yes and no. Unfortunately due to limitations with iOS and Safari browser extensions won’t work in a standalone PWA, which means scrobbling won’t work. But if you wanted to just listen to some radio, knock yourself out. I have tested on Android and the app seems to work seamlessly. I suspect it'll work with [Pano Scrobbler](https://github.com/kawaiiDango/pano-scrobbler), I just didn't have an opportunity to check since I was just borrowing someone else's device. 
+Yes and no. Unfortunately due to limitations with iOS and Safari browser extensions won’t work in a standalone PWA, which means scrobbling won’t work. But if you wanted to just listen to some radio, knock yourself out. I have tested on Android and the app seems to work seamlessly. 
 
 ### How did you choose the stations?
 Part of my motivation was to add Canadian and local stations to my rotation. So there are some pretty niche and deep cut stations in there. Most are Indie and Alternative stations, and some stations that will play a bit of everything. I’ve tried to steer clear of corporate radio stations with lots of commercials, but that doesn’t mean there aren’t some stations with them. My criteria was typically whether they played a decent variety of music. And they needed to have a public API that I could pull the data from.
@@ -38,7 +42,7 @@ There are a few different factors that can cause a site to not have streaming da
 It does, though only in browsers that support HLS playback. I could have added a 3rd party JavaScript library for that, but it was literally the only station with that problem. BBC streams will work in Safari on macOS and iOS. Beyond that there are browser extensions that can enable HLS. I honestly don’t know how compatibility might fare on Windows/Linux/Android, as my primary focus was on macOS/iOS/iPadOS. 
 
 ### Does this work with Apple CarPlay?
-Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping between stations is something that does work, but it's imperfect at this point, but does work. I had a couple people test Android Auto and the app didn't work. I am going to get an Android phone and try testing this myself soon. 
+Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping stations now works well using the media controls.
 
 ## To-Do List
 - [ ] Add native scrobbling to make this a complete PWA solution.
