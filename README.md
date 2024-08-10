@@ -3,8 +3,8 @@ A PWA and website to listen to cool radio stations and easily scrobble to [LastF
 
 [![HTML5](https://img.shields.io/badge/HTML-FF4500?style=for-the-badge&logo=html5&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/CSS-0077B5?&style=for-the-badge&logo=css3&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](#)
 
-![image](https://github.com/jbwharris/scrobblerad.io/assets/2962327/9deb33e5-eb4e-4313-a412-ce1fbce95a1a)
-![AA4F7E87-0923-4025-ADA5-C6297216F79F_1_102_o](https://github.com/jbwharris/scrobblerad.io/assets/2962327/d32dcaf7-171e-4899-9fb4-849d61af5a9d)
+![image](https://github.com/user-attachments/assets/bedece54-1ae3-44b0-a683-360698c612b7)
+
 
 
 
