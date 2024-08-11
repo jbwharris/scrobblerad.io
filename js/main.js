@@ -53,22 +53,29 @@ class Page {
     }
 
     cacheDOMElements() {
-        this.currentSongElement = document.getElementById("title");
-        this.currentArtistElement = document.getElementById("artist");
-        this.currentAlbumElement = document.getElementById("album");
-        this.currentListenersElement = document.getElementById("listeners");
-        this.coverArtElement = document.getElementById("albumArt");
-        this.radioNameElementLink = document.getElementById("radioNameLink");
-        this.radioNameElement = document.getElementById("radioName");
-        this.stationLocationElement = document.getElementById("stationLocation");
+        const elementIds = {
+            currentSong: "title",
+            currentArtist: "artist",
+            currentAlbum: "album",
+            currentListeners: "listeners",
+            coverArt: "albumArt",
+            radioNameLink: "radioNameLink",
+            radioName: "radioName",
+            stationLocation: "stationLocation"
+        };
+
+        for (const [key, id] of Object.entries(elementIds)) {
+            this[key + 'Element'] = document.getElementById(id);
+        }
     }
+
 
     changeTitlePage() {
         document.title = `${this.title} currently loading`;
     }
 
     refreshCurrentData(values) {
-        const [song, artist, album, artworkUrl, listeners, playcount, updateArt] = values;
+        const [song, artist, album, artworkUrl, listeners, playcount] = values;
         const nf = new Intl.NumberFormat('en-US');
 
         this.setupMediaSession(song, artist, artworkUrl);
@@ -78,7 +85,7 @@ class Page {
                 document.documentElement.style.setProperty("--albumArt", `url("${artworkUrl}")`);
                 animateElement(this.coverArtElement);
 
-                this.radioNameElementLink.href = stations[this.stationName].webUrl;
+                this.radioNameLinkElement.href = stations[this.stationName].webUrl;
                 animateElement(this.radioNameElement);
                 this.radioNameElement.innerHTML = this.title;
                 this.stationLocationElement.innerHTML = stations[this.stationName].location;
@@ -88,6 +95,8 @@ class Page {
                 this.animateAndUpdateElement(this.currentAlbumElement, album);
                 if (listeners !== null  && playcount !== null ) {
                     this.animateAndUpdateElement(this.currentListenersElement, `Listeners: ${nf.format(listeners)} | Plays: ${nf.format(playcount)}`);
+                } else {
+                    this.animateAndUpdateElement(this.currentListenersElement, '');
                 }
             };
             this.coverArtElement.src = artworkUrl;
@@ -241,22 +250,22 @@ class RadioPlayer {
     }
 
     handleStationSelect(direction, stationName, firstRun) {
-        if (!stationName || direction == false) return;
+        if (!stationName || direction === false) return;
 
-
+        // Clear any existing streaming intervals
         if (this.streamingInterval) {
-          clearInterval(this.streamingInterval);
+            clearInterval(this.streamingInterval);
+            this.streamingInterval = null;
         }
 
         if (firstRun) {
-            this.playButton.lastElementChild.className = "fa spinner-grow text-light";
+            this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
-            this.getStreamingData();
-            firstRun = false; // Set firstRun to false after first run logic
-
             console.log(stationName);
             this.stationName = stationName;
             this.updateArt = true;
+            this.getStreamingData();
+            firstRun = false; // Set firstRun to false after first run logic
         }
 
         const debouncedSetupAudio = this.debounce(() => {
@@ -275,12 +284,12 @@ class RadioPlayer {
             };
 
             newAudio.onerror = (error) => {
-              console.warn('Error loading audio:', error);
-              if (direction == true) {
-                this.skipBackward();
-              } else {
-                this.skipForward();
-              }
+                console.warn('Error loading audio:', error);
+                if (direction === true) {
+                    this.skipBackward();
+                } else {
+                    this.skipForward();
+                }
             };
 
             newAudio.load();
@@ -289,7 +298,7 @@ class RadioPlayer {
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
             if (radioInput) {
-              radioInput.checked = true;
+                radioInput.checked = true;
             }
 
             // Update the URL hash
@@ -297,7 +306,27 @@ class RadioPlayer {
         }, 250); // Adjust the debounce delay as needed
 
         debouncedSetupAudio();
+
+        // Add visibility change listener to pause when the page is hidden
+        // document.addEventListener('visibilitychange', () => {
+        //     if (document.hidden && this.audio.paused) {
+        //         console.log("did the visibility change code run?");
+        //         if (this.streamingInterval) {
+        //             clearInterval(this.streamingInterval);
+        //             this.streamingInterval = null;
+        //             this.audio.pause();
+
+        //         }
+        //     } else {
+        //         if (this.audio && !this.audio.paused) {
+        //             this.streamingInterval = setInterval(() => {
+        //                 this.getStreamingData();
+        //             }, 25000);
+        //         }
+        //     }
+        // });
     }
+
 
     extractSongAndArtist(data, stationName) {
         let song = this.getPath(data, stations[stationName].song)?.replace(/&apos;/g, "'") || '';
@@ -329,7 +358,6 @@ class RadioPlayer {
             const match = regexPattern.exec(data);
 
             if (match) {
-                // Extract and trim the matched groups
                 song = match[1]?.trim() || '';
                 artist = match[2]?.trim() || '';
                 album = match[3]?.trim() || '';
@@ -338,39 +366,28 @@ class RadioPlayer {
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
                 }
-
-                // Now you can use song, artist, and album as needed
             } else {
                 console.log('No match found');
             }
         }
 
-
-        // Check if any filtered values are present in the song or artist
+        // Check for filtered values or station name and return null if they are present
         const filteredValues = stations[stationName].filter || [];
-
-        const hasFilteredValue = filteredValues.some(value => {
-            return song.includes(value) || artist.includes(value);
-        });
-
-        // Check if the stationName or a phone number exists in the match data
+        const hasFilteredValue = filteredValues.some(value => song.includes(value) || artist.includes(value));
         const stationNameExists = String(song).includes(stationName) || String(artist).includes(stationName);
         const phoneNumberExists = /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(song) || /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(artist);
 
-        // If either filteredValues, stationName, a phone number exists or there is no value for song, set song and artist accordingly
-        if (!song && !artist) {
-            console.log('Song and artist missing');
-            return;
-        } else if (stationNameExists || phoneNumberExists || hasFilteredValue) {
-            song = 'Station may be taking a break';
-            artist = '';
-            return;
+        if (stationNameExists || phoneNumberExists || hasFilteredValue || (!song && !artist)) {
+            return null;
         }
 
-
+        if (/single/i.exec(album)) {
+            album = song;
+        }
 
         return [song, artist, album, albumArt];
     }
+
 
     getLfmMeta(currentSong, currentArtist, currentAlbum) {
         return new Promise((resolve, reject) => {
@@ -539,14 +556,10 @@ class RadioPlayer {
         if (data && this.stationName) {
             const extractedData = this.extractSongAndArtist(data, this.stationName);
 
+            console.log('extractedData', extractedData);
+
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
-                // Handle the first load differently
-                if (!this.hasLoadedData) {
-                    this.hasLoadedData = true; // Set this flag on the first load
-                    return; // Exit early to avoid showing "No streaming data currently available" prematurely
-                }
-
                 const page = new Page(this.stationName, this);
                 page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true]);
                 return;
@@ -666,25 +679,28 @@ class RadioPlayer {
     play() {
         if (!this.audio.src) return;
 
+        // Check if the stream should be reloaded based on page visibility
         if (this.shouldReloadStream) {
             console.log("the stream is reloading");
-            this.handleStationSelect(null, this.stationName, true) // Reload the stream
+            this.handleStationSelect(null, this.stationName, true); // Reload the stream
             this.shouldReloadStream = false; // Reset the flag
+        } else {
+            // Attempt to play audio
+            this.audio.play().then(() => {
+                this.isPlaying = true;
+                this.playButton.lastElementChild.className = "icon-pause";
+                document.getElementById("metadata").classList.add("playing");
+
+                if (this.pauseTimeout) {
+                    clearTimeout(this.pauseTimeout);
+                    this.pauseTimeout = null;
+                }
+
+            }).catch((error) => {
+                console.error('Error playing audio:', error);
+            });
+
         }
-        this.audio.play().then(() => {
-            this.isPlaying = true;
-            this.playButton.lastElementChild.className = "icon-pause";
-            document.getElementById("metadata").classList.add("playing");
-
-
-            if (this.pauseTimeout) {
-                clearTimeout(this.pauseTimeout);
-                this.pauseTimeout = null;
-            }
-
-        }).catch((error) => {
-            console.error('Error playing audio:', error);
-        });
     }
 
     pause() {
@@ -703,6 +719,7 @@ class RadioPlayer {
             this.shouldReloadStream = true;
         }, 30000);
     }
+
 
     togglePlay() {
         this.isPlaying ? this.pause() : this.play();
