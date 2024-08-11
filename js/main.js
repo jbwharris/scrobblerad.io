@@ -98,6 +98,10 @@ class Page {
                 } else {
                     this.animateAndUpdateElement(this.currentListenersElement, '');
                 }
+
+                if (song !== '' || artist !== '' || title !== `${stations[this.stationName].stationName} currently loading`) {
+                    document.title = `${song} - ${artist} | ${stations[this.stationName].stationName} on scrobblerad.io`;
+                }
             };
             this.coverArtElement.src = artworkUrl;
         }, 1500);
@@ -122,10 +126,6 @@ class Page {
                 startTime: 0,
                 artwork: [{ src: artworkUrl }],
             });
-
-            if (song !== '' || artist !== '' || title !== `${stations[this.stationName].stationName} currently loading`) {
-                document.title = `${song} - ${artist} | ${stations[this.stationName].stationName} on scrobblerad.io`;
-            }
 
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
