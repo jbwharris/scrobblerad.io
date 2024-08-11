@@ -260,9 +260,7 @@ class RadioPlayer {
         }
 
         if (firstRun) {
-            if (navigator.getAutoplayPolicy(this.audio) === "allowed") {
-                this.playButton.lastElementChild.className = "spinner-grow text-light";
-            }
+            this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
             console.log(stationName);
             this.stationName = stationName;
