@@ -156,6 +156,7 @@ class RadioPlayer {
         this.debounceTimeout = null; // Store debounce timeout ID
         this.firstRun = true;
         this.streamingInterval = null; // Initialize streamingInterval here
+        this.canAutoplay = false;
 
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
@@ -166,9 +167,9 @@ class RadioPlayer {
 
           setTimeout(() => {
             this.audio = newAudio;
+            this.getStreamingData()
             this.play();
             this.isPlaying = true;
-            this.getStreamingData()
           }, 500);
         }, 1500);
 
@@ -259,7 +260,9 @@ class RadioPlayer {
         }
 
         if (firstRun) {
-            this.playButton.lastElementChild.className = "spinner-grow text-light";
+            if (navigator.getAutoplayPolicy(this.audio) === "allowed") {
+                this.playButton.lastElementChild.className = "spinner-grow text-light";
+            }
             this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
             console.log(stationName);
             this.stationName = stationName;
@@ -306,25 +309,6 @@ class RadioPlayer {
         }, 250); // Adjust the debounce delay as needed
 
         debouncedSetupAudio();
-
-        // Add visibility change listener to pause when the page is hidden
-        // document.addEventListener('visibilitychange', () => {
-        //     if (document.hidden && this.audio.paused) {
-        //         console.log("did the visibility change code run?");
-        //         if (this.streamingInterval) {
-        //             clearInterval(this.streamingInterval);
-        //             this.streamingInterval = null;
-        //             this.audio.pause();
-
-        //         }
-        //     } else {
-        //         if (this.audio && !this.audio.paused) {
-        //             this.streamingInterval = setInterval(() => {
-        //                 this.getStreamingData();
-        //             }, 25000);
-        //         }
-        //     }
-        // });
     }
 
 
@@ -501,7 +485,6 @@ class RadioPlayer {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
-                            console.log('data from JS', data);
                         }
 
                     // Compare the current data response with the previous one
@@ -538,7 +521,8 @@ class RadioPlayer {
         const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
         const album = doc.querySelector('span.release')?.textContent.trim() || '';
         const albumArt = doc.querySelector('img')?.src || '';
-       // const timestamp = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
+      //  const timestamp = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
+
 
     // Return the extracted data in the format expected by processData
        return `${song} - ${artist} - ${album} - ${albumArt}`;
@@ -676,46 +660,28 @@ class RadioPlayer {
     play() {
         if (!this.audio.src) return;
 
-        // Check if autoplay is possible
-        const isAutoplayPossible = async () => {
-            try {
-                await this.audio.play();
-                this.audio.pause(); // Pause immediately if it was able to play
-                return true;
-            } catch (error) {
-                return false;
-            }
-        };
+        // Check if the stream should be reloaded based on page visibility
+        if (this.shouldReloadStream) {
+            console.log("the stream is reloading");
+            this.handleStationSelect(null, this.stationName, true); // Reload the stream
+            this.shouldReloadStream = false; // Reset the flag
+        } else {
+            // Attempt to play audio
+            this.audio.play().then(() => {
+                this.isPlaying = true;
+                this.playButton.lastElementChild.className = "icon-pause";
+                document.getElementById("metadata").classList.add("playing");
 
-        isAutoplayPossible().then((canAutoplay) => {
-            if (!canAutoplay) {
-                console.log("Autoplay is not possible. User interaction required.");
-                // Handle the scenario where autoplay is not allowed (e.g., show a play button)
-                return;
-            }
+                if (this.pauseTimeout) {
+                    clearTimeout(this.pauseTimeout);
+                    this.pauseTimeout = null;
+                }
 
-            // Continue with the rest of the play logic if autoplay is possible
-            if (this.shouldReloadStream) {
-                console.log("The stream is reloading");
-                this.handleStationSelect(null, this.stationName, true); // Reload the stream
-                this.shouldReloadStream = false; // Reset the flag
-            } else {
-                // Attempt to play audio
-                this.audio.play().then(() => {
-                    this.isPlaying = true;
-                    this.playButton.lastElementChild.className = "icon-pause";
-                    document.getElementById("metadata").classList.add("playing");
+            }).catch((error) => {
+                console.error('Error playing audio:', error);
+            });
 
-                    if (this.pauseTimeout) {
-                        clearTimeout(this.pauseTimeout);
-                        this.pauseTimeout = null;
-                    }
-
-                }).catch((error) => {
-                    console.error('Error playing audio:', error);
-                });
-            }
-        });
+        }
     }
 
     pause() {
@@ -730,11 +696,10 @@ class RadioPlayer {
 
         // Set a timeout to mark stream reload after 30 seconds
         this.pauseTimeout = setTimeout(() => {
-            console.log("The stream should be reloaded");
+            console.log("the stream should be reloaded");
             this.shouldReloadStream = true;
         }, 30000);
     }
-
 
 
     togglePlay() {
