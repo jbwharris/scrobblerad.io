@@ -468,56 +468,58 @@ class RadioPlayer {
 
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
+            
             if (!this.stationName) return;
 
-            let stationUrl = this.addCacheBuster(stations[this.stationName].apiUrl);
+            if (this.isPlaying && !this.shouldReloadStream) {
+                let stationUrl = this.addCacheBuster(stations[this.stationName].apiUrl);
 
-            const fetchOptions = {
-                method: stations[this.stationName].method || 'GET',
-                headers: stations[this.stationName].headers || {},
-            };
+                const fetchOptions = {
+                    method: stations[this.stationName].method || 'GET',
+                    headers: stations[this.stationName].headers || {},
+                };
 
-            fetch(stationUrl, fetchOptions)
-                .then((response) => {
-                    const contentType = response.headers.get('content-type');
+                fetch(stationUrl, fetchOptions)
+                    .then((response) => {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType.includes('application/json') || contentType.includes('application/vnd.api+json' || stations[this.stationName].phpString )) {
+                            return response.json().then((data) => ({ data, contentType }));
+                        } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
+                            return response.text().then((data) => ({ data, contentType }));
+                        } else {
+                            throw new Error(`Unsupported content type: ${contentType}`);
+                        }
+                    })
+                    .then(({ data, contentType }) => {
+                            if (contentType.includes('text/html') && !stations[this.stationName].phpString) {
+                                // Parse the HTML response
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(data, 'text/html');
+                                data = this.extractDataFromHTML(doc);
+                            } else if (contentType.includes('application/javascript')) {
+                                // Extract the HTML content from the JavaScript response
+                                const htmlContent = this.extractHTMLFromJS(data);
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(htmlContent, 'text/html');
+                                data = this.extractDataFromHTML(doc);
+                            }
 
-                    if (contentType.includes('application/json') || contentType.includes('application/vnd.api+json' || stations[this.stationName].phpString )) {
-                        return response.json().then((data) => ({ data, contentType }));
-                    } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
-                        return response.text().then((data) => ({ data, contentType }));
-                    } else {
-                        throw new Error(`Unsupported content type: ${contentType}`);
-                    }
-                })
-                .then(({ data, contentType }) => {
-                        if (contentType.includes('text/html') && !stations[this.stationName].phpString) {
-                            // Parse the HTML response
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(data, 'text/html');
-                            data = this.extractDataFromHTML(doc);
-                        } else if (contentType.includes('application/javascript')) {
-                            // Extract the HTML content from the JavaScript response
-                            const htmlContent = this.extractHTMLFromJS(data);
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(htmlContent, 'text/html');
-                            data = this.extractDataFromHTML(doc);
+                        // Compare the current data response with the previous one
+                        if (this.isDataSameAsPrevious(data)) {
+                            // Data response is the same as the previous one, no need to process further
+                            return;
                         }
 
-                    // Compare the current data response with the previous one
-                    if (this.isDataSameAsPrevious(data)) {
-                        // Data response is the same as the previous one, no need to process further
-                        return;
-                    }
+                        // Store the current data response for future comparison
+                        this.previousDataResponse = data;
 
-                    // Store the current data response for future comparison
-                    this.previousDataResponse = data;
-
-                    // Process the new data response
-                    this.processData(data);
-                })
-                .catch((error) => {
-                    console.error('Error fetching streaming data:', error);
-                });
+                        // Process the new data response
+                        this.processData(data);
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching streaming data:', error);
+                    });
+            }
         }
     }
 
