@@ -1,4 +1,4 @@
-const urlCoverArt = "../img/defaultArt.png";
+const urlCoverArt = "img/defaultArt.png";
 const stationKeys = Object.keys(stations);
 
 function generateRadioButtons() {
@@ -82,7 +82,8 @@ class Page {
 
         setTimeout(() => {
             this.coverArtElement.onload = () => {
-                document.documentElement.style.setProperty("--albumArt", `url("${artworkUrl}")`);
+                const backgroundUrl = artworkUrl === urlCoverArt ? `url("../${artworkUrl}")` : `url("${artworkUrl}")`;
+                document.documentElement.style.setProperty("--albumArt", backgroundUrl);
 
                 this.radioNameLinkElement.href = stations[this.stationName].webUrl;
                 this.radioNameElement.innerHTML = this.title;
@@ -267,6 +268,7 @@ class RadioPlayer {
             this.stationName = stationName;
             this.updateArt = true;
             this.getStreamingData();
+            this.isPlaying = true;
             firstRun = false; // Set firstRun to false after first run logic
         }
 
@@ -312,9 +314,7 @@ class RadioPlayer {
 
 
     extractSongAndArtist(data, stationName) {
-        const paths = ['song', 'artist', 'album', 'albumArt'];
-        const replaceApostrophe = str => str?.replace(/&apos;/g, "'") || '';
-
+        const replaceApostrophe = str => str?.replace(/&apos;|’/g, "'") || '';
         const getMetadata = (key) => replaceApostrophe(this.getPath(data, stations[stationName][key]));
 
         let song = getMetadata('song');
@@ -379,11 +379,8 @@ class RadioPlayer {
             album = song;
         }
 
-
         // If albumArt is empty, assign the fallback URL
         albumArt = albumArt || urlCoverArt;
-
-        console.log('albumArt after processed', albumArt);
 
         return [song, artist, album, albumArt];
     }
@@ -535,12 +532,12 @@ class RadioPlayer {
 
     // Helper function to extract necessary data from HTML response
     extractDataFromHTML(doc) {
-        const song = doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available';
-        const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
-        const album = doc.querySelector('span.release')?.textContent.trim() || '';
-        const albumArt = doc.querySelector('img')?.src || '';
+        const replaceEnDashWithEmDash = str => str.replace(/-/g, '—');
 
-        console.log(`${song} - ${artist} - ${album} - ${albumArt}`);
+        const song = replaceEnDashWithEmDash(doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available');
+        const artist = replaceEnDashWithEmDash(doc.querySelector('span.artist')?.textContent.trim() || '');
+        const album = replaceEnDashWithEmDash(doc.querySelector('span.release')?.textContent.trim() || '');
+        const albumArt = doc.querySelector('img')?.src || '';
 
         // Return the extracted data in the format expected by processData
         return `${song} - ${artist} - ${album} - ${albumArt}`;
