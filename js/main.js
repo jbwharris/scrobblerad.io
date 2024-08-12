@@ -83,12 +83,13 @@ class Page {
         setTimeout(() => {
             this.coverArtElement.onload = () => {
                 document.documentElement.style.setProperty("--albumArt", `url("${artworkUrl}")`);
-                animateElement(this.coverArtElement);
 
                 this.radioNameLinkElement.href = stations[this.stationName].webUrl;
-                animateElement(this.radioNameElement);
                 this.radioNameElement.innerHTML = this.title;
                 this.stationLocationElement.innerHTML = stations[this.stationName].location;
+                animateElement(this.radioNameElement);
+                animateElement(this.stationLocationElement);
+                animateElement(this.coverArtElement);
 
                 this.animateAndUpdateElement(this.currentSongElement, song);
                 this.animateAndUpdateElement(this.currentArtistElement, artist);
@@ -311,14 +312,19 @@ class RadioPlayer {
 
 
     extractSongAndArtist(data, stationName) {
-        let song = this.getPath(data, stations[stationName].song)?.replace(/&apos;/g, "'") || '';
-        let artist = this.getPath(data, stations[stationName].artist)?.replace(/&apos;/g, "'") || '';
-        let album = this.getPath(data, stations[stationName].album)?.replace(/&apos;/g, "'") || '';
-        let albumArt = this.getPath(data, stations[stationName].albumArt)?.replace(/&apos;/g, "'") || '';
+        const paths = ['song', 'artist', 'album', 'albumArt'];
+        const replaceApostrophe = str => str?.replace(/&apos;/g, "'") || '';
+
+        const getMetadata = (key) => replaceApostrophe(this.getPath(data, stations[stationName][key]));
+
+        let song = getMetadata('song');
+        let artist = getMetadata('artist');
+        let album = getMetadata('album');
+        let albumArt = getMetadata('albumArt');
 
         if (stations[stationName].altPath && !song) {
-            song = this.getPath(data, stations[stationName].song2)?.replace(/&apos;/g, "'") || '';
-            artist = this.getPath(data, stations[stationName].artist2)?.replace(/&apos;/g, "'") || '';
+            song = getMetadata('song2');
+            artist = getMetadata('artist2');
         }
 
         if (stations[stationName].orbPath) {
@@ -343,7 +349,7 @@ class RadioPlayer {
                 song = match[1]?.trim() || '';
                 artist = match[2]?.trim() || '';
                 album = match[3]?.trim() || '';
-                albumArt = match[4]?.trim() || '';
+                albumArt = match[4]?.trim() || urlCoverArt;
 
                 if (stations[stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -353,19 +359,31 @@ class RadioPlayer {
             }
         }
 
-        // Check for filtered values or station name and return null if they are present
-        const filteredValues = stations[stationName].filter || [];
-        const hasFilteredValue = filteredValues.some(value => song.includes(value) || artist.includes(value));
-        const stationNameExists = String(song).includes(stationName) || String(artist).includes(stationName);
-        const phoneNumberExists = /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(song) || /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.test(artist);
+        // Helper function to check if a string contains any of the filtered values
+        const containsFilteredValue = (text, values) => values.some(value => text.includes(value));
 
-        if (stationNameExists || phoneNumberExists || hasFilteredValue || (!song && !artist)) {
+        // Check for filtered values, station name, or phone number and return null if any are present
+        const filteredValues = stations[stationName].filter || [];
+        const checkInvalidContent = (text) => {
+            return containsFilteredValue(text, filteredValues) ||
+                   text.includes(stationName) ||
+                   /\b[\+]?[(]?[0-9]{2,6}[)]?[-\s\.]?[-\s\/\.0-9]{3,15}\b/m.exec(text);
+        };
+
+        if (checkInvalidContent(song) || checkInvalidContent(artist) || (!song && !artist)) {
             return null;
         }
 
+        // If the album is labeled as "single," set the album to the song title
         if (/single/i.exec(album)) {
             album = song;
         }
+
+
+        // If albumArt is empty, assign the fallback URL
+        albumArt = albumArt || urlCoverArt;
+
+        console.log('albumArt after processed', albumArt);
 
         return [song, artist, album, albumArt];
     }
@@ -429,7 +447,7 @@ class RadioPlayer {
                             return;
                         } else {
                             lfmArt = urlCoverArt;
-                            lfmAlbum = filter.filterField('track', currentAlbum) || '';
+                            lfmAlbum = filter.filterField('album', currentAlbum) || '';
                             lfmSong = filter.filterField('track', currentSong) || 'No streaming data currently available';
                             lfmArtist = filter.filterField('artist', currentArtist) || '';
                             lfmListeners = null;
@@ -519,11 +537,11 @@ class RadioPlayer {
         const artist = doc.querySelector('span.artist')?.textContent.trim() || '';
         const album = doc.querySelector('span.release')?.textContent.trim() || '';
         const albumArt = doc.querySelector('img')?.src || '';
-      //  const timestamp = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
 
+        console.log(`${song} - ${artist} - ${album} - ${albumArt}`);
 
-    // Return the extracted data in the format expected by processData
-       return `${song} - ${artist} - ${album} - ${albumArt}`;
+        // Return the extracted data in the format expected by processData
+        return `${song} - ${artist} - ${album} - ${albumArt}`;
     }
 
    // Function to compare the current data response with the previous one
