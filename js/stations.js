@@ -731,6 +731,7 @@ const stations = {
     apiUrl: "https://scraper2.onlineradiobox.com/us.w276bz?l=0",
     timestamp: "updated",
     orbPath: true,
+    filter: ["WNRN", "In-Studio Session"],
   },
   wnxp: {
     artist: "0.artist",
