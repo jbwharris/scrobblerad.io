@@ -296,7 +296,7 @@ class RadioPlayer {
             const newAudio = new Audio(this.addCacheBuster(stations[stationName].streamUrl));
 
             newAudio.onloadedmetadata = () => {
-                this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is switched
+                this.lfmMetaChanged = false; // Reset lfmMetaChanged when station is  switched
 
                 // Use the debounced function to handle audio playback
                 this.debouncedPlayAudio(newAudio);
@@ -309,7 +309,7 @@ class RadioPlayer {
 
             
             newAudio.onerror = (error) => {
-                console.warn('Error loading audio:', error);
+                console.warn('Error loading audio: ', error);
                 // Only skip stations if the player is currently playing
                 if (this.isPlaying) {
                     if (direction === true) {
