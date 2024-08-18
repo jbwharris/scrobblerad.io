@@ -132,6 +132,7 @@ class Page {
             };
 
             this.coverArtElement.src = artworkUrl;
+            animateElement(this.coverArtElement);
         }, 1500);
     }
 
@@ -450,7 +451,11 @@ class RadioPlayer {
                 } else {
                     lfmMethod = 'track.getInfo';
                     lfmQueryField = 'track';
-                    lfmDataField = currentSong.replace(/\s*\(.*?version.*?\)/gi, '');
+                    lfmDataField = currentSong
+                        .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
+                        .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                        .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
+                    .trim();
                 }
 
                 const lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(filter.filterField('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(filter.filterField(lfmQueryField, lfmDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
