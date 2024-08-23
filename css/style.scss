@@ -3,26 +3,33 @@
    --media-footer: 8rem;
 }
 
+html {
+   height: 100dvh;
+   scroll-behavior: smooth;
+}
+
 body {
    background: var(--albumArt) no-repeat center center fixed;
    background-size: cover;
-   overflow-y: hidden;
-   max-height: 100vh;
+   min-height: 100dvh;
+   min-height: -webkit-fill-available;
 }
 
 /* Theme sombre ou clair */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme:dark) {
    body {
       backdrop-filter: blur(2rem) contrast(30%) brightness(90%);
       -webkit-backdrop-filter: blur(2rem) contrast(30%) brightness(90%);
    }
+
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme:light) {
    body {
       backdrop-filter: blur(2rem) contrast(30%) brightness(170%);
       -webkit-backdrop-filter: blur(2rem) contrast(30%) brightness(170%);
    }
+
 }
 
 /* Animation transition */
@@ -41,6 +48,7 @@ body {
    100% {
       opacity: 1;
    }
+
 }
 
 @keyframes fadeIn {
@@ -51,6 +59,7 @@ body {
    100% {
       opacity: 1;
    }
+
 }
 
 .fadeIn {
@@ -63,11 +72,194 @@ body {
 #mainWrapper {
    margin-top: 3rem;
    position: relative;
-   height: calc(100vh - 3rem);
+   min-height: calc(100dvh - 3rem);
+
+   &:after {
+      content: '';
+      height: 4rem;
+      background: hsla(0, 0%, 0%, .3);
+      position: fixed;
+      bottom: 0;
+      left: -10%;
+      right: 0;
+      z-index: -1;
+   }
+
 }
 
 #player {
    position: relative;
+   height: calc(100dvh - 3rem);
+
+   button#playButton {
+      transition: all 250ms ease-in-out;
+
+      &:has(.icon-pause) {
+         background: hsla(188, 71%, 34%, .85);
+         border-color: hsla(189, 69%, 26%, .85);
+
+         &:hover,
+         &:focus {
+            background: hsla(189, 69%, 26%, .85);
+         }
+
+      }
+
+      &:has(.spinner-grow) {
+         background: hsla(243, 69%, 36%, .85);
+         border-color: hsla(243, 69%, 22%, .85);
+      }
+
+   }
+
+   & p::before,
+   & a::before {
+      display: inline-block;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      margin-right: .5rem;
+      font-size: 1rem !important;
+      opacity: .7;
+      font-weight: 200 !important;
+   }
+
+   & p:empty::before,
+   & a:empty::before {
+      opacity: 0;
+   }
+
+   .metainfo p {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      width: 100%;
+      display: block;
+      margin-bottom: .5rem;
+
+      &.h3 {
+         font-size: clamp(22px, 16.878px + 1.366vw, 36px);
+      }
+
+      &.h4 {
+         font-size: clamp(16px, 12.341px + 0.976vw, 26px);
+      }
+
+   }
+
+   #title {
+      &::before {
+         font-family: 'iconfont';
+         content: '\e904';
+      }
+
+   }
+
+   #artist {
+      &::before {
+         font-family: 'iconfont';
+         content: '\e90b';
+      }
+
+   }
+
+   #album {
+      height: auto;
+      transition: height 250ms ease-in-out;
+
+      &::before {
+         font-family: 'iconfont';
+         content: '\e90c';
+      }
+
+      &:empty {
+         height: 0;
+      }
+
+   }
+
+   #listeners {
+      border: 1px dashed hsla(255, 255%, 255%, .25);
+      border-width: 1px 0;
+      margin: 0 0 .5rem;
+      padding: .5rem 0;
+
+      &:empty {
+         border-color: transparent;
+
+         &:before {
+            content: '';
+            height: 0;
+         }
+
+      }
+
+      &::before {
+         font-family: 'iconfont';
+         content: '\e90a';
+      }
+
+   }
+
+   #radioNameLink {
+      background: transparent;
+      border: 0;
+      display: block;
+      color: rgb(225, 225, 225);
+
+      &[href]:empty {
+         background-color: transparent;
+         border-color: transparent;
+      }
+
+      & span {
+         display: inline; opacity: 1; transition: all 250ms ease-in-out;
+
+         &::before {
+            font-family: 'iconfont';
+            font-weight: 100;
+            margin:0 .5rem 0 1rem;
+            opacity: .6;
+         }
+
+         &#radioName:before {
+            content: '\e90d';
+         }
+
+         &#stationLocation:before {
+            content: '\e903';
+         }
+
+         &:empty {
+            opacity: 0;
+         }
+
+      }
+
+   }
+
+   .media-controls-wrapper {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+
+      .media-controls {
+         display: flex;
+         padding: 0 !important;
+         height: 4rem;
+
+         button {
+            flex-grow: 1;
+            max-height: 4rem;
+            margin: 0 !important;
+            border-radius: 0;
+            font-size: 1.75rem;
+         }
+
+      }
+
+   }
+
 }
 
 #webamp {
@@ -76,15 +268,17 @@ body {
 }
 
 #metadata {
-   height: calc(100vh - var(--media-footer) - 3rem);
+   height: calc(100dvh - 3rem);
+
    .album-controls {
       align-items: center;
       justify-content: space-around;
       align-content: center;
       text-align: center;
       display: flex;
-      height: 100%;
+      height: calc(100dvh - 3rem);
    }
+
 }
 
 .metainfo {
@@ -92,13 +286,15 @@ body {
    flex-direction: column;
    align-items: center;
    justify-content: center;
+
    >* {
-      min-height: 2rem;
+      min-height: 1.5rem;
    }
 
    h4#title {
       font-weight: bold;
    }
+
 }
 
 h1.siteName {
@@ -106,7 +302,7 @@ h1.siteName {
    line-height: 3rem;
    font-size: 1.5rem;
    margin: 0;
-   color:#fff;
+   color: #fff;
 }
 
 .gitLink {
@@ -115,32 +311,36 @@ h1.siteName {
    right: 1rem;
    font-size: 2rem;
    color: #fff;
+   text-decoration:none;
 }
 
 html,
 body {
-   overflow-x: hidden;
 }
+
 body {
    padding: 0;
    margin: 0;
    font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif;
 }
+
 .top-item {
    margin-top: 100px;
 }
+
 header {
    margin: 0;
    width: 100%;
    background-color: rgba(0, 0, 0, 1);
-   position: fixed;
+   position: relative;
    height: 3rem;
    z-index: 20;
    top: 0;
    left: 0;
 }
+
 nav.stationNav {
-   height: calc(100vh - 3rem);
+   height: calc(100dvh - 3rem);
    position: absolute;
    left: -1px;
    --stationWidth: clamp(20rem, 19.293rem + 3.008vw, 22rem);
@@ -152,12 +352,18 @@ nav.stationNav {
    padding-top: .5rem;
    overflow-y: scroll;
 
+   a {
+      text-decoration: none;
+   }
+
    label {
       background: #333;
       padding: .4rem .5rem .4rem 1rem;
       font-size: clamp(1.2rem, 1.13rem + 0.348vw, 1.4rem);
       transition: all 250ms ease-in-out;
       color: #fff;
+      display: block;
+      width: 100%;
 
       &:nth-child(odd) {
          background: #393939
@@ -173,18 +379,22 @@ nav.stationNav {
       input[type="radio"] {
          display: none;
       }
+
    }
+
 }
 
 input[type="checkbox"]:checked~nav.stationNav {
    transform: translateX(0);
    z-index: 40;
 }
+
 input[type="checkbox"] {
    box-sizing: border-box;
    display: none;
    transition: all 0.25s;
 }
+
 .menuIconToggle {
    box-sizing: border-box;
    cursor: pointer;
@@ -197,10 +407,13 @@ input[type="checkbox"] {
    transition: all 0.3s;
    padding: 1rem .75rem .75rem;
 
-   &:hover, &:focus {
+   &:hover,
+   &:focus {
       background: rgba(100, 100, 100, .5)
    }
+
 }
+
 .hamb-line {
    box-sizing: border-box;
    position: absolute;
@@ -209,6 +422,7 @@ input[type="checkbox"] {
    background-color: #fff;
    transition: all 0.25s;
 }
+
 .hor {
    transition: all 0.3s;
    box-sizing: border-box;
@@ -216,12 +430,14 @@ input[type="checkbox"] {
    float: left;
    margin-top: 3px;
 }
+
 .dia.part-1 {
    position: relative;
    box-sizing: border-box;
    float: left;
    transition: all 0.25s;
 }
+
 .dia.part-2 {
    box-sizing: border-box;
    position: relative;
@@ -229,68 +445,108 @@ input[type="checkbox"] {
    margin-top: 3px;
    transition: all 0.25s;
 }
+
 input[type="checkbox"]:checked~.menuIconToggle {
    &>.hor {
       box-sizing: border-box;
       opacity: 0;
       transition: all 0.25s;
    }
+
    &>.dia.part-1 {
       box-sizing: border-box;
       transform: rotate(135deg);
       margin-top: 8px;
       transition: all 0.25s;
    }
+
    &>.dia.part-2 {
       box-sizing: border-box;
       transform: rotate(-135deg);
       margin-top: -9px;
       transition: all 0.25s;
    }
+
 }
-@media screen and (max-width: 640px) {
+
+@media screen and (max-width:640px) {
    nav.stationNav {
-      --stationWidth: 101vw;
+      --stationWidth: 75vw;
    }
+
    #metadata .album-controls {
       align-items: unset;
       align-content: unset;
    }
 
    #webamp {
-      top: 0;
+      top: 1rem;
+      height: fit-content;
+
+      #albumArt {
+         max-width: 85vw;
+      }
+
    }
 
    .metainfo {
       justify-content: stretch;
       padding: 0 !important;
       position: relative;
-      padding-bottom: calc(.5rem + env(safe-area-inset-bottom));
+      margin-bottom: 4.5rem;
+      align-self: end;
 
-      #title, #artist, #album {
-         max-width: 80vw;
-         margin: .5rem 0 0;
+      p {
+         max-width: 85vw;
          align-content: end;
       }
 
-      a#radioName {
+      a#radioNameLink {
          border-radius: 0;
          width: 100%;
          display: block;
          margin-bottom: 0 !important;
-         position: sticky;
-         bottom: 2rem;
-         align-self: flex-end;
+         padding: 0;
+         background: transparent;
+         font-weight: 400;
       }
 
-      p#stationLocation {
+      span#radioName {
+         border-radius: 0;
+         width: 100%;
+         display: block;
+         margin-bottom: 0 !important;
+         padding: 0;
+         font-weight: 400;
+      }
+
+      span#stationLocation {
          display: block;
          width: 100%;
          margin-bottom: 0;
-         background: rgba(0, 0, 0, .5);
-         align-self: flex-end;
-         position: sticky;
-         bottom: 0;
       }
+
    }
+
 }
+
+@media screen and (max-width:375px) and (max-height:675px) {
+   #webamp #albumArt {
+      max-width: 75vw;
+   }
+
+   .metainfo p {
+      -webkit-line-clamp: 1;
+   }
+
+}
+
+@media screen and (max-width:430px) and (max-height:932px) {
+   .metainfo p {
+      -webkit-line-clamp: 1;
+   }
+
+}
+
+
+
