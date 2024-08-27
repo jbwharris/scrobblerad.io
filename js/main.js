@@ -9,37 +9,33 @@ async function generateRadioButtons() {
 
   stationKeys.forEach((stationKey) => {
     const station = stations[stationKey];
-    const label = document.createElement('label');
-
-    if (skipCORS && !station.cors || !skipCORS && !station.cors || skipCORS && station.cors  ) {
-      label.id = stationKey; // Set the label's id to the stationKey
-      label.textContent = station.stationName;  
+    const button = document.createElement('button');
+    
+    if (skipCORS && !station.cors || !skipCORS && !station.cors || skipCORS && station.cors) {
+      button.name = stationKey; // Set the button's name to the stationKey
+      button.textContent = station.stationName;
+      
       const input = document.createElement('input');
       input.type = 'radio';
       input.name = 'station';
       input.value = stationKey;
       input.checked = stationKey === radioPlayer.stationName;
 
-      // Add event listener to update the URL hash
-      input.addEventListener('change', () => {
-        if (input.checked) {
-          window.location.hash = `#${stationKey}`;
-        }
+      // Add event listener to update the URL hash and handle station selection
+      button.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent the default button behavior
+        window.location.hash = `#${stationKey}`;
+        radioPlayer.handleStationSelect(null, stationKey, true);
       });
 
-      // Create an anchor link to jump to the station
-      const anchor = document.createElement('a');
-      anchor.href = `#${stationKey}`;
-      anchor.appendChild(label);
-
-      label.appendChild(input);
-      fragment.appendChild(anchor);
+      // Attach the input to the button
+      button.appendChild(input);
+      fragment.appendChild(button);
     }
   });
 
   stationSelectDiv.appendChild(fragment);
 }
-
 
 async function isCORSEnabled(url) {
   try {
@@ -127,7 +123,7 @@ class Page {
 
         setTimeout(() => {
             const updateMetadata = () => {
-                if (!song || !artist || !artworkUrl || !currentStationData[this.stationName]) {
+                if ((!song && !artist) || !artworkUrl || !currentStationData[this.stationName]) {
                     return;
                 }
 
@@ -301,9 +297,11 @@ class RadioPlayer {
 
         if (hash) {
             const stationName = hash.substring(1); // Remove the '#' character
-            const label = document.getElementById(stationName);
+            const label = document.getElementsByName(stationName);
+
+            console.log('label', label);
             if (label) {
-                label.scrollIntoView(); // Scroll to the label
+              //  label.scrollIntoView(); // Scroll to the label
                 // Simulate selecting the station
                 this.handleStationSelect(null, stationName, true);
             }
@@ -341,7 +339,6 @@ class RadioPlayer {
             console.log(stationName);
             this.stationName = stationName;
             this.updateArt = true;
-            this.getStreamingData();
             this.isPlaying = true;
             firstRun = false;
         }
@@ -467,6 +464,8 @@ class RadioPlayer {
         // Cleanup the artist name
         artist = this.cleanupArtist(artist);
 
+        // console.log('track, artist, album before filters', song, artist, album);
+
         // Apply filtering before returning
         song = this.applyFilters('track', song)
                 .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
@@ -476,18 +475,30 @@ class RadioPlayer {
         artist = this.applyFilters('artist', artist);
         album = this.applyFilters('album', album);
 
-        // Helper function to check if a string contains any of the filtered values
-        const containsFilteredValue = (text, values) => values.some(value => text.includes(value));
+        // console.log('track, artist, album after filters', song, artist, album);
 
-        // Check for filtered values, station name, or phone number and return null if any are present
-        const filteredValues = this.currentStationData[this.stationName].filter || [];
-        const checkInvalidContent = (text) => {
-            return containsFilteredValue(text, filteredValues) ||
-                   text.includes(stationName);
+        // Helper function to check if a string contains any of the filtered values
+        const containsFilteredValue = (text, values) => {
+            if (!text) return false; // Ensure text is defined
+            return values.some(value => text.includes(value));
         };
 
-        if (checkInvalidContent(song) || checkInvalidContent(artist) || (!song && !artist)) {
+        // Check for filtered values or station name and return true if any are present
+        const checkInvalidContent = (text) => {
+            const filteredValues = this.currentStationData[this.stationName].filter || [];
+            const stationNameValue = this.currentStationData[this.stationName].stationName;
+
+            console.log('Text:', text);
+            console.log('Filtered Values:', filteredValues);
+            console.log('Station Name:', stationName);
+
+            return containsFilteredValue(text, filteredValues) || containsFilteredValue(text, [stationNameValue]);
+        };
+
+        if (checkInvalidContent(song) || checkInvalidContent(artist) ) {
             return ['Station may be taking a break', null, null, urlCoverArt];
+        } else if ((!song && !artist)) {
+            return ['Station data is currently missing', null, null, urlCoverArt];
         }
 
         // If the album is labeled as "single," set the album to the song title
@@ -878,8 +889,10 @@ generateRadioButtons().then(() => {
     radioPlayer.jumpToStationFromHash();
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Your code that interacts with the DOM goes here
+document.addEventListener('DOMContentLoaded', async function() {
+    // Generate the radio buttons first
+    await generateRadioButtons();
+
     const defaultStation = stationKeys[0];
     radioPlayer.handleStationSelect(false, defaultStation, true);
 
@@ -891,6 +904,16 @@ document.addEventListener('DOMContentLoaded', function() {
             radioPlayer.handleStationSelect(direction, stationName, true);
         }, { once: true });
     } else {
-        console.error('Element with ID "station-select" not found.');
+        console.error('Element with ID "stationSelect" not found.');
+    }
+
+    // Scroll to Panel 2
+    const container = document.querySelector('.mobile-swipe');
+    const panel2 = document.getElementById('panel2');
+    if (container && panel2) {
+        container.scrollTo({
+            left: panel2.offsetLeft,
+            behavior: 'smooth' // Change to 'auto' if you don't want smooth scrolling
+        });
     }
 }, { once: true });
