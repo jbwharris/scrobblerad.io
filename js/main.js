@@ -5,6 +5,10 @@ async function generateRadioButtons() {
   const skipCORS = await isCORSEnabled('https://storage.googleapis.com/chirpradio-public/playlist.json');
 
   const stationSelectDiv = document.getElementById('stationSelect');
+  
+  // Clear the container to prevent duplicates
+  stationSelectDiv.innerHTML = '';
+
   const fragment = document.createDocumentFragment();
 
   stationKeys.forEach((stationKey) => {
@@ -21,13 +25,6 @@ async function generateRadioButtons() {
       input.value = stationKey;
       input.checked = stationKey === radioPlayer.stationName;
 
-      // Add event listener to update the URL hash and handle station selection
-      button.addEventListener('click', (event) => {
-        event.preventDefault(); // Prevent the default button behavior
-        window.location.hash = `#${stationKey}`;
-        radioPlayer.handleStationSelect(null, stationKey, true);
-      });
-
       // Attach the input to the button
       button.appendChild(input);
       fragment.appendChild(button);
@@ -35,6 +32,17 @@ async function generateRadioButtons() {
   });
 
   stationSelectDiv.appendChild(fragment);
+
+  // Event delegation: Add a single event listener to the parent container
+  stationSelectDiv.addEventListener('click', (event) => {
+    const clickedButton = event.target.closest('button');
+    if (clickedButton) {
+      event.preventDefault(); // Prevent the default button behavior
+      const stationKey = clickedButton.name;
+      window.location.hash = `#${stationKey}`;
+      radioPlayer.handleStationSelect(null, stationKey, true);
+    }
+  });
 }
 
 async function isCORSEnabled(url) {
@@ -885,13 +893,11 @@ const radioPlayer = new RadioPlayer(
     document.getElementById("skipBack")
 ); 
 
-generateRadioButtons().then(() => {
-    radioPlayer.jumpToStationFromHash();
-});
-
 document.addEventListener('DOMContentLoaded', async function() {
     // Generate the radio buttons first
     await generateRadioButtons();
+
+    radioPlayer.jumpToStationFromHash();
 
     const defaultStation = stationKeys[0];
     radioPlayer.handleStationSelect(false, defaultStation, true);

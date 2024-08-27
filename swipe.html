@@ -11,6 +11,7 @@
   <!-- pwa support -->
   <link rel="manifest" href="manifest.json" />
   <!-- ios support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar" content="black-translucent" />
   <!-- The page color schemes -->
   <meta name="color-scheme" content="light dark">
@@ -31,7 +32,7 @@
 
 </head>
 
-<body class="d-flex flex-column">
+<body class="d-flex flex-column" ontouchstart="">
   <div class="container-fluid" id="player">
     <div class="row">
       <main class="flex-shrink-0 col">
