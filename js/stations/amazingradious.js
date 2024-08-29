@@ -1,7 +1,7 @@
 const stationData = {
   amazingradious: {
-    artist: "included.1.attributes.radio_artist",
-    song: "included.1.attributes.radio_name",
+    artist: "included.0.attributes.name",
+    song: "included.1.attributes.name",
     album: "",
     albumArt: "included.1.attributes.image_urls.large",
     stationName: "Amazing Radio US",
