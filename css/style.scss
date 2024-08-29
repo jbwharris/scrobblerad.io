@@ -40,17 +40,6 @@ body {
    animation-fill-mode: both;
 }
 
-@-webkit-keyframes fadeIn {
-   0% {
-      opacity: 0;
-   }
-
-   100% {
-      opacity: 1;
-   }
-
-}
-
 @keyframes fadeIn {
    0% {
       opacity: 0;
@@ -59,7 +48,6 @@ body {
    100% {
       opacity: 1;
    }
-
 }
 
 .fadeIn {
@@ -87,9 +75,87 @@ body {
 
 }
 
+.panels {padding:0;}
+
+.project-info {
+   height: calc(100dvh - 4rem);
+   position: relative;
+   overflow-y: scroll;
+  scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
+  scrollbar-width: thin;
+
+   a:not(.gitLink) {
+     text-decoration: none;
+     color: #fff;
+     font-weight: 700;
+     position: relative;
+     z-index: 1;
+
+     &::before {
+        content: '';
+        background-color: hsla(322deg 100% 65%);
+        position: absolute;
+        left: 0;
+        bottom: 0px;
+        width: 100%;
+        height: 2px;
+        z-index: -1;
+        transition: all .3s ease-in-out;
+      }
+
+      &:hover::before {
+        bottom: 0;
+        height: 100%;
+      }
+   }
+
+   .gitLink  {
+      position: relative;
+      font-size: 2rem;
+      color: #fff;
+      text-decoration:none;
+
+      &:hover {
+         color: #eee;
+      }
+   }
+
+  .accordion {
+   .accordion-item {
+      background: transparent;
+      margin-top: .5rem;
+      border: 0;
+
+      .accordion-header button {
+         background:rgba(0,0,0,0.15);
+         border-radius: 0 .5rem .5rem 0;
+         color: #fff;
+         transition: all .3s ease-in-out;
+         padding-right: 2rem;
+
+         &[aria-expanded="true"] {
+            background: linear-gradient(90deg,rgb(146,11,181) 39%, rgb(36,27,196) 90%);
+            border-radius: 0 .5rem 0 0;
+         }
+
+         &:after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            position: absolute;
+            top: 1rem;;
+            right: .5rem;
+         }
+      }
+
+      .accordion-body {
+         background: rgba(0,0,0,.5);
+      }
+   }
+  }
+}
+
 #player {
    position: relative;
-   height: calc(100dvh - 3rem);
+   height: 100dvh;
 
    button#playButton {
       transition: all 250ms ease-in-out;
@@ -136,13 +202,14 @@ body {
       width: 100%;
       display: block;
       margin-bottom: .5rem;
+      font-size: clamp(16px, 15.231px + 0.192vw, 18px);
 
       &.h3 {
-         font-size: clamp(22px, 16.878px + 1.366vw, 36px);
+         font-size: clamp(22px, 13.538px + 2.115vw, 44px);
       }
 
       &.h4 {
-         font-size: clamp(16px, 12.341px + 0.976vw, 26px);
+         font-size: clamp(16px, 9.846px + 1.538vw, 32px);
       }
 
    }
@@ -242,11 +309,17 @@ body {
       width: 100%;
       position: absolute;
       bottom: 0;
+      left:0;
+      left:0;
+      background: rgba(0,0,0,.3);
 
       .media-controls {
          display: flex;
          padding: 0 !important;
          height: 4rem;
+         max-width: 1100px;
+         margin: 0 auto;
+
 
          button {
             flex-grow: 1;
@@ -268,7 +341,7 @@ body {
 }
 
 #metadata {
-   height: calc(100dvh - 3rem);
+   height: calc(100dvh - 4rem);
 
    .album-controls {
       align-items: center;
@@ -276,7 +349,7 @@ body {
       align-content: center;
       text-align: center;
       display: flex;
-      height: calc(100dvh - 3rem);
+      height: calc(100dvh - 4rem);
    }
 
 }
@@ -305,15 +378,6 @@ h1.siteName {
    color: #fff;
 }
 
-.gitLink {
-   position: absolute;
-   top: 0;
-   right: 1rem;
-   font-size: 2rem;
-   color: #fff;
-   text-decoration:none;
-}
-
 html,
 body {
 }
@@ -339,35 +403,49 @@ header {
    left: 0;
 }
 
+
+h3.sidebar-text {
+   position: sticky;
+   top: 0;
+   background: rgba(0,0,0,.85);
+   display: block; 
+   width:auto;
+   padding: .5rem;
+   z-index: 100;
+   margin-bottom:0;
+}
+
 nav.stationNav {
-   height: calc(100dvh - 3rem);
-   position: absolute;
-   left: -1px;
-   --stationWidth: clamp(20rem, 19.293rem + 3.008vw, 22rem);
-   width: var(--stationWidth);
-   transform: translateX(calc(-1 * var(--stationWidth)));
-   transition: transform 250ms ease-in-out;
-   border-left: 1px solid #eee;
-   background: rgba(0, 0, 0, .85);
-   padding-top: .5rem;
-   overflow-y: scroll;
+   height: calc(100dvh - 4rem);
+   position: relative;
+   left: 0;
+   padding: 0;
+
+   #stationSelect {
+         overflow-y: scroll;
+         height: calc(100dvh - 6.5rem); 
+         padding-bottom: .5rem;
+         scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
+         scrollbar-width: thin;
+   }
+
 
    a {
       text-decoration: none;
    }
 
-   label {
-      background: #333;
+   button {
       padding: .4rem .5rem .4rem 1rem;
       font-size: clamp(1.2rem, 1.13rem + 0.348vw, 1.4rem);
       transition: all 250ms ease-in-out;
       color: #fff;
       display: block;
       width: 100%;
-
-      &:nth-child(odd) {
-         background: #393939
-      }
+            background:rgba(0,0,0,.15);
+      border-radius: .5rem 0 0 .5rem;
+      margin:.5rem 0 0;
+      border:0;
+      text-align:left;
 
       &:has(input:checked) {
          background: rgb(36, 27, 196);
@@ -489,11 +567,31 @@ input[type="checkbox"]:checked~.menuIconToggle {
 
    }
 
+   .mobile-swipe {
+     display: grid;
+     grid-template-columns: repeat(3, 100%);
+     will-change: transform;
+     align-content: center;
+     overflow-x: auto;
+     scroll-snap-coordinate: 0 0;
+     scroll-snap-points-x: repeat(100%);
+     scroll-snap-type: x mandatory;
+     -webkit-overflow-scrolling: touch;
+
+     & > * {
+      scroll-snap-align: start;
+     }
+   }
+
+   .project-info {
+      padding:0;
+   }
+
    .metainfo {
       justify-content: stretch;
       padding: 0 !important;
       position: relative;
-      margin-bottom: 4.5rem;
+      margin-bottom: 1rem;
       align-self: end;
 
       p {
