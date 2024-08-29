@@ -9,6 +9,9 @@ html {
 }
 
 body {
+   padding: 0;
+   margin: 0;
+   font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
    background: var(--albumArt) no-repeat center center fixed;
    background-size: cover;
    min-height: 100dvh;
@@ -369,40 +372,6 @@ body {
    }
 
 }
-
-h1.siteName {
-   text-align: center;
-   line-height: 3rem;
-   font-size: 1.5rem;
-   margin: 0;
-   color: #fff;
-}
-
-html,
-body {
-}
-
-body {
-   padding: 0;
-   margin: 0;
-   font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif;
-}
-
-.top-item {
-   margin-top: 100px;
-}
-
-header {
-   margin: 0;
-   width: 100%;
-   background-color: rgba(0, 0, 0, 1);
-   position: relative;
-   height: 3rem;
-   z-index: 20;
-   top: 0;
-   left: 0;
-}
-
 
 h3.sidebar-text {
    position: sticky;
