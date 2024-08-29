@@ -1,8 +1,9 @@
 const urlCoverArt = "img/defaultArt.png";
 const stationKeys = Object.keys(stations);
+let skipCORS = '';
 
 async function generateRadioButtons() {
-  const skipCORS = await isCORSEnabled('https://storage.googleapis.com/chirpradio-public/playlist.json');
+  skipCORS = await isCORSEnabled('https://storage.googleapis.com/chirpradio-public/playlist.json');
 
   const stationSelectDiv = document.getElementById('stationSelect');
   
@@ -11,24 +12,28 @@ async function generateRadioButtons() {
 
   const fragment = document.createDocumentFragment();
 
-  stationKeys.forEach((stationKey) => {
+  // Filter the stationKeys based on the CORS condition
+  const filteredStationKeys = stationKeys.filter((stationKey) => {
+    const station = stations[stationKey];
+    // Exclude stations with a `cors` value when skipCORS is false
+    return !(skipCORS === false && station.cors);
+  });
+
+  filteredStationKeys.forEach((stationKey) => {
     const station = stations[stationKey];
     const button = document.createElement('button');
+    button.name = stationKey; // Set the button's name to the stationKey
+    button.textContent = station.stationName;
     
-    if (skipCORS && !station.cors || !skipCORS && !station.cors || skipCORS && station.cors) {
-      button.name = stationKey; // Set the button's name to the stationKey
-      button.textContent = station.stationName;
-      
-      const input = document.createElement('input');
-      input.type = 'radio';
-      input.name = 'station';
-      input.value = stationKey;
-      input.checked = stationKey === radioPlayer.stationName;
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'station';
+    input.value = stationKey;
+    input.checked = stationKey === radioPlayer.stationName;
 
-      // Attach the input to the button
-      button.appendChild(input);
-      fragment.appendChild(button);
-    }
+    // Attach the input to the button
+    button.appendChild(input);
+    fragment.appendChild(button);
   });
 
   stationSelectDiv.appendChild(fragment);
@@ -162,6 +167,9 @@ class Page {
                 // Animate the entire playermeta container
                 animateElement(playerMetaElement);
 
+                // Simulate a click on #panel2 after the animation
+                document.querySelector('#panel2').click();
+
                 // Update document title
                 document.title = `${song} - ${artist} | ${currentStationData[this.stationName].stationName} on scrobblerad.io`;
             };
@@ -191,6 +199,7 @@ class Page {
                 previoustrack: () => this.radioPlayer.skipBackward(),
                 play: () => this.radioPlayer.togglePlay(),
                 pause: () => this.radioPlayer.togglePlay(),
+                stop: () => this.radioPlayer.reloadStream(),
             };
 
             for (const [action, handler] of Object.entries(actionHandlers)) {
@@ -201,12 +210,13 @@ class Page {
 }
 
 class RadioPlayer {
-    constructor(buttonElement, skipForwardButton, skipBackButton) {
+    constructor(buttonElement, skipForwardButton, skipBackButton, reloadStreamButton) {
         this.currentStationData = null;
         this.audio = new Audio();
         this.playButton = buttonElement;
         this.skipForwardButton = skipForwardButton;
         this.skipBackButton = skipBackButton;
+        this.reloadStreamButton = reloadStreamButton;
         this.isPlaying = null;
         this.stationName = "";
         this.previousDataResponse = null;
@@ -249,12 +259,14 @@ class RadioPlayer {
         this.togglePlay = this.togglePlay.bind(this);
         this.skipForward = this.skipForward.bind(this);
         this.skipBackward = this.skipBackward.bind(this);
+        this.reloadStream = this.reloadStream.bind(this);
     }
 
     async addEventListeners() {
         this.playButton.addEventListener("click", this.togglePlay);
         this.skipForwardButton.addEventListener("click", this.skipForward);
         this.skipBackButton.addEventListener("click", this.skipBackward);
+        this.reloadStreamButton.addEventListener("click", this.reloadStream);
 
         document.getElementById("stationSelect").addEventListener("click", (event) => {
             if (event.target && event.target.matches("input[name='station']")) {
@@ -282,10 +294,17 @@ class RadioPlayer {
         }
     }
 
-    calculateNextAndPreviousIndices(direction) {
+    calculateNextAndPreviousIndices() {
         this.currentIndex = stationKeys.indexOf(this.stationName);
-        this.nextIndex = (this.currentIndex + 1) % stationKeys.length;
-        this.previousIndex = (this.currentIndex - 1 + stationKeys.length) % stationKeys.length;
+
+        const nextStation = stationKeys[(this.currentIndex + 1) % stationKeys.length];
+        const previousStation = stationKeys[(this.currentIndex - 1 + stationKeys.length) % stationKeys.length];
+
+        const nextStep = (stations[nextStation].cors && !skipCORS) ? 2 : 1;
+        const previousStep = (stations[previousStation].cors && !skipCORS) ? 2 : 1;
+
+        this.nextIndex = (this.currentIndex + nextStep) % stationKeys.length;
+        this.previousIndex = (this.currentIndex - previousStep + stationKeys.length) % stationKeys.length;
     }
 
     // Debounce function
@@ -875,6 +894,15 @@ class RadioPlayer {
         this.handleStationSelect(null, nextStationKey, true);
     }
 
+    reloadStream() {
+        this.shouldReloadStream = true;
+        console.log('reload working');
+        this.playButton.lastElementChild.className = "spinner-grow text-light";
+        this.calculateNextAndPreviousIndices();
+        const currentStationKey = stationKeys[this.currentIndex];
+        this.handleStationSelect(true, currentStationKey, true);
+    }
+
     addCacheBuster(url) {
         const timestamp = new Date().getTime();
         if (this.stationName === 'radiowestern') {
@@ -890,7 +918,8 @@ class RadioPlayer {
 const radioPlayer = new RadioPlayer(
     document.getElementById("playButton"),
     document.getElementById("skipForward"),
-    document.getElementById("skipBack")
+    document.getElementById("skipBack"),
+    document.getElementById("reloadStream"),
 ); 
 
 document.addEventListener('DOMContentLoaded', async function() {
