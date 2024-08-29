@@ -123,6 +123,7 @@ const stations = {
   },
   newsounds: {
     stationName: "New Sounds",
+    cors: true,
   },
   plazaone: {
     stationName: "Nightwave Plaza",
