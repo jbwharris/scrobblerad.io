@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>scrobblerad.io | scrobble awesome radio</title>
+  <title>ScrobbleRadio | scrobble awesome radio</title>
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -41,41 +41,67 @@
 
             <div class="col col-xxl-2 col-md-3 align-self-end project-info panels" id="panel1">
 
-              <h3 class="fw-bold h5 sidebar-text">FAQ</h3>
+              <h3 class="fw-bold h5 sidebar-text">ScrobbleRadio FAQ</h3>
               <div class="accordion" id="accordionFaq">
                 <div class="accordion-item">
                   <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIntro" aria-expanded="false" aria-controls="collapseIntro">
+                      What is ScrobbleRadio?
+                    </button>
+                  </h2>
+                  <div id="collapseIntro" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      ScrobbleRadio is a streaming radio player for a curated list of radio stations from around the world. There are a ton of radio streaming apps out there, but none that did so with a <a href="https://www.businessinsider.com/guides/tech/what-is-last-fm-scrobbling">scrobbling</a> first focus. That was the primary goal, to gather a bunch of great radio stations that have publicly accessible metadata and make an app that could scrobble the songs to <a href="https://last.fm">last.fm</a>, <a href="https://libre.fm">libre.fm</a> and <a href="https://listenbrainz.org">ListenBrainz</a>. For years I had struggled with finding a reliable way to scrobble radio on the go. There were many apps that allowed you to scrobble music, or listen to radio streams, but rarely both.
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMusic" aria-expanded="false" aria-controls="collapseMusic">
+                      What kinds of music are available in ScrobbleRadio?
+                    </button>
+                  </h2>
+                  <div id="collapseMusic" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      <p>ScrobbleRadio is primarily focused on Indie and the many facets of music that can branch off that genre. A lot of the stations are very freeform and can play a broad selection of music that can venture into rock, alternative, hip-hop, pop, jazz, soul, funk, country, electronic or dance from a wide span of eras. Many of the stations are public radio, college stations or listener supported organizations. If your goal is music exploration and hearing tons of different, interesting and challenging music, you've found the right place.</p>
+                      <p>Given the nature of these stations, sometimes they might be playing talk segments, or some genre you're simply not interested in. That's cool, just skip to the next station like you would with your car radio. You genuinely never know what you might hear next. </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseScrobble" aria-expanded="false" aria-controls="collapseScrobble">
                       How do I scrobble music on this site?
                     </button>
                   </h2>
-                  <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                  <div id="collapseScrobble" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
-                      This site relies on <a href="https://web-scrobbler.com">Web Scrobbler</a> browsers extensions for iOS/iPadOS (Safari), and desktop browsers (Chrome, Firefox, Safari and other modern browsers) on macOS, Windows and Linux. Android scrobbling can be done by <a href="https://github.com/kawaiiDango/pano-scrobbler">Pano Scrobbler</a>. I considered building scrobbling functionality for the site, but relying on existing, robust scrobbling apps that support <a href="https://last.fm">last.fm</a>, <a href="https://libre.fm">libre.fm</a>, <a href="https://listenbrainz.org">ListenBrainz</a> and <a href="https://github.com/krateng/maloja">Maloja</a> just made more sense.
+                      ScrobbleRadio relies on <a href="https://web-scrobbler.com">Web Scrobbler</a> browsers extensions for iOS/iPadOS (Safari), and desktop browsers (Chrome, Firefox, Safari and other modern browsers) on macOS, Windows and Linux. Android scrobbling can be done by <a href="https://github.com/kawaiiDango/pano-scrobbler">Pano Scrobbler</a>. I considered building scrobbling functionality for the site, but relying on existing, robust scrobbling apps that support <a href="https://last.fm">last.fm</a>, <a href="https://libre.fm">libre.fm</a>, <a href="https://listenbrainz.org">ListenBrainz</a> and <a href="https://github.com/krateng/maloja">Maloja</a> just made more sense.
                     </div>
                   </div>
                 </div>
                 <div class="accordion-item">
                   <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseListen" aria-expanded="false" aria-controls="collapseListen">
                       What if I don't scrobble music?
                     </button>
                   </h2>
-                  <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                  <div id="collapseListen" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
-                      That's totally fine. This app was built with scrobbling music in mind, but it's a perfectly functional radio player if that's not your thing. The goal of this app was to reliably be able to show the metadata from streaming radio sources and try to fill in gaps in album and album art whenever possible.
+                      <p>That's totally fine. ScrobbleRadio was built with scrobbling music in mind, but it's a perfectly functional radio player if that's not your thing. The goal of this app was to reliably be able to show the metadata from streaming radio sources and try to fill in gaps in album and album art whenever possible.</p>
+                      <p>This app has been briefly tested to function on Android, but has been first and foremost been optimized to work well on macOS, iOS and iPadOS.</p>
                     </div>
                   </div>
                 </div>
                 <div class="accordion-item">
                   <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccuracy" aria-expanded="false" aria-controls="collapseAccuracy">
                       My scrobble didn't match properly on last.fm, why did this happen?
                     </button>
                   </h2>
-                  <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                  <div id="collapseAccuracy" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
-                      <p>This app does it's best to clean up the data coming from a radio station source, but it can be imperfect. Music metadata is complex and easy to get mixed up. Songs with guest vocalists and collaborations are a nightmare and given the data is coming radio stations around the world, there is little consistency. This app is a best effort to clean-up the incoming data, removing data like (2007 Remaster), (Radio Edit) or (Clean Version). It checks with the last.fm api whether there's corrections for the song and artist. But sometimes there's just things you can't account for like human error (spelling mistakes), or maybe a long song name getting truncated in the stations database.</p>
+                      <p>ScrobbleRadio does its best to clean up the data coming from a radio station source, but it can be imperfect. Music metadata is complex and easy to get mixed up. Songs with guest vocalists and collaborations are a nightmare and given the data is coming radio stations around the world, there is little consistency. This app is a best effort to clean-up the incoming data, removing data like (2007 Remaster), (Radio Edit) or (Clean Version). It checks with the last.fm api whether there's corrections for the song and artist. But sometimes there's just things you can't account for like human error (spelling mistakes), or maybe a long song name getting truncated in the stations database.</p>
 
                       <p>If 100% scrobble accuracy is necessary for you, there is a setting in Web Scrobbler called "Scrobble recognized or edited tracks (default)" which would only scrobble a song if it's properly identified or edited. Then there is a Cache that you can review the disallowed scrobbles and edit them manually.</p>
                     </div>
@@ -110,7 +136,7 @@
             </div>
 
             <div class="col col-xxl-8 col-md-6 panels" id="panel2">
-              <div class="playermeta row row-cols-1 px-0 album-controls">
+              <div class="playermeta px-0 album-controls">
                 <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
                   <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
                 </div>
@@ -149,10 +175,10 @@
   </div>
 
   <template id="meta">
-    <div class="col col-xxl-5 col-md-7 player px-0 mt-md-2" id="webamp">
+    <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
       <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
     </div>
-    <div class="col col-xxl-6 col-md-10 p-2 metainfo">
+    <div class="col col-xxl-5 col-md-10 p-2 metainfo">
       <p id="title" class="text-capitalize h3"></p>
       <p id="artist" class="text-capitalize h4"></p>
       <p id="album" class="text-capitalize"></p>
