@@ -16,6 +16,7 @@ body {
    background-size: cover;
    min-height: 100dvh;
    min-height: -webkit-fill-available;
+   font-size: clamp(16px, 15.296px + 0.188vw, 18px);
 }
 
 /* Theme sombre ou clair */
@@ -208,11 +209,11 @@ body {
       font-size: clamp(16px, 15.231px + 0.192vw, 18px);
 
       &.h3 {
-         font-size: clamp(22px, 13.538px + 2.115vw, 44px);
+         font-size: clamp(22px, 15.662px + 1.69vw, 40px);
       }
 
       &.h4 {
-         font-size: clamp(16px, 9.846px + 1.538vw, 32px);
+         font-size: clamp(16px, 11.07px + 1.315vw, 30px);
       }
 
    }
@@ -406,7 +407,7 @@ nav.stationNav {
 
    button {
       padding: .4rem .5rem .4rem 1rem;
-      font-size: clamp(1.2rem, 1.13rem + 0.348vw, 1.4rem);
+      font-size: clamp(17px, 15.592px + 0.376vw, 21px);
       transition: all 250ms ease-in-out;
       color: #fff;
       display: block;
