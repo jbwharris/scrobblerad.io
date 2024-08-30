@@ -440,7 +440,7 @@ class RadioPlayer {
     }
 
     extractSongAndArtist(data, stationName) {
-        const replaceApostrophe = str => str?.replace(/&apos;|’/g, "'") || '';
+        const replaceApostrophe = str => str?.replace(/&apos;|’|‘|‚|‛|`|´/g, "'") || '';
         const getMetadata = (key) => replaceApostrophe(this.getPath(data, this.currentStationData[this.stationName][key]));
 
 

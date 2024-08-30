@@ -39,9 +39,9 @@
         <div class="container-fluid px-0" id="metadata">
           <div class="row mobile-swipe">
 
-            <div class="col col-md-2 align-self-end project-info panels" id="panel1">
+            <div class="col col-xxl-2 col-md-3 align-self-end project-info panels" id="panel1">
 
-              <h3 class="fw-bold h5 sidebar-text">Frequently Asked Questions</h3>
+              <h3 class="fw-bold h5 sidebar-text">FAQ</h3>
               <div class="accordion" id="accordionFaq">
                 <div class="accordion-item">
                   <h2 class="accordion-header">
@@ -104,22 +104,22 @@
               </div>
 
               <footer class="p-3 text-center text-md-left">
-                <p class="fs-6">Built with ❤️ in 🇨🇦 by <a href="https://jbwharr.is">James Harris</a></p>
+                <p class="fs-6">Built with ❤️ in 🇨🇦<br />by <a href="https://jbwharr.is">jbwharris</a></p>
                 <a href="https://github.com/jbwharris/scrobblerad.io" class="gitLink" target="_blank"><i class="icon-github" aria-hidden="true"></i></a>
               </footer>
             </div>
 
-            <div class="col-md-8 panels" id="panel2">
+            <div class="col col-xxl-8 col-md-6 panels" id="panel2">
               <div class="playermeta row row-cols-1 px-0 album-controls">
-                <div class="col col-md-5 player px-0 mt-0" id="webamp">
+                <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
                   <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
                 </div>
-                <div class="col col-md-5 pt-3 p-4 metainfo">
+                <div class="col col-xxl-5 col-md-10 p-2 metainfo">
                   <p class="fs-3">Swipe left to pick a station to get started</p>
                 </div>
               </div>
             </div>
-            <nav class="stationNav col col-md-2 panels" id="panel3">
+            <nav class="stationNav col col-xxl-2 col-md-3 panels" id="panel3">
               <h3 class="sidebar-text fw-bold h5">Choose A Station</h3>
               <div class="d-flex flex-column position-relative" id="stationSelect">
 
@@ -128,16 +128,16 @@
           </div>
           <div class="media-controls-wrapper">
             <div class="media-controls">
-              <button id="skipBack" type="button" class="btn btn-dark btn-lg mt-3">
+              <button id="skipBack" type="button" class="btn btn-dark btn-lg mt-3" title="Previous Station">
                 <i class="icon-backward"></i>
               </button>
-              <button id="playButton" type="button" class="btn btn-dark btn-lg mt-3">
+              <button id="playButton" type="button" class="btn btn-dark btn-lg mt-3" title="Play / Pause">
                 <i class="icon-play"></i>
               </button>
-              <button id="reloadStream" type="button" class="btn btn-dark btn-lg mt-3">
+              <button id="reloadStream" type="button" class="btn btn-dark btn-lg mt-3" title="Reload Steam">
                 <i class="icon-reload"></i>
               </button>
-              <button id="skipForward" type="button" class="btn btn-dark btn-lg mt-3">
+              <button id="skipForward" type="button" class="btn btn-dark btn-lg mt-3" title="Next Station">
                 <i class="icon-forward"></i>
               </button>
             </div>
@@ -149,10 +149,10 @@
   </div>
 
   <template id="meta">
-    <div class="col col-md-5 player px-0 mt-0" id="webamp">
+    <div class="col col-xxl-5 col-md-7 player px-0 mt-md-2" id="webamp">
       <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
     </div>
-    <div class="col col-md-5 pt-3 p-4 metainfo">
+    <div class="col col-xxl-6 col-md-10 p-2 metainfo">
       <p id="title" class="text-capitalize h3"></p>
       <p id="artist" class="text-capitalize h4"></p>
       <p id="album" class="text-capitalize"></p>
