@@ -89,7 +89,14 @@ class Page {
         this.radioPlayer = radioPlayer;
 
         this.cacheDOMElements();
-        this.setupMediaSession('', '', '');
+        // Assuming currentStationData is available in scope or passed to the constructor
+        const stationData = stations[stationName] || currentStationData[stationName];
+        this.setupMediaSession(
+            stationData.title || '',
+            stationData.artist || '',
+            stationData.album || '',
+            stationData.stationName // or this.stationName
+        );
 
         // Cache the template element
         this.template = document.querySelector('#meta');
@@ -132,7 +139,7 @@ class Page {
     refreshCurrentData(values) {
         const [song, artist, album, artworkUrl, listeners, playcount, , currentStationData] = values;
 
-        this.setupMediaSession(song, artist, artworkUrl);
+        this.setupMediaSession(song, artist, artworkUrl, currentStationData[this.stationName]);
 
         setTimeout(() => {
             const updateMetadata = () => {
@@ -183,12 +190,12 @@ class Page {
         }, 1500);
     }
 
-    setupMediaSession(song, artist, artworkUrl) {
+    setupMediaSession(song, artist, artworkUrl, displayStationName) {
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: song ||  `${this.stationName} currently loading`,
+                title: song ||  `${displayStationName} currently loading`,
                 artist: artist || '',
-                album: `Now playing on ${this.stationName}` || '',
+                album: `Now playing on ${displayStationName}` || '',
                 duration: Infinity,
                 startTime: 0,
                 artwork: [{ src: artworkUrl }],
@@ -199,7 +206,6 @@ class Page {
                 previoustrack: () => this.radioPlayer.skipBackward(),
                 play: () => this.radioPlayer.togglePlay(),
                 pause: () => this.radioPlayer.togglePlay(),
-                stop: () => this.radioPlayer.reloadStream(),
             };
 
             for (const [action, handler] of Object.entries(actionHandlers)) {
