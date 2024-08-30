@@ -154,6 +154,7 @@ class Page {
                     listeners !== null && playcount !== null ? `Listeners: ${this.formatCompactNumber(listeners)} | Plays: ${this.formatCompactNumber(playcount)}` : '';
 
                 clone.querySelector('#albumArt').src = artworkUrl; // Update the image source
+                clone.querySelector('#albumArt').alt = `${song} by ${artist}`;
                 const radioNameLink = clone.querySelector('#radioNameLink');
                 radioNameLink.href = currentStationData[this.stationName].webUrl;
                 clone.querySelector('#radioName').textContent = currentStationData[this.stationName].stationName;
