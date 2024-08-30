@@ -2,8 +2,8 @@ const staticPlayer = "scrobblerad.io"
 const assets = [
   "/",
   "/css/style.css",
-  "/js/main.js",
-  "/js/stations.js",
+  "/js/main-dist.js",
+  "/js/stations-dist.js",
   "/img/defaultArt.png",
 ]
 
