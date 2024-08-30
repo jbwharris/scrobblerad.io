@@ -85,18 +85,11 @@ function animateElement(element, duration = 2000) {
 class Page {
     constructor(stationName, radioPlayer) {
         this.stationName = stationName;
-        this.title = stationName;
+        this.displayStationName = stations[stationName].stationName;
         this.radioPlayer = radioPlayer;
 
         this.cacheDOMElements();
-        // Assuming currentStationData is available in scope or passed to the constructor
-        const stationData = stations[stationName] || currentStationData[stationName];
-        this.setupMediaSession(
-            stationData.title || '',
-            stationData.artist || '',
-            stationData.album || '',
-            stationData.stationName // or this.stationName
-        );
+        this.setupMediaSession('', '', '', this.displayStationName);
 
         // Cache the template element
         this.template = document.querySelector('#meta');
@@ -121,7 +114,7 @@ class Page {
     }
 
     changeTitlePage() {
-        document.title = `${this.title} currently loading`;
+        document.title = `${this.displayStationName} currently loading`;
     }
 
     formatCompactNumber(number) {
@@ -332,7 +325,6 @@ class RadioPlayer {
             const stationName = hash.substring(1); // Remove the '#' character
             const label = document.getElementsByName(stationName);
 
-            console.log('label', label);
             if (label) {
               //  label.scrollIntoView(); // Scroll to the label
                 // Simulate selecting the station
@@ -520,10 +512,6 @@ class RadioPlayer {
         const checkInvalidContent = (text) => {
             const filteredValues = this.currentStationData[this.stationName].filter || [];
             const stationNameValue = this.currentStationData[this.stationName].stationName;
-
-            console.log('Text:', text);
-            console.log('Filtered Values:', filteredValues);
-            console.log('Station Name:', stationName);
 
             return containsFilteredValue(text, filteredValues) || containsFilteredValue(text, [stationNameValue]);
         };
