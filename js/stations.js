@@ -207,6 +207,9 @@ const stations = {
   wluw: {
     stationName: "WLUW",
   },
+  wmfo: {
+    stationName: "WMFO",
+  },
   wmse: {
     stationName: "WMSE Radio",
   },

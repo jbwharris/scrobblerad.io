@@ -271,6 +271,9 @@ class RadioPlayer {
         document.getElementById("stationSelect").addEventListener("click", (event) => {
             if (event.target && event.target.matches("input[name='station']")) {
                 this.handleStationSelect(event, event.target.value, true);
+
+                // Scroll the selected station into view
+                event.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         });
 
@@ -324,12 +327,11 @@ class RadioPlayer {
 
         if (hash) {
             const stationName = hash.substring(1); // Remove the '#' character
-            const label = document.getElementsByName(stationName);
+            const button = document.querySelector(`button[name='${stationName}']`);
 
-            if (label) {
-              //  label.scrollIntoView(); // Scroll to the label
-                // Simulate selecting the station
-                this.handleStationSelect(null, stationName, true);
+            if (button) {
+                button.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to the button
+                this.handleStationSelect(null, stationName, true); // Simulate selecting the station
             }
         }
     }
