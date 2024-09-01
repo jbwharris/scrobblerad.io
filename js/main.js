@@ -89,7 +89,7 @@ class Page {
         this.radioPlayer = radioPlayer;
 
         this.cacheDOMElements();
-        this.setupMediaSession('', '', '', this.displayStationName);
+        this.setupMediaSession('', '', '');
 
         // Cache the template element
         this.template = document.querySelector('#meta');
@@ -132,7 +132,7 @@ class Page {
     refreshCurrentData(values) {
         const [song, artist, album, artworkUrl, listeners, playcount, , currentStationData] = values;
 
-        this.setupMediaSession(song, artist, artworkUrl, currentStationData[this.stationName]);
+        this.setupMediaSession(song, artist, artworkUrl);
 
         setTimeout(() => {
             const updateMetadata = () => {
@@ -184,12 +184,12 @@ class Page {
         }, 1500);
     }
 
-    setupMediaSession(song, artist, artworkUrl, displayStationName) {
+    setupMediaSession(song, artist, artworkUrl) {
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: song ||  `${displayStationName} currently loading`,
+                title: song ||  `${this.displayStationName} currently loading`,
                 artist: artist || '',
-                album: `Now playing on ${displayStationName}` || '',
+                album: `Now playing on ${this.displayStationName}` || '',
                 duration: Infinity,
                 startTime: 0,
                 artwork: [{ src: artworkUrl }],
