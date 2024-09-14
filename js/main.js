@@ -3,7 +3,7 @@ const stationKeys = Object.keys(stations);
 let skipCORS = '';
 
 async function generateRadioButtons() {
-  skipCORS = await isCORSEnabled('https://storage.googleapis.com/chirpradio-public/playlist.json');
+  skipCORS = await isCORSEnabled('https://scrobblerad.io/');
 
   const stationSelectDiv = document.getElementById('stationSelect');
   
@@ -454,7 +454,6 @@ class RadioPlayer {
         return cleanedArtist.trim();
     }   
 
-
     getFilterSet() {
         return {
             artist: [MetadataFilter.normalizeFeature],
@@ -812,8 +811,6 @@ class RadioPlayer {
             }
         }
     }
-
-
 
     upsizeImgUrl(url) {
         if (url) {
