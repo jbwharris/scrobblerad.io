@@ -381,10 +381,6 @@ class RadioPlayer {
 
         this.currentStationData = stationData;
 
-        if (stations[stationName].stationName === this.currentStationData[stationName].stationName) {
-            document.title = `${this.currentStationData[stationName].stationName} currently loading`;
-        }
-
         // Clear any existing streaming intervals
         if (this.streamingInterval) {
             clearInterval(this.streamingInterval);
@@ -432,6 +428,10 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
+
+            if (stations[stationName].stationName === this.currentStationData[stationName].stationName) {
+                document.title = `${this.currentStationData[stationName].stationName} currently loading`;
+            }
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
             if (radioInput) radioInput.checked = true;
