@@ -26,6 +26,12 @@
 }
 
 
+.icon-show-panels:before {
+  content: "\e90f";
+}
+.icon-hide-panels:before {
+  content: "\e911";
+}
 .icon-github:before {
   content: "\e90e";
 }
