@@ -141,10 +141,6 @@ class Page {
         }
     }
 
-    changeTitlePage() {
-        document.title = `${this.displayStationName} currently loading`;
-    }
-
     formatCompactNumber(number) {
       if (number < 1000) {
         return number;
@@ -161,6 +157,8 @@ class Page {
         const [song, artist, album, artworkUrl, listeners, playcount, , currentStationData] = values;
 
         this.setupMediaSession(song, artist, artworkUrl);
+
+        document.title = `${this.displayStationName} currently loading`;
 
         setTimeout(() => {
             const updateMetadata = () => {
@@ -430,7 +428,6 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            page.changeTitlePage();
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
             if (radioInput) radioInput.checked = true;
