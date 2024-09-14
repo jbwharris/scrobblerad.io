@@ -472,8 +472,7 @@ class RadioPlayer {
 
     extractSongAndArtist(data, stationName) {
         const replaceApostrophe = str => str?.replace(/&apos;|’|‘|‚|‛|`|´/g, "'") || '';
-        const getMetadata = (key) => replaceApostrophe(this.getPath(data, this.currentStationData[this.stationName][key]));
-
+        const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
 
         let song = getMetadata('song');
         let artist = getMetadata('artist');
@@ -496,7 +495,7 @@ class RadioPlayer {
                 }
             } else {
                 console.log('No match found');
-            } 
+            }
         }
 
         if (this.currentStationData[this.stationName].stringPath) {
@@ -520,18 +519,14 @@ class RadioPlayer {
         // Cleanup the artist name
         artist = this.cleanupArtist(artist);
 
-        // console.log('track, artist, album before filters', song, artist, album);
-
         // Apply filtering before returning
         song = this.applyFilters('track', song)
                 .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
-                .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                .replace(/\s*\(.*?edit.*?\)/gi, '')      // Removes text in brackets containing "edit"
                 .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
             .trim();
         artist = this.applyFilters('artist', artist);
         album = this.applyFilters('album', album);
-
-        // console.log('track, artist, album after filters', song, artist, album);
 
         // Helper function to check if a string contains any of the filtered values
         const containsFilteredValue = (text, values) => {
@@ -547,11 +542,16 @@ class RadioPlayer {
             return containsFilteredValue(text, filteredValues) || containsFilteredValue(text, [stationNameValue]);
         };
 
-        if (checkInvalidContent(song) || checkInvalidContent(artist) ) {
+        if (checkInvalidContent(song) || checkInvalidContent(artist)) {
             return ['Station may be taking a break', null, null, urlCoverArt];
         } else if ((!song && !artist)) {
             return ['Station data is currently missing', null, null, urlCoverArt];
         }
+
+        // Apply replaceApostrophe before returning
+        song = replaceApostrophe(song);
+        artist = replaceApostrophe(artist);
+        album = replaceApostrophe(album);
 
         // If the album is labeled as "single," set the album to the song title
         if (/single/i.exec(album)) {
@@ -563,6 +563,7 @@ class RadioPlayer {
 
         return [song, artist, album, albumArt];
     }
+
 
     getLfmMeta(currentSong, currentArtist, currentAlbum) {
         return new Promise((resolve, reject) => {
@@ -615,9 +616,9 @@ class RadioPlayer {
                             return;
                         } else {
                             lfmArt = urlCoverArt;
-                            lfmAlbum = currentAlbum || '';
-                            lfmSong = currentSong || 'No streaming data currently available';
-                            lfmArtist = currentArtist || '';
+                            lfmAlbum = this.applyFilters('album', currentAlbum) || '';
+                            lfmSong = this.applyFilters('track', currentSong) || 'No streaming data currently available';
+                            lfmArtist = this.applyFilters('track', currentArtist) || '';
                             lfmListeners = null;
                             lfmPlaycount = null;
                         }
