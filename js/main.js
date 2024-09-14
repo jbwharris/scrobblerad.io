@@ -194,9 +194,6 @@ class Page {
                 document.querySelector('#panel2').click();
 
                 this.setupMediaSession(song, artist, artworkUrl);
-
-                // Update document title
-                document.title = `${song} - ${artist} | ${currentStationData[this.stationName].stationName} on scrobblerad.io`;
             };
 
             // Prefetch the image and call updateMetadata once it's loaded
@@ -218,6 +215,11 @@ class Page {
                 startTime: 0,
                 artwork: [{ src: artworkUrl }],
             });
+
+            // Update document title
+            if (song && artist) {
+                document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
+            }
 
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
