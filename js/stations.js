@@ -100,6 +100,9 @@ const stations = {
   kexp: {
     stationName: "KEXP",
   },
+  kpcr: {
+    stationName: "KPCR - Pirate Cat Radio",
+  },
   krsm: {
     stationName: "KRSM",
   },
