@@ -26,20 +26,19 @@
   <meta property="og:type" content="music.radio_station">
   <meta property="og:image" content="https://scrobblerad.io/img/social-thumb.png">
   <!-- Bootstrap CSS v5.0.2 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-dark.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha256-PI8n5gCcz9cQqQXm3PEtDuPG8qx9oFsFctPg0S5zb8g=" crossorigin="anonymous">
   <link rel="stylesheet" href="css/iconfont.css">
   <link rel="stylesheet" href="css/style.css">
 
 </head>
 
-<body class="d-flex flex-column" ontouchstart="">
+<body class="d-flex flex-column" ontouchstart="" data-bs-theme="dark">
   <div class="container-fluid" id="player">
     <div class="row">
       <main class="flex-shrink-0 col">
         <div class="container-fluid px-0" id="metadata">
           <div class="row mobile-swipe">
-
-            <div class="col col-xxl-2 col-md-3 align-self-end project-info panels" id="panel1">
+            <div class="col col-xxl-2 col-md-3 align-self-end project-info panels off-canvas off-canvas-left show" id="panel1">
 
               <h3 class="fw-bold h5 sidebar-text">ScrobbleRadio FAQ</h3>
               <div class="accordion" id="accordionFaq">
@@ -51,7 +50,7 @@
                   </h2>
                   <div id="collapseIntro" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
-                      ScrobbleRadio is a streaming radio player for a curated list of radio stations from around the world. There are a ton of radio streaming apps out there, but none that did so with a <a href="https://www.businessinsider.com/guides/tech/what-is-last-fm-scrobbling">scrobbling</a> first focus. That was the primary goal, to gather a bunch of great radio stations that have publicly accessible metadata and make an app that could scrobble the songs to <a href="https://last.fm">last.fm</a>, <a href="https://libre.fm">libre.fm</a> and <a href="https://listenbrainz.org">ListenBrainz</a>. For years I had struggled with finding a reliable way to scrobble radio on the go. There were many apps that allowed you to scrobble music, or listen to radio streams, but rarely both.
+                      ScrobbleRadio is a streaming radio player for a curated list of radio stations from around the world. There are a ton of radio streaming apps out there, but none that did so with a <a href="https://www.businessinsider.com/guides/tech/what-is-last-fm-scrobbling" target="_blank">scrobbling</a> first focus. That was the primary goal, to gather a bunch of great radio stations that have publicly accessible metadata and make an app that could scrobble the songs to <a href="https://last.fm" target="_blank">last.fm</a>, <a href="https://libre.fm" target="_blank">libre.fm</a> and <a href="https://listenbrainz.org" target="_blank">ListenBrainz</a>. For years I had struggled with finding a reliable way to scrobble radio on the go. There were many apps that allowed you to scrobble music, or listen to radio streams, but rarely both.
                     </div>
                   </div>
                 </div>
@@ -76,7 +75,7 @@
                   </h2>
                   <div id="collapseScrobble" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
-                      ScrobbleRadio relies on <a href="https://web-scrobbler.com">Web Scrobbler</a> browsers extensions for iOS/iPadOS (Safari), and desktop browsers (Chrome, Firefox, Safari and other modern browsers) on macOS, Windows and Linux. Android scrobbling can be done by <a href="https://github.com/kawaiiDango/pano-scrobbler">Pano Scrobbler</a>. I considered building scrobbling functionality for the site, but relying on existing, robust scrobbling apps that support <a href="https://last.fm">last.fm</a>, <a href="https://libre.fm">libre.fm</a>, <a href="https://listenbrainz.org">ListenBrainz</a> and <a href="https://github.com/krateng/maloja">Maloja</a> just made more sense.
+                      ScrobbleRadio relies on <a href="https://web-scrobbler.com">Web Scrobbler</a> browsers extensions for iOS/iPadOS (Safari), and desktop browsers (Chrome, Firefox, Safari and other modern browsers) on macOS, Windows and Linux. Android scrobbling can be done by <a href="https://github.com/kawaiiDango/pano-scrobbler" target="_blank">Pano Scrobbler</a>. I considered building scrobbling functionality for the site, but relying on existing, robust scrobbling apps that support <a href="https://last.fm" target="_blank">last.fm</a>, <a href="https://libre.fm" target="_blank">libre.fm</a>, <a href="https://listenbrainz.org" target="_blank">ListenBrainz</a> and <a href="https://github.com/krateng/maloja" target="_blank">Maloja</a> just made more sense.
                     </div>
                   </div>
                 </div>
@@ -120,9 +119,9 @@
                       <ul>
                         <li>Playback on iOS can be initiated before you start driving. Simply open the site in Safari, pick a station and playback should start and the song, artist, station name and album cover should be visible on screen.</li>
                         <li>You can use the in-car media controls to switch between stations. Playback will continue for the current station until the new audio stream begins loading. There is an on-screen notice of what station is loading. You can skip multiple stations if you're looking for a particular station.</li>
-                        <li>If playback stops while driving due to poor mobile data coverage, the app will keep trying to load the feed. If it pauses for awhile, try skipping to the next station and back again and it should initiate a new system. As iOS only allows access to play/pause, next and previous track, unfortunately there's no way to reload a feed directly with Carplay.</li>
+                        <li>If playback stops while driving due to poor mobile data coverage, the app will keep trying to load the feed. If it pauses for awhile, try skipping to the next station and back again and it should initiate a new session. As iOS only allows access to play/pause, next and previous track, unfortunately there's no way to reload a feed directly with Carplay.</li>
                         <li>Resume playback after leaving the car and coming back seems to be hit-and-miss. If it's been a short period of time, it will sometimes just resume playing the session. Otherwise you'll just need to go into Safari and start playing music again.</li>
-                        <li>Be sure to obey local traffic laws and not use your phone while driving.</li>
+                        <li><em>Be sure to obey local traffic laws and not use your phone while driving.</em></li>
                       </ul>
                     </div>
                   </div>
@@ -136,21 +135,26 @@
             </div>
 
             <div class="col col-xxl-8 col-md-6 panels" id="panel2">
+
               <div class="playermeta px-0 row album-controls">
                 <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
-                  <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
+                  <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="ScrobbleRadio - scrobble awesome radio">
                 </div>
                 <div class="col col-xxl-5 col-md-10 p-2 metainfo">
-                  <p class="fs-3">Swipe left to pick a station to get started</p>
+                  <p class="fs-3 d-sm-none">Swipe left to pick a station to get started</p>
+                  <p class="fs-3 d-none d-md-block">Pick a station to get started</p>
                 </div>
               </div>
             </div>
-            <nav class="stationNav col col-xxl-2 col-md-3 panels" id="panel3">
-              <h3 class="sidebar-text fw-bold h5">Choose A Station</h3>
-              <div class="d-flex flex-column position-relative" id="stationSelect">
+            <div class="col col-xxl-2 col-md-3 panels off-canvas off-canvas-right show" id="panel3">
 
-              </div>
-            </nav>
+              <nav class="stationNav">
+                <h3 class="sidebar-text fw-bold h5">Choose A Station</h3>
+                <div class="d-flex flex-column position-relative" id="stationSelect">
+
+                </div>
+              </nav>
+            </div>
           </div>
           <div class="media-controls-wrapper">
             <div class="media-controls">
@@ -167,9 +171,10 @@
                 <i class="icon-forward"></i>
               </button>
             </div>
+
+            <button class="btn btn-dark btn-lg" type="button" id="togglePanels" title="Toggle side panels"><i class="icon-hide-panels"></i> <span class="visually-hidden">Toggle side panels</span></button>
           </div>
 
-        </div>
       </main>
     </div>
   </div>
@@ -192,12 +197,11 @@
 
   <!-- Bootstrap JavaScript Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha256-cMPWkL3FzjuaFSfEYESYmjF25hCIL6mfRSPnW8OVvM4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha256-3gQJhtmj7YnV1fmtbVcnAV6eI4ws0Tr48bVZCThtCGQ=" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@web-scrobbler/metadata-filter@latest/dist/filter.min.js"></script>
 
   <script src="js/stations-dist.js"></script>
   <script src="js/main-dist.js"></script>
-
 </body>
 
 </html>
