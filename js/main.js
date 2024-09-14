@@ -381,7 +381,9 @@ class RadioPlayer {
 
         this.currentStationData = stationData;
 
-        document.title = `${this.currentStationData[stationName].stationName} currently loading`;
+        if (stations[stationName].stationName === this.currentStationData[stationName].stationName) {
+            document.title = `${this.currentStationData[stationName].stationName} currently loading`;
+        }
 
         // Clear any existing streaming intervals
         if (this.streamingInterval) {
