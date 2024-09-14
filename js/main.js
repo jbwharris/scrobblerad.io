@@ -3,7 +3,7 @@ const stationKeys = Object.keys(stations);
 let skipCORS = '';
 
 async function generateRadioButtons() {
-  skipCORS = await isCORSEnabled('https://scrobblerad.io');
+  skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/q2/');
 
   const stationSelectDiv = document.getElementById('stationSelect');
   
