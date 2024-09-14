@@ -156,10 +156,6 @@ class Page {
     refreshCurrentData(values) {
         const [song, artist, album, artworkUrl, listeners, playcount, , currentStationData] = values;
 
-        this.setupMediaSession(song, artist, artworkUrl);
-
-        document.title = `${this.displayStationName} currently loading`;
-
         setTimeout(() => {
             const updateMetadata = () => {
                 if ((!song && !artist) || !artworkUrl || !currentStationData[this.stationName]) {
@@ -196,6 +192,8 @@ class Page {
 
                 // Simulate a click on #panel2 after the animation
                 document.querySelector('#panel2').click();
+
+                this.setupMediaSession(song, artist, artworkUrl);
 
                 // Update document title
                 document.title = `${song} - ${artist} | ${currentStationData[this.stationName].stationName} on scrobblerad.io`;
@@ -380,6 +378,8 @@ class RadioPlayer {
         if (!stationData) return;
 
         this.currentStationData = stationData;
+
+        document.title = `${this.currentStationData[stationName].stationName} currently loading`;
 
         // Clear any existing streaming intervals
         if (this.streamingInterval) {
