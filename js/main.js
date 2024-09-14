@@ -48,6 +48,34 @@ async function generateRadioButtons() {
       radioPlayer.handleStationSelect(null, stationKey, true);
     }
   });
+
+    // Offcanvas Panels Toggle
+    document.getElementById("togglePanels").addEventListener("click", function () {
+        const leftPanel = document.getElementById("panel1");
+        const centrePanel = document.getElementById("panel2");
+        const rightPanel = document.getElementById("panel3");
+        const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels"); // Target either icon class
+
+        // Toggle the panels
+        leftPanel.classList.toggle("show");
+        centrePanel.classList.toggle("grow");
+        rightPanel.classList.toggle("show");
+
+        // Check if we have an icon to toggle
+        if (iconElement) {
+            // Toggle between the two icon classes
+            if (iconElement.classList.contains("icon-hide-panels")) {
+                iconElement.classList.remove("icon-hide-panels");
+                iconElement.classList.add("icon-show-panels");
+            } else {
+                iconElement.classList.remove("icon-show-panels");
+                iconElement.classList.add("icon-hide-panels");
+            }
+        }
+    });
+
+
+
 }
 
 async function isCORSEnabled(url) {
