@@ -141,10 +141,6 @@ class Page {
         }
     }
 
-    changeTitlePage() {
-        document.title = `${this.displayStationName} currently loading`;
-    }
-
     formatCompactNumber(number) {
       if (number < 1000) {
         return number;
@@ -430,7 +426,6 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            page.changeTitlePage();
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
             if (radioInput) radioInput.checked = true;
