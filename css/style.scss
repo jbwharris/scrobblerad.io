@@ -150,7 +150,7 @@ body {
    scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
    scrollbar-width: thin;
    opacity: 1;
-   left:0;
+   left:-1rem;
    transition: all 0.3s ease-in-out;
 
    &.off-canvas.show {
@@ -468,12 +468,25 @@ nav.stationNav {
    left: 0;
    padding: 0;
 
+   .loader {
+      width:100%;
+      text-align: center;
+      vertical-align: middle;
+      height: 70dvh;
+      line-height: 70dvh;
+
+      .spinner-grow {
+         height:5rem;
+         width: 5rem;
+      }
+   }
+
    #stationSelect {
-         overflow-y: scroll;
-         height: calc(100dvh - 6.5rem); 
-         padding-bottom: .5rem;
-         scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
-         scrollbar-width: thin;
+      overflow-y: scroll;
+      height: calc(100dvh - 6.5rem); 
+      padding-bottom: .5rem;
+      scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
+      scrollbar-width: thin;
    }
 
 
