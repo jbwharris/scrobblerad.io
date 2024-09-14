@@ -9,6 +9,6 @@ const stationData = {
     timestamp: "updated",
     orbPath: true,
     flipMeta: true,
-    filter: ["WTMD", "6 Degrees of Soul", "Brooks Long"],
+    filter: ["WTMD", "6 Degrees of Soul", "Brooks Long", "Bob Sekinger"],
   }
 };

@@ -1,13 +1,14 @@
 const stationData = {
   wbfo: {
     stationName: "WBFO - The Bridge",
-    albumArt: "iImg",
+    artist: "onNow.song.artistName",
+    song: "onNow.song.trackName",
     location: "Buffalo, NY 🇺🇸",
     webUrl: "https://www.wbfo.org/the-bridge",
     streamUrl: "https://17633.live.streamtheworld.com/WBFO_THE_BRIDGEAAC.aac",
-    apiUrl: "https://scraper2.onlineradiobox.com/us.thebridge?l=0",
-    timestamp: "updated",
-    orbPath: true,
+    apiUrl:
+      "https://api.composer.nprstations.org/v1/widget/5a679ab2e4b0f3ec69154c59/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
+    needPath: true,
     filter: ["WBFO", "The Bridge"],
   }
 };
