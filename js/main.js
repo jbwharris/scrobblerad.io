@@ -3,7 +3,7 @@ const stationKeys = Object.keys(stations);
 let skipCORS = '';
 
 async function generateRadioButtons() {
-  skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/q2/');
+  const skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/');
 
   const stationSelectDiv = document.getElementById('stationSelect');
   
@@ -12,12 +12,17 @@ async function generateRadioButtons() {
 
   const fragment = document.createDocumentFragment();
 
-  // Filter the stationKeys based on the CORS condition
-  const filteredStationKeys = stationKeys.filter((stationKey) => {
+  // Iterate through station keys and remove stations with CORS if skipCORS is false
+  Object.keys(stations).forEach((stationKey) => {
     const station = stations[stationKey];
-    // Exclude stations with a `cors` value when skipCORS is false
-    return !(skipCORS === false && station.cors);
+    // Remove the station if CORS is enabled and we need to skip CORS stations
+    if (skipCORS === false && station.cors) {
+      delete stations[stationKey];
+    }
   });
+
+  // Now filter and generate buttons for remaining stations
+  const filteredStationKeys = Object.keys(stations); // Now this contains only non-CORS stations
 
   filteredStationKeys.forEach((stationKey) => {
     const station = stations[stationKey];
@@ -49,34 +54,32 @@ async function generateRadioButtons() {
     }
   });
 
-    // Offcanvas Panels Toggle
-    document.getElementById("togglePanels").addEventListener("click", function () {
-        const leftPanel = document.getElementById("panel1");
-        const centrePanel = document.getElementById("panel2");
-        const rightPanel = document.getElementById("panel3");
-        const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels"); // Target either icon class
+  // Offcanvas Panels Toggle
+  document.getElementById("togglePanels").addEventListener("click", function () {
+    const leftPanel = document.getElementById("panel1");
+    const centrePanel = document.getElementById("panel2");
+    const rightPanel = document.getElementById("panel3");
+    const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels"); // Target either icon class
 
-        // Toggle the panels
-        leftPanel.classList.toggle("show");
-        centrePanel.classList.toggle("grow");
-        rightPanel.classList.toggle("show");
+    // Toggle the panels
+    leftPanel.classList.toggle("show");
+    centrePanel.classList.toggle("grow");
+    rightPanel.classList.toggle("show");
 
-        // Check if we have an icon to toggle
-        if (iconElement) {
-            // Toggle between the two icon classes
-            if (iconElement.classList.contains("icon-hide-panels")) {
-                iconElement.classList.remove("icon-hide-panels");
-                iconElement.classList.add("icon-show-panels");
-            } else {
-                iconElement.classList.remove("icon-show-panels");
-                iconElement.classList.add("icon-hide-panels");
-            }
-        }
-    });
-
-
-
+    // Check if we have an icon to toggle
+    if (iconElement) {
+      // Toggle between the two icon classes
+      if (iconElement.classList.contains("icon-hide-panels")) {
+        iconElement.classList.remove("icon-hide-panels");
+        iconElement.classList.add("icon-show-panels");
+      } else {
+        iconElement.classList.remove("icon-show-panels");
+        iconElement.classList.add("icon-hide-panels");
+      }
+    }
+  });
 }
+
 
 async function isCORSEnabled(url) {
   try {
