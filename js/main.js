@@ -326,17 +326,10 @@ class RadioPlayer {
         }
     }
 
-    calculateNextAndPreviousIndices() {
+    calculateNextAndPreviousIndices(direction) {
         this.currentIndex = stationKeys.indexOf(this.stationName);
-
-        const nextStation = stationKeys[(this.currentIndex + 1) % stationKeys.length];
-        const previousStation = stationKeys[(this.currentIndex - 1 + stationKeys.length) % stationKeys.length];
-
-        const nextStep = (stations[nextStation].cors && !skipCORS) ? 2 : 1;
-        const previousStep = (stations[previousStation].cors && !skipCORS) ? 2 : 1;
-
-        this.nextIndex = (this.currentIndex + nextStep) % stationKeys.length;
-        this.previousIndex = (this.currentIndex - previousStep + stationKeys.length) % stationKeys.length;
+        this.nextIndex = (this.currentIndex + 1) % stationKeys.length;
+        this.previousIndex = (this.currentIndex - 1 + stationKeys.length) % stationKeys.length;
     }
 
     // Debounce function
