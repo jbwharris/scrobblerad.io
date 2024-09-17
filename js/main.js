@@ -220,9 +220,9 @@ class Page {
             });
 
             // Update document title
-            if (song && artist) {
-                document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
-            }
+            // if (song && artist) {
+            //     document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
+            // }
 
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
@@ -424,10 +424,11 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
+            page.setupMediaSession(`${this.currentStationData[stationName].stationName} currently loading`, '', urlCoverArt);
 
-            if (stations[stationName].stationName === this.currentStationData[stationName].stationName) {
-                document.title = `${this.currentStationData[stationName].stationName} currently loading`;
-            }
+            // if (stations[stationName].stationName === this.currentStationData[stationName].stationName) {
+            //     document.title = `${this.currentStationData[stationName].stationName} currently loading`;
+            // }
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
             if (radioInput) radioInput.checked = true;
