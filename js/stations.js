@@ -1,4 +1,7 @@
 const stations = {
+  altradio: {
+    stationName: "AltRadio",
+  },
   amazingradiouk: {
     stationName: "Amazing Radio UK",
   },  
@@ -173,6 +176,9 @@ const stations = {
   },
   tmm2: {
     stationName: "The Music Machine 2",
+  },
+  thepoint: {
+    stationName: "The Point",
   },
   thesummit: {
     stationName: "The Summit",

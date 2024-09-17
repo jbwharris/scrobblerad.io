@@ -16,6 +16,7 @@ const stationData = {
       "92.9",
       "NPR News",
       "PSA",
+      "kpcr.org"
     ],
   },
 }
