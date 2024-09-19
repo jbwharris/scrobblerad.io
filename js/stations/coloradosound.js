@@ -1,13 +1,16 @@
 const stationData = {
   coloradosound: {
     stationName: "The Colorado Sound",
-    albumArt: "iImg",
+    artist: "0.TPE1",
+    song: "0.TIT2",
+    album: "0.TALB",
+    albumArt: "0.WXXX_album_art",
     location: "Greeley, CO 🇺🇸",
     webUrl: "https://coloradosound.org",
     streamUrl: "https://ais-sa1.streamon.fm/7891_96k.aac",
-    apiUrl: "https://scraper2.onlineradiobox.com/us.kjac?l=0",
-    timestamp: "updated",
-    orbPath: true,
+    apiUrl: "https://yp.cdnstream1.com/metadata/7891_96k/current.json",
+    timestamp: "played_on",
+    needPath: true,
     filter: ["The Colorado Sound"],
-  }
-};
+  },
+}
