@@ -512,16 +512,20 @@ class RadioPlayer {
         }
 
         // Cleanup the artist name
-        artist = this.cleanupArtist(artist);
+        if (artist) {
+            artist = this.cleanupArtist(artist);
+        }
 
         // Apply filtering before returning
-        song = this.applyFilters('track', song)
-                .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
-                .replace(/\s*\(.*?edit.*?\)/gi, '')      // Removes text in brackets containing "edit"
-                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
-            .trim();
-        artist = this.applyFilters('artist', artist);
-        album = this.applyFilters('album', album);
+        if (song) {
+            song = this.applyFilters('track', song)
+                    .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
+                    .replace(/\s*\(.*?edit.*?\)/gi, '')      // Removes text in brackets containing "edit"
+                    .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
+                .trim();
+            artist = this.applyFilters('artist', artist);
+            album = this.applyFilters('album', album);
+        }
 
         // Helper function to check if a string contains any of the filtered values
         const containsFilteredValue = (text, values) => {
