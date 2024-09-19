@@ -36,6 +36,10 @@ const stations = {
   ckua: {
     stationName: "CKUA",
   },
+  ckut: {
+    stationName: "CKUT",
+    cors: true,
+  },
   coloradosound: {
     stationName: "The Colorado Sound",
   },
@@ -127,6 +131,9 @@ const stations = {
   metradio: {
     stationName: "Met Radio",
   },
+  midtownradio: {
+    stationName: "Midtown Radio",
+  },
   newsounds: {
     stationName: "New Sounds",
     cors: true,
@@ -140,6 +147,9 @@ const stations = {
   radiocaroline: {
     stationName: "Radio Caroline",
   },
+  radiolaurier: {
+    stationName: "Radio Laurier",
+  }, 
   radioparadiseglobal: {
     stationName: "Radio Paradise Global Mix",
   },
