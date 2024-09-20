@@ -317,12 +317,35 @@ class RadioPlayer {
 
     init() {
         if ("serviceWorker" in navigator) {
-            document.addEventListener("DOMContentLoaded", () => {
-                navigator.serviceWorker
-                    .register("serviceWorker.js")
-                    .then(() => console.log("Service worker registered"))
-                    .catch((err) => console.log("Service worker not registered", err));
-            }, { once: true });
+            navigator.serviceWorker
+                .register("serviceWorker.js")
+                .then((registration) => {
+                    console.log("Service worker registered", registration);
+
+                    // Optionally, check for updates to the service worker
+                    if (registration.waiting) {
+                        // If there's a waiting SW, prompt the user or refresh
+                        console.log("Service worker is waiting to activate");
+                    }
+
+                    registration.onupdatefound = () => {
+                        console.log("New service worker update found!");
+                        const newWorker = registration.installing;
+
+                        newWorker.onstatechange = () => {
+                            if (newWorker.state === "installed") {
+                                if (navigator.serviceWorker.controller) {
+                                    // A new service worker is available, notify the user
+                                    console.log("New service worker installed, but waiting to activate");
+                                } else {
+                                    // The service worker is installed for the first time
+                                    console.log("Service worker installed for the first time");
+                                }
+                            }
+                        };
+                    }
+                })
+                .catch((err) => console.log("Service worker not registered", err));
         }
     }
 
@@ -562,7 +585,6 @@ class RadioPlayer {
 
         return [song, artist, album, albumArt];
     }
-
 
     getLfmMeta(currentSong, currentArtist, currentAlbum) {
         return new Promise((resolve, reject) => {
