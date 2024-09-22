@@ -9,7 +9,6 @@ const stationData = {
     streamUrl: "https://current.stream.publicradio.org/current.aac",
     apiUrl:
       "https://ca.api.iheart.com/api/v3/live-meta/stream/6291/trackHistory?limit=1",
-    needPath: true,
-    updated: "data.0.endTime",
+    timestamp: "data.0.endTime",
   }
 };

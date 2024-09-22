@@ -7,5 +7,6 @@ const stationData = {
     streamUrl: "https://radio.streemlion.com:4245/stream",
     apiUrl: "https://scraper2.onlineradiobox.com/ca.dkfmclassic",
     orbPath: true,
+    timestamp: "updated",
   }
 };

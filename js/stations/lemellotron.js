@@ -10,5 +10,6 @@ const stationData = {
     streamUrl: "https://www.radioking.com/play/lemellotron-stream",
     apiUrl:
       "https://api.radioking.io/widget/radio/lemellotron-stream/track/current",
+    timestamp: "end_at",
   }
 };

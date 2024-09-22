@@ -7,5 +7,6 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/us.bagel?l=0",
     timestamp: "updated",
     orbPath: true,
+    timezone: "America/New_York",
   }
 };

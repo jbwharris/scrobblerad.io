@@ -49,6 +49,10 @@ const stations = {
   d2relax: {
     stationName: "D2 Relax",
   },
+  demostation: {
+    stationName: "Demo Station",
+    cors: true,
+  },
   dkfm: {
     stationName: "DKFM",
   },

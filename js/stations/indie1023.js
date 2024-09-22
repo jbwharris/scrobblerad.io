@@ -10,7 +10,7 @@ const stationData = {
     webUrl: "https://indie1023.org",
     streamUrl: "https://stream1.cprnetwork.org/cpr3_lo",
     apiUrl: "https://playlist.cprnetwork.org/won_plus3/KVOQ.json",
-    needPath: true,
     altPath: true,
+    timezone: "America/Denver",
   }
 };

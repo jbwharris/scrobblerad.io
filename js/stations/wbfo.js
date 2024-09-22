@@ -8,7 +8,7 @@ const stationData = {
     streamUrl: "https://17633.live.streamtheworld.com/WBFO_THE_BRIDGEAAC.aac",
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/5a679ab2e4b0f3ec69154c59/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
-    needPath: true,
     filter: ["WBFO", "The Bridge"],
+    timestamp: "onNow.song._start_time",
   }
 };

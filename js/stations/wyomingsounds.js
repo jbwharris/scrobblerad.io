@@ -9,5 +9,6 @@ const stationData = {
     pathRegex: /(.+?)\s*-\s*(.+?)\s*-\s*.*/,
     orbPath: true,
     flipMeta: true,
+    timestamp: "updated",
   }
 };

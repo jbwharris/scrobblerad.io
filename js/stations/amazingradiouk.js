@@ -10,5 +10,6 @@ const stationData = {
     streamUrl: "https://stream.amazingradio.com:8443/stream.mp3?ngsw-bypass",
     apiUrl: "https://api.amazingtunes.com/radio/uk/airplays?page[size]=1&include[]=tune&include[]=tune.artist",
     needPath: true,
+    timestamp: "data.0.attributes.aired_at",
   }
 }

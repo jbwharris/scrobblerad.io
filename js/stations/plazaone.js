@@ -9,6 +9,6 @@ const stationData = {
     webUrl: "https://plaza.one/",
     streamUrl: "https://radio.plaza.one/mp3",
     apiUrl: "https://api.plaza.one/status",
-    needPath: true,
+    timestamp: "updated_at",
   }
 };

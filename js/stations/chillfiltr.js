@@ -8,5 +8,6 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/ca.chillfiltr?l=0",
     timestamp: "updated",
     orbPath: true,
+    timezone: "America/Toronto",
   }
 };

@@ -10,5 +10,6 @@ const stationData = {
     streamUrl: "https://stream3.amazingradio.us:8443/stream.mp3?redirected=1",
     apiUrl: "https://api.amazingtunes.com/radio/us/airplays?page[size]=1&include[]=tune&include[]=tune.artist",
     needPath: true,
+    timestamp: "data.0.attributes.aired_at",
   }
 }

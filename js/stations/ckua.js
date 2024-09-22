@@ -11,5 +11,6 @@ const stationData = {
       "https://yp.cdnstream1.com/metadata/7000_48k/current.json?cb=308869",
     needPath: true,
     timestamp: "0.last_seen",
+    timezone: "America/Edmonton",
   }
 };

@@ -8,5 +8,6 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/ca.d1alternative",
     orbPath: true,
     filter: ["D1 Alternative"],
+    timestamp: "updated",
   }
 };

@@ -8,8 +8,9 @@ const stationData = {
     webUrl: "https://www.midtownradio.ca/",
     streamUrl: "https://midtownradiokw.out.airtime.pro/midtownradiokw_a",
     apiUrl: "https://midtownradiokw.airtime.pro/api/live-info",
-    timestamp: "current.ends",
+    timestamp: "current.starts",
+    timezone: "UTC",
     needPath: true,
-    filter: ["Midtown"],
+    filter: ["Midtown", ".mp3"],
   }
 };

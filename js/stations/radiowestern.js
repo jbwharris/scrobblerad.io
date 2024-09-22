@@ -8,6 +8,13 @@ const stationData = {
     webUrl: "https://radiowestern.ca",
     streamUrl: "https://949fm.ca/stream",
     apiUrl: "https://radiowestern.ca:8000/latest",
-    filter: ["Jonah Nemiroff", "Station ID", "Dead Air"],
-  }
-};
+    filter: [
+      "Jonah Nemiroff",
+      "Station ID",
+      "Dead Air",
+      "RW Ads",
+      "Radio Western",
+      "RW ",
+    ],
+  },
+}

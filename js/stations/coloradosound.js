@@ -9,8 +9,7 @@ const stationData = {
     webUrl: "https://coloradosound.org",
     streamUrl: "https://ais-sa1.streamon.fm/7891_96k.aac",
     apiUrl: "https://yp.cdnstream1.com/metadata/7891_96k/current.json",
-    timestamp: "played_on",
-    needPath: true,
+    timestamp: "0.played_on",
     filter: ["The Colorado Sound"],
   },
 }

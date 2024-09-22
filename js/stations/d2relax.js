@@ -8,5 +8,6 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/ca.d2relax",
     orbPath: true,
     filter: ["D2 Relax"],
+    timestamp: "updated",
   }
 };

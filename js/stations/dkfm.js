@@ -8,5 +8,6 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/ca.dkfmshoegazeradio",
     orbPath: true,
     filter: ["ID/PSA", "DKFM"],
+    timestamp: "updated",
   }
 };

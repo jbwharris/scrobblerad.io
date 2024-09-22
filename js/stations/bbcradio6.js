@@ -7,5 +7,6 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/uk.bbcradio6?l=0",
     timestamp: "updated",
     orbPath: true,
+    timezone: "UTC",
   }
 };
