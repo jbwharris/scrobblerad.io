@@ -489,22 +489,50 @@ class RadioPlayer {
     }
 
     extractSongAndArtist(data, stationName) {
-        const replaceApostrophe = str => str?.replace(/&apos;|’|‘|‚|‛|`|´/g, "'") || '';
+        const replaceSpecialCharacters = str => str
+            ?.replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")     // Apostrophe variants
+            .replace(/–|—/g, "-")                    // En and em dashes
+            .replace(/[“”„]/g, '"')                  // Curly quotes
+            .replace(/…/g, "...")                    // Ellipsis
+            .replace(/\u00A0/g, " ")                 // Non-breaking spaces
+            .replace(/[\t\n\r]/g, '')                // Control characters
+            .replace(/&amp;/g, '&')                  // HTML entities
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/\s*\[.*?\]/g, '')              // Strips text in square brackets
+            .replace(/[*/|\\]/g, '')                 // Asterisks, pipes, and slashes
+            .replace(/--/g, '-')                     // Double hyphens
+            .trim() || '';                           // Fallback if string is empty
+
         const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
 
         let song = getMetadata('song');
         let artist = getMetadata('artist');
         let album = getMetadata('album');
         let albumArt = getMetadata('albumArt');
+        let updated = '';
+        let dataPath = data.title;
 
         if (this.currentStationData[this.stationName].altPath && !song) {
             song = getMetadata('song2');
             artist = getMetadata('artist2');
         }
 
+        if (this.currentStationData[this.stationName].spinPath) {
+            song = data.song || '';
+            artist = data.artist || '';
+            album = data.album || '';
+            albumArt = data.albumArt || '';
+            updated = data.updated || '';
+        }
+
         if (this.currentStationData[this.stationName].orbPath) {
+            if (this.currentStationData[this.stationName].dataPath) {
+                dataPath = data.data.title;
+            }
+
             const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
-            const match = regexPattern.exec(data.title);
+            const match = regexPattern.exec(dataPath);
 
             if (match) {
                 [artist, song, album] = match.slice(1, 4).map((str) => str?.trim());
@@ -525,6 +553,9 @@ class RadioPlayer {
                 artist = match[2]?.trim() || '';
                 album = match[3]?.trim() || '';
                 albumArt = match[4]?.trim() || urlCoverArt;
+                updated = match[5]?.trim() || '';
+
+                console.log("match[5]?.trim()", match[5]?.trim());
 
                 if (this.currentStationData[this.stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -542,9 +573,12 @@ class RadioPlayer {
         // Apply filtering before returning
         if (song) {
             song = this.applyFilters('track', song)
-                    .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
-                    .replace(/\s*\(.*?edit.*?\)/gi, '')      // Removes text in brackets containing "edit"
-                    .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
+                .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
+                .replace(/\s-\s.*version.*$/i, '') // Removes " - Radio Version" or similar
+                .replace(/\s*\(.*?edit.*?\)/gi, '')      // Removes text in brackets containing "edit"
+                .replace(/\s-\s.*edit.*$/i, '') // Removes " - Radio Edit" or similar
+                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
+                .replace(/\s*-\s*\d{4}\s*Remastered.*/i, '') // Removes " - 2001 Remastered" or similar
                 .trim();
             artist = this.applyFilters('artist', artist);
             album = this.applyFilters('album', album);
@@ -570,21 +604,22 @@ class RadioPlayer {
             return ['Station data is currently missing', null, null, urlCoverArt];
         }
 
-        // Apply replaceApostrophe before returning
-        song = replaceApostrophe(song);
-        artist = replaceApostrophe(artist);
-        album = replaceApostrophe(album);
+        // Apply replaceSpecialCharacters before returning
+        song = replaceSpecialCharacters(song);
+        artist = replaceSpecialCharacters(artist);
+        album = replaceSpecialCharacters(album);
 
         // If the album is labeled as "single," set the album to the song title
         if (/single/i.exec(album)) {
-            return [song, artist, song, albumArt];
+            return [song, artist, song, albumArt, updated];
         }
 
         // If albumArt is empty, assign the fallback URL
         albumArt = albumArt || urlCoverArt;
 
-        return [song, artist, album, albumArt];
+        return [song, artist, album, albumArt, updated];
     }
+
 
     getLfmMeta(currentSong, currentArtist, currentAlbum) {
         return new Promise((resolve, reject) => {
@@ -735,11 +770,13 @@ class RadioPlayer {
         const artist = replaceEnDashWithEmDash(doc.querySelector('span.artist')?.textContent.trim() || '');
         const album = replaceEnDashWithEmDash(doc.querySelector('span.release')?.textContent.trim() || '');
         const albumArt = doc.querySelector('img')?.src || '';
+        const updated = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
+        console.log("updated", updated);
 
        // console.log(`${song} - ${artist} - ${album} - ${albumArt}`);
 
         // Return the extracted data in the format expected by processData
-        return `${song} - ${artist} - ${album} - ${albumArt}`;
+        return {song, artist, album, albumArt, updated};
     }
 
    // Function to compare the current data response with the previous one
@@ -748,10 +785,29 @@ class RadioPlayer {
         return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
     }
 
+
+    changeTimeZone(date, timeZone) {
+      if (typeof date === 'string') {
+        return new Date(
+          new Date(date).toLocaleString('en-US', {
+            timeZone,
+          }),
+        );
+      }
+
+      return new Date(
+        date.toLocaleString('en-US', {
+          timeZone,
+        }),
+      );
+    }                               
+
     processData(data) {
         // Check if data and stationName are available
         if (data && this.stationName) {
             const extractedData = this.extractSongAndArtist(data, this.stationName);
+
+            console.log("data", data);
 
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
@@ -763,34 +819,75 @@ class RadioPlayer {
             // Data has successfully loaded at least once
             this.hasLoadedData = true;
 
-            const [song, artist, album, albumArt] = extractedData;
+            const [song, artist, album, albumArt, updated] = extractedData;
 
             let staleData = '';
-            const currentTimeMillis = new Date().getTime();
+            let currentTime = Date.now(); // Get current time in milliseconds
+            let epochTimestamp = '';
+            const timezone = this.currentStationData[this.stationName].timezone;
+            let timestamp;
 
-            // Extract the timestamp from the data
-            let epochTimeString = this.getPath(data, this.currentStationData[this.stationName].timestamp) || this.getPath(data, this.currentStationData[this.stationName].timestamp2) || "";
-            // console.log("epochTimeString", epochTimeString);
-
-            let epochTimeMillis;
-
-            if (String(epochTimeString).includes('T')) {
-                // Handle ISO 8601 format (e.g., 2024-08-09T19:32:02Z)
-                epochTimeMillis = Date.parse(epochTimeString);
-            } else if (String(epochTimeString).match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-                // Handle custom format "YYYY-MM-DD HH:MM:SS"
-                const [datePart, timePart] = epochTimeString.split(' ');
-                const [year, month, day] = datePart.split('-');
-                const [hour, minute, second] = timePart.split(':');
-                
-                epochTimeMillis = new Date(year, month - 1, day, hour, minute, second).getTime();
+            if (this.stationName === 'indie1023') {
+                timestamp =  Date.parse(`${data[1].date} ${data[1].time} MDT`); 
+                console.log('indie1023 timestamp', timestamp);
             } else {
-                // Assume Unix epoch time
-                epochTimeMillis = parseInt(epochTimeString) * 1000;
+                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
             }
 
+            // Ensure timestamp is a number
+            timestamp = !isNaN(Date.parse(timestamp)) ? Date.parse(timestamp) : timestamp;
+
+            console.log('timezone', timezone, 'timestamp', timestamp);
+
+            if (updated || (timezone && timestamp)) {
+                const currentDateComponents = new Intl.DateTimeFormat('en-US', {
+                    timeZone: timezone,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZoneName: 'short',
+                }).format(new Date()).split(', ');
+
+                const [datePart, timePart] = currentDateComponents;
+                const [month, day, year] = datePart.split('/');
+                const [time, pm, timeZoneName] = timePart.split(' ');
+
+                // Generate current time in the appropriate format
+                const formattedTime = `${year}-${month}-${day} ${time} ${pm} ${timeZoneName}`;
+                currentTime = Date.parse(formattedTime); // Parse formatted time to milliseconds
+
+                // Generate updated time string
+                let currentUpdatedTime = timezone && timestamp
+                    ? `${timestamp} ${timeZoneName}`
+                    : `${year}-${month}-${day} ${updated} ${timeZoneName}`;
+
+                console.log('currentUpdatedTime', currentUpdatedTime);
+
+                // Parse the updated time string
+                epochTimestamp = Date.parse(currentUpdatedTime);
+                console.log("Current Time:", currentTime);
+                console.log("Epoch Current Time:", epochTimestamp);
+            }
+
+            // Use the parsed timestamp or fallback to parsed current timestamp
+            let epochTimeString = epochTimestamp || Date.parse(timestamp) || timestamp;
+
+            // Normalize both epochTimeString and currentTime to be in milliseconds
+            epochTimeString = epochTimeString.toString().length === 10
+                ? epochTimeString * 1000 // Convert seconds to milliseconds
+                : parseInt(epochTimeString.toString().replace('.', '').slice(0, 13), 10);
+
+            console.log("currentTime:", currentTime);
+            console.log("epochTimeString:", epochTimeString);
+
             // Calculate the time difference
-            const timeDifference = currentTimeMillis - epochTimeMillis;
+            const timeDifference = currentTime - epochTimeString;
+
+
+
+            console.log('timedifference', timeDifference);
 
             // Check if the data is stale (older than 15 minutes or 900000 milliseconds)
             if (timeDifference > 900000 && epochTimeString !== "") {
@@ -846,28 +943,22 @@ class RadioPlayer {
 
     getPath(obj, prop) {
         if (!obj || typeof obj !== 'object' || !prop) {
-            // Handle invalid arguments or undefined properties
-            return undefined; // or throw an error, log a message, etc.
+            return undefined; // Handle invalid arguments
         }
 
-        if (this.currentStationData[this.stationName].needPath === true) {
-            var parts = prop.split("."),
-                last = parts.pop(),
-                l = parts.length,
-                i = 1,
-                current = parts[0];
+        // Split the property path by "." for multi-layer paths
+        const parts = prop.split(".");
+        let current = obj;
 
-            while ((obj = obj[current]) && i < l) {
-                current = parts[i];
-                i++;
+        // Traverse the object for each part of the path
+        for (let i = 0; i < parts.length; i++) {
+            if (current[parts[i]] === undefined) {
+                return undefined; // Return undefined if any part of the path is not found
             }
-
-            if (obj) {
-                return obj[last];
-            }
-        } else {
-            return obj[prop];
+            current = current[parts[i]]; // Drill down into the object
         }
+
+        return current; // Return the final value
     }
 
     play() {
