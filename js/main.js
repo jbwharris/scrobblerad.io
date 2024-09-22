@@ -807,8 +807,6 @@ class RadioPlayer {
         if (data && this.stationName) {
             const extractedData = this.extractSongAndArtist(data, this.stationName);
 
-            console.log("data", data);
-
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
                 const page = new Page(this.stationName, this);
@@ -829,15 +827,12 @@ class RadioPlayer {
 
             if (this.stationName === 'indie1023') {
                 timestamp =  Date.parse(`${data[1].date} ${data[1].time} MDT`); 
-                console.log('indie1023 timestamp', timestamp);
             } else {
                 timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
             }
 
             // Ensure timestamp is a number
             timestamp = !isNaN(Date.parse(timestamp)) ? Date.parse(timestamp) : timestamp;
-
-            console.log('timezone', timezone, 'timestamp', timestamp);
 
             if (updated || (timezone && timestamp)) {
                 const currentDateComponents = new Intl.DateTimeFormat('en-US', {
@@ -863,12 +858,8 @@ class RadioPlayer {
                     ? `${timestamp} ${timeZoneName}`
                     : `${year}-${month}-${day} ${updated} ${timeZoneName}`;
 
-                console.log('currentUpdatedTime', currentUpdatedTime);
-
                 // Parse the updated time string
                 epochTimestamp = Date.parse(currentUpdatedTime);
-                console.log("Current Time:", currentTime);
-                console.log("Epoch Current Time:", epochTimestamp);
             }
 
             // Use the parsed timestamp or fallback to parsed current timestamp
@@ -878,9 +869,6 @@ class RadioPlayer {
             epochTimeString = epochTimeString.toString().length === 10
                 ? epochTimeString * 1000 // Convert seconds to milliseconds
                 : parseInt(epochTimeString.toString().replace('.', '').slice(0, 13), 10);
-
-            console.log("currentTime:", currentTime);
-            console.log("epochTimeString:", epochTimeString);
 
             // Calculate the time difference
             const timeDifference = currentTime - epochTimeString;
