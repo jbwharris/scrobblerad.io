@@ -27,6 +27,9 @@ const stations = {
   chly: {
     stationName: "CHLY",
   },
+  civl: {
+    stationName: "CIVL",
+  },
   cjiq: {
     stationName: "CJIQ",
   },
@@ -39,6 +42,9 @@ const stations = {
   ckut: {
     stationName: "CKUT",
     cors: true,
+  },
+  ckuw: {
+    stationName: "CKUW",
   },
   coloradosound: {
     stationName: "The Colorado Sound",
@@ -89,9 +95,6 @@ const stations = {
   indiegoogleplus: {
     stationName: "Indie Google+",
     cors: true,
-  },
-  indieradio: {
-    stationName: "IHeartRadio Indie Radio",
   },
   indiexfm: {
     stationName: "Indie X FM",
