@@ -10,6 +10,6 @@ const stationData = {
     streamUrl: "https://kexp.streamguys1.com/kexp160.aac",
     apiUrl: "https://api.kexp.org/v2/plays/?limit=1&format=json",
     timestamp: "results.0.airdate",
-    needPath: true,
+    timezone: "America/Los_Angeles",
   }
 };

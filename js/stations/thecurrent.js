@@ -10,5 +10,6 @@ const stationData = {
     apiUrl:
       "https://ca.api.iheart.com/api/v3/live-meta/stream/6291/trackHistory?limit=1",
     timestamp: "data.0.endTime",
+    timezone: "America/Chicago",
   }
 };

@@ -9,5 +9,6 @@ const stationData = {
     orbPath: true,
     filter: ["ID/PSA", "DKFM"],
     timestamp: "updated",
+    timezone: "America/Los_Angeles",
   }
 };

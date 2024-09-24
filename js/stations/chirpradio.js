@@ -12,5 +12,6 @@ const stationData = {
       "https://storage.googleapis.com/chirpradio-public/playlist.json",
     needPath: true,
     timestamp: "now_playing.played_at_gmt_ts",
+    timezone: "America/Chicago",
   }
 };

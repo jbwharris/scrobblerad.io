@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://music.wfuv.org/music-hi",
     apiUrl: "https://scraper2.onlineradiobox.com/us.wfuvhd2?l=0",
     timestamp: "updated",
+    timezone: "America/New_York",
     orbPath: true,
   }
 };

@@ -10,5 +10,6 @@ const stationData = {
     streamUrl: "https://radio.plaza.one/mp3",
     apiUrl: "https://api.plaza.one/status",
     timestamp: "updated_at",
+    timezone: "America/New_York",
   }
 };

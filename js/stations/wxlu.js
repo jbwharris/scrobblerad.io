@@ -8,5 +8,6 @@ const stationData = {
     spinPath: true,
     timezone: "America/New_York",
     filter: ["WRIR"],
+    timezone: "America/New_York",
   }
 };

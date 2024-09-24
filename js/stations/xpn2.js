@@ -9,5 +9,6 @@ const stationData = {
     timestamp: "updated",
     orbPath: true,
     filter: ["World Cafe", "XPN", "xpn.org"],
+    timezone: "America/New_York",
   }
 };

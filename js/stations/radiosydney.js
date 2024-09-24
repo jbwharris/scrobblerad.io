@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://cast3.asurahosting.com/proxy/radiosyd/stream",
     apiUrl: "https://scraper2.onlineradiobox.com/au.sydney128",
     timestamp: "updated",
+    timezone: "Australia/Sydney",
     orbPath: true,
     flipMeta: true,
     pathRegex: /^(.*?)\s*-\s*(.*?)\s*(?:-\s*(.*))?$/g,

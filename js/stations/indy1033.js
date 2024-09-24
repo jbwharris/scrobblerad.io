@@ -10,5 +10,6 @@ const stationData = {
     apiUrl: "https://ca.api.iheart.com/api/v3/live-meta/stream/909/trackHistory?limit=1",
     needPath: true,
     timestamp: "data.0.endTime",
+    timezone: "America/Indiana/Indianapolis",
   }
 };

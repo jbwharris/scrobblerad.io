@@ -9,5 +9,6 @@ const stationData = {
     streamUrl: "https://kcrw.streamguys1.com/kcrw_192k_mp3_e24",
     apiUrl: "https://tracklist-api.kcrw.com/music",
     timestamp: "datetime",
+    timestamp: "America/Los_Angeles",
   }
 };

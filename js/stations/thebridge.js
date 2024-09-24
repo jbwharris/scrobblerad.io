@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://live.amperwave.net/direct/publictv19-ktbgfmaac-imc1",
     apiUrl: "https://scraper2.onlineradiobox.com/us.ktbg?l=0",
     timestamp: "updated",
+    timezone: "America/Chicago",
     orbPath: true,
     filter: ["The Bridge", "Sonic Spectrum"],
   }

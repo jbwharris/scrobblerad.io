@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://media-ssl.musicradio.com/RadioXLondon",
     apiUrl: "https://scraper2.onlineradiobox.com/uk.radiox?l=0",
     timestamp: "updated",
+    timezone: "UTC",
     orbPath: true,
   }
 };

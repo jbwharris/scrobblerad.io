@@ -8,5 +8,6 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/ca.dkfmclassic",
     orbPath: true,
     timestamp: "updated",
+    timezone: "America/Toronto",
   }
 };

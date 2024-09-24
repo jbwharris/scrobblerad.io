@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://listen-msmn.sharp-stream.com/nme2.mp3",
     apiUrl: "https://scraper2.onlineradiobox.com/uk.themusicmachine2?l=0",
     timestamp: "updated",
+    timezone: "UTC",
     orbPath: true,
     filter: ["AD START"],
   }

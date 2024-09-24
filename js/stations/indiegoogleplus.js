@@ -8,6 +8,6 @@ const stationData = {
     streamUrl: "https://radio.howtojointheindiediscothequewaitlist.com/igp.ogg",
     apiUrl: "https://deepcut.live/api/room.shortcut_info?shortcut=indie_google&extended=false",
     timestamp: "1.room.metadata.current_song.starttime",
-    needPath: true,
+    timezone: "America/New_York",
   }
 };

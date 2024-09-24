@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://msmn3.co/proxy/x1mp33/stream",
     apiUrl: "https://scraper2.onlineradiobox.com/uk.themusicmachine1?l=0",
     timestamp: "updated",
+    timezone: "UTC",
     orbPath: true,
     filter: ["AD START"],
   }

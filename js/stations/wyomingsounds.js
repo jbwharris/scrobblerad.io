@@ -10,5 +10,6 @@ const stationData = {
     orbPath: true,
     flipMeta: true,
     timestamp: "updated",
+    timezone: "America/Denver",
   }
 };

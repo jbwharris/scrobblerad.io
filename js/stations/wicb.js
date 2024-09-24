@@ -10,6 +10,7 @@ const stationData = {
     streamUrl: "https://icecast.do.zufall.co/wicb_aac_high",
     apiUrl: "https://api-v2.wicb.org/song/history/WICB?limit=1",
     timestamp: "0.timestamp",
+    timezone: "America/New_York",
     needPath: true,
   }
 };

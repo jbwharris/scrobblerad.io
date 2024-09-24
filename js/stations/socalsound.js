@@ -10,6 +10,7 @@ const stationData = {
     apiUrl: "https://ca.api.iheart.com/api/v3/live-meta/stream/5523/trackHistory?limit=1",
     filter: ["The SoCal Sound"],
     timestamp: "data.0.endTime",
+    timezone: "America/Los_Angeles",
     needPath: true,
   }
 };

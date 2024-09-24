@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://18373.live.streamtheworld.com/WJCT_HD4.mp3",
     apiUrl: "https://scraper2.onlineradiobox.com/us.wjcthd4?l=0",
     timestamp: "updated",
+    timezone: "America/New_York",
     orbPath: true,
   }
 };

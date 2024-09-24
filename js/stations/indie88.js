@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://cob-ais.leanstream.co/CINDFM-MP3",
     apiUrl: "https://scraper2.onlineradiobox.com/ca.cind?l=0",
     timestamp: "updated",
+    timezone: "America/Toronto",
     orbPath: true,
     flipMeta: true,
   }

@@ -10,5 +10,6 @@ const stationData = {
       "https://api.composer.nprstations.org/v1/widget/5a679ab2e4b0f3ec69154c59/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
     filter: ["WBFO", "The Bridge"],
     timestamp: "onNow.song._start_time",
+    timezone: "America/New_York",
   }
 };

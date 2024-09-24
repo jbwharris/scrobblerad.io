@@ -11,5 +11,6 @@ const stationData = {
     apiUrl: "https://api.amazingtunes.com/radio/us/airplays?page[size]=1&include[]=tune&include[]=tune.artist",
     needPath: true,
     timestamp: "data.0.attributes.aired_at",
+    timezone: "America/New_York",
   }
 }

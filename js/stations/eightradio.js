@@ -7,6 +7,7 @@ const stationData = {
     streamUrl: "https://stream.rcast.net/66127",
     apiUrl: "https://scraper2.onlineradiobox.com/ie.8radio",
     timestamp: "updated",
+    timezone: "Europe/Dublin",
     pathRegex: /^(.*?)s*-s*(.*?)$/,
     orbPath: true,
     filter: ["8radio", "8Radio.com"],

@@ -9,8 +9,8 @@ const stationData = {
     streamUrl: "https://radiolaurier.out.airtime.pro/radiolaurier_a",
     apiUrl: "https://radiolaurier.airtime.pro/api/live-info",
     timestamp: "current.starts",
+    timezone: "America/Toronto",
     timezone: "UTC",
-    needPath: true,
     filter: ["Radio Laurier"],
   }
 };

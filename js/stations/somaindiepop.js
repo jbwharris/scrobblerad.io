@@ -9,6 +9,7 @@ const stationData = {
     streamUrl: "https://ice5.somafm.com/indiepop-128-mp3",
     apiUrl: "https://somafm.com/songs/indiepop.json",
     timestamp: "songs.0.date",
+    timezone: "America/Los_Angeles",
     needPath: true,
   }
 };

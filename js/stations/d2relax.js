@@ -9,5 +9,6 @@ const stationData = {
     orbPath: true,
     filter: ["D2 Relax"],
     timestamp: "updated",
+    timezone: "America/Toronto",
   }
 };
