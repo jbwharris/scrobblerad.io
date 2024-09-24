@@ -220,9 +220,11 @@ class Page {
             });
 
             // Update document title
-            // if (song && artist) {
-            //     document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
-            // }
+            if (song && artist) {
+                document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
+            } else if (song && !artist) {
+                document.title = `${song} | ${this.displayStationName} on scrobblerad.io`;
+            }
 
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
@@ -584,19 +586,21 @@ class RadioPlayer {
             album = this.applyFilters('album', album);
         }
 
-        // Helper function to check if a string contains any of the filtered values
+        // Helper function to check if a string contains any of the filtered values (case-insensitive)
         const containsFilteredValue = (text, values) => {
             if (!text) return false; // Ensure text is defined
-            return values.some(value => text.includes(value));
+            const lowerCaseText = text.toLowerCase();
+            return values.some(value => lowerCaseText.includes(value.toLowerCase()));
         };
 
-        // Check for filtered values or station name and return true if any are present
+        // Check for filtered values or station name and return true if any are present (case-insensitive)
         const checkInvalidContent = (text) => {
             const filteredValues = this.currentStationData[this.stationName].filter || [];
             const stationNameValue = this.currentStationData[this.stationName].stationName;
 
             return containsFilteredValue(text, filteredValues) || containsFilteredValue(text, [stationNameValue]);
         };
+
 
         if (checkInvalidContent(song) || checkInvalidContent(artist)) {
             return ['Station may be taking a break', null, null, urlCoverArt];
@@ -819,22 +823,44 @@ class RadioPlayer {
 
             const [song, artist, album, albumArt, updated] = extractedData;
 
+            // Predefined values
             let staleData = '';
             let currentTime = Date.now(); // Get current time in milliseconds
-            let epochTimestamp = '';
+            let apiUpdatedTime = '';
             const timezone = this.currentStationData[this.stationName].timezone;
-            let timestamp;
+            let timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
 
-            if (this.stationName === 'indie1023') {
-                timestamp =  Date.parse(`${data[1].date} ${data[1].time} MDT`); 
-            } else {
-                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+            console.log('pre conversion timestamp:', timestamp);
+
+            // Check if the timestamp is a number and convert to milliseconds if necessary
+            if (typeof timestamp === 'number') {
+                timestamp = Math.floor(timestamp); // Ensure it's an integer by rounding down
+                if (timestamp.toString().length === 10) {
+                    timestamp *= 1000; // Convert to milliseconds if it's in seconds
+                }
             }
 
-            // Ensure timestamp is a number
-            timestamp = !isNaN(Date.parse(timestamp)) ? Date.parse(timestamp) : timestamp;
+            // Check if the timestamp is in seconds (10 digits) or milliseconds (13 digits)
+            if (typeof timestamp === 'number' && timestamp.toString().length === 10) {
+                // Convert seconds to milliseconds if it's in seconds
+                timestamp *= 1000;
+            } else if (typeof timestamp === 'number' && timestamp.toString().length === 13) {
+                // If it's already in milliseconds, leave it as is
+                timestamp = Number(timestamp);
+            }
 
-            if (updated || (timezone && timestamp)) {
+            timestamp = !isNaN(timestamp)
+                ? new Date(Number(timestamp))    // Handle epoch value
+                : !isNaN(Date.parse(timestamp))
+                ? new Date(timestamp)            // Handle date string
+                : timestamp;                     // Leave unchanged if neither
+
+            console.log('timezone', timezone, 'timestamp', timestamp, 'currentTime', currentTime, 'updated', updated);
+
+
+            // Step 2: Handle timezone formatting for current time and timestamp separately
+            if ((timezone && timestamp) || (updated && timezone)) {
+                // Format current time in the specified timezone
                 const currentDateComponents = new Intl.DateTimeFormat('en-US', {
                     timeZone: timezone,
                     year: 'numeric',
@@ -842,50 +868,90 @@ class RadioPlayer {
                     day: '2-digit',
                     hour: '2-digit',
                     minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
                     timeZoneName: 'short',
-                }).format(new Date()).split(', ');
+                }).formatToParts(new Date());
 
-                const [datePart, timePart] = currentDateComponents;
-                const [month, day, year] = datePart.split('/');
-                const [time, pm, timeZoneName] = timePart.split(' ');
+                let datePart = '', timePart = '', timeZoneName = '';
+                currentDateComponents.forEach(part => {
+                    if (['month', 'day', 'year'].includes(part.type)) datePart += part.value + '/';
+                    else if (['hour', 'minute', 'second'].includes(part.type)) timePart += part.value + ':';
+                    else if (part.type === 'timeZoneName') timeZoneName = part.value;
+                });
 
-                // Generate current time in the appropriate format
-                const formattedTime = `${year}-${month}-${day} ${time} ${pm} ${timeZoneName}`;
-                currentTime = Date.parse(formattedTime); // Parse formatted time to milliseconds
+                datePart = datePart.slice(0, -1); // Remove trailing '/'
+                timePart = timePart.slice(0, -1); // Remove trailing ':'
+                const formattedTime = `${datePart} ${timePart} ${timeZoneName}`; // Current time formatted in timezone
 
-                // Generate updated time string
-                let currentUpdatedTime = timezone && timestamp
-                    ? `${timestamp} ${timeZoneName}`
-                    : `${year}-${month}-${day} ${updated} ${timeZoneName}`;
+                let formattedUpdatedTime;
 
-                // Parse the updated time string
-                epochTimestamp = Date.parse(currentUpdatedTime);
+                if (updated) {
+                    formattedUpdatedTime = `${datePart} ${updated} ${timeZoneName}`; // constructing the spinitron date value from updated
+                    timestamp = formattedUpdatedTime;
+                }
+
+                // Format updated time (timestamp) in the specified timezone
+                const updatedDateComponents = new Intl.DateTimeFormat('en-US', {
+                    timeZone: timezone,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                    timeZoneName: 'short',
+                }).formatToParts(new Date(timestamp));
+
+                let updatedDatePart = '', updatedTimePart = '';
+                updatedDateComponents.forEach(part => {
+                    if (['month', 'day', 'year'].includes(part.type)) updatedDatePart += part.value + '/';
+                    else if (['hour', 'minute', 'second'].includes(part.type)) updatedTimePart += part.value + ':';
+                });
+
+                updatedDatePart = updatedDatePart.slice(0, -1); // Remove trailing '/'
+                updatedTimePart = updatedTimePart.slice(0, -1); // Remove trailing ':'
+
+                
+                if (timezone && timestamp) {
+                    formattedUpdatedTime = `${updatedDatePart} ${updatedTimePart} ${timeZoneName}`; // Timestamp formatted in timezone
+                }
+
+                console.log('formattedTime:', formattedTime);
+                console.log('formattedUpdatedTime:', formattedUpdatedTime);
+
+                // Convert formatted times to epoch
+                apiUpdatedTime = Date.parse(formattedUpdatedTime); // Convert updated timestamp to epoch
+
+                // Check if the timestamp is in seconds and convert to milliseconds if necessary
+                if (typeof apiUpdatedTime === 'number' && timestamp.toString().length === 10) {
+                    apiUpdatedTime *= 1000; // Convert to milliseconds if it's in seconds
+                }
+
+                currentTime = Date.parse(formattedTime); // Convert current time to epoch
+
+                console.log('apiUpdatedTime', apiUpdatedTime, 'currentTime', currentTime);
             }
 
-            // Use the parsed timestamp or fallback to parsed current timestamp
-            let epochTimeString = epochTimestamp || Date.parse(timestamp) || timestamp;
-
-            // Normalize both epochTimeString and currentTime to be in milliseconds
-            epochTimeString = epochTimeString.toString().length === 10
-                ? epochTimeString * 1000 // Convert seconds to milliseconds
-                : parseInt(epochTimeString.toString().replace('.', '').slice(0, 13), 10);
-
             // Calculate the time difference
-            const timeDifference = currentTime - epochTimeString;
-
-
-
+            const timeDifference = currentTime - apiUpdatedTime;
             console.log('timedifference', timeDifference);
 
+
+
+
+
+
             // Check if the data is stale (older than 15 minutes or 900000 milliseconds)
-            if (timeDifference > 900000 && epochTimeString !== "") {
+            if (timeDifference > 900000 && apiUpdatedTime !== "") {
                 staleData = 'Streaming data is stale';
             }
 
             // Check for stale data or no valid song data
             if (song === 'No streaming data currently available' || song === 'Station may be taking a break' || song === 'Station data is currently missing' || staleData) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData([staleData || song, '', '', urlCoverArt, null, null, true, this.currentStationData]);
+                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData]);
                 return;
             }
 
