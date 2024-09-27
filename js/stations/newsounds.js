@@ -10,6 +10,6 @@ const stationData = {
     apiUrl: "https://api.wnyc.org/api/v1/whats_on/q2/",
     needPath: true,
     timestamp: "expires",
-    timestamp: "America/New_York",
+    timezone: "America/New_York",
   }
 };
