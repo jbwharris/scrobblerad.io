@@ -777,7 +777,6 @@ class RadioPlayer {
         const album = replaceEnDashWithEmDash(doc.querySelector('span.release')?.textContent.trim() || '');
         const albumArt = doc.querySelector('img')?.src || '';
         const updated = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
-        console.log("updated", updated);
 
        // console.log(`${song} - ${artist} - ${album} - ${albumArt}`);
 
@@ -825,9 +824,23 @@ class RadioPlayer {
 
             // Predefined values
             const timezone = this.currentStationData[this.stationName].timezone;
-            let timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+            let timestamp;
+
+            if ([this.stationName] == 'indie1023') {
+                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
+                console.log('102.3 timestamp', timestamp);
+            } else {
+                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+            }
+
+
             if (this.currentStationData[this.stationName].altPath && !song) {
-                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
+                if ([this.stationName] == 'indie1023') {
+                    timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[2])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[3])}`;
+                    console.log('102.3 timestamp', timestamp);
+                } else {
+                    timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
+                }
             }
 
             // Format and check stale data in a separate function
@@ -864,7 +877,13 @@ class RadioPlayer {
     }
 
     checkStaleData(timezone, timestamp, updated) {
+
         let staleData = '';
+
+        if (!timezone && !timestamp && !updated) {
+            return staleData;
+        }
+
         let apiUpdatedData;
         let timezoneTime = new Date().toLocaleString("en-US", { timeZone: timezone, 
         year: 'numeric', 
@@ -885,6 +904,7 @@ class RadioPlayer {
 
         // Handle timestamp conversion and formatting
         const { apiUpdatedTime } = this.formatTimeInTimezone(timezone, timestamp, updated);
+        console.log('apiUpdatedTime before ISO conversion', apiUpdatedTime);
         apiUpdatedData = new Date(apiUpdatedTime).toISOString();
 
         // Convert formatted times to epoch
@@ -904,49 +924,34 @@ class RadioPlayer {
         return { staleData };
     }
 
-    convertTimestamp(timestamp, timezone) {
-        // Check if the input is a valid ISO 8601 string (with optional timezone info)
-        const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
+convertTimestamp(timestamp, timezone) {
+    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
+    const isEpoch = /^\d+(\.\d+)?$/.test(timestamp);
+    const isUTC = typeof timestamp === 'string' && timestamp.endsWith('Z');
 
-        // Check if the input is a number (epoch, either in seconds or milliseconds)
-        const isEpoch = /^\d+(\.\d+)?$/.test(timestamp);
+    // Updated regex for both 'MM/DD/YYYY HH:MM:SS' and 'YYYY-MM-DD HH:MM:SS'
+    const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
 
-        // Check if the ISO string ends with 'Z' (UTC)
-        const isUTC = typeof timestamp === 'string' && timestamp.endsWith('Z');
-
-        // Check if the input is in 'MM/DD/YYYY HH:MM:SS' format (without timezone)
-        const dateWithoutTimezoneRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/;
-
-        // Determine the format
-        if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
-            if (isUTC) {
-                // console.log('UTC (ISO 8601)');
-                timestamp = new Date(timestamp).toISOString(); // convert timestamp to UTC
-            }
-            // console.log('ISO 8601');
-        } else if (isEpoch) {
-            // Check if the epoch is in seconds or milliseconds based on its value, not length
-            if (timestamp < 1e12) {  // If less than 1 trillion, it's in seconds
-                // console.log('Epoch (seconds)');
-                timestamp *= 1000; // Convert to milliseconds if in seconds
-            } else {
-                // console.log('Epoch (milliseconds)');
-            }
-            timestamp = new Date(timestamp).toISOString(); // convert timestamp to ISO
-        } else if (dateWithoutTimezoneRegex.test(timestamp)) {
-            // Extract just the timezone part
-            const timestampTimezonePart = new Date(timestamp).toLocaleString('en-US', {
-                timeZone: timezone,
-                timeZoneName: 'short',
-            }).split(' ').pop(); // This isolates the 'CDT', 'EDT', etc.
-            // Append the timezone (default to 'America/Chicago' or any other)
-            timestamp = new Date(`${timestamp} ${timestampTimezonePart}`).toISOString();
-        } else {
-            // console.log('Unknown format');
+    if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
+        if (isUTC) {
+            timestamp = new Date(timestamp).toISOString();
         }
-
-        return timestamp;
+    } else if (isEpoch) {
+        if (timestamp < 1e12) {
+            timestamp *= 1000; // Convert seconds to milliseconds
+        }
+        timestamp = new Date(timestamp).toISOString();
+    } else if (dateWithoutTimezoneRegex.test(timestamp)) {
+        const timestampTimezonePart = new Date(timestamp).toLocaleString('en-US', {
+            timeZone: timezone,
+            timeZoneName: 'short',
+        }).split(' ').pop(); // Get timezone abbreviation
+        timestamp = new Date(`${timestamp} ${timestampTimezonePart}`).toISOString();
     }
+
+    return timestamp;
+}
+
 
     formatTimeInTimezone(timezone, timestamp, updated) {
         let apiUpdatedTime = '';
