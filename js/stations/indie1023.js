@@ -12,5 +12,6 @@ const stationData = {
     apiUrl: "https://playlist.cprnetwork.org/won_plus3/KVOQ.json",
     altPath: true,
     timezone: "America/Denver",
+    timestamp: ["0.date", "0.time", "1.date", "1.time"],
   }
 };
