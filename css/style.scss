@@ -23,8 +23,7 @@ body {
 /* Theme sombre ou clair */
 @media (prefers-color-scheme:dark) {
    body {
-      backdrop-filter: blur(2rem) contrast(30%) brightness(90%);
-      -webkit-backdrop-filter: blur(2rem) contrast(30%) brightness(90%);
+      backdrop-filter: blur(2em) contrast(50%) brightness(80%);
    }
 
 }
@@ -32,7 +31,6 @@ body {
 @media (prefers-color-scheme:light) {
    body {
       backdrop-filter: blur(2rem) contrast(30%) brightness(170%);
-      -webkit-backdrop-filter: blur(2rem) contrast(30%) brightness(170%);
    }
 
 }
@@ -201,7 +199,7 @@ body {
       border: 0;
 
       .accordion-header button {
-         background:rgba(0,0,0,0.15);
+         background:rgba(0,0,0,0.35);
          border-radius: 0 .5rem .5rem 0;
          color: #fff;
          transition: all .3s ease-in-out;
@@ -235,7 +233,7 @@ body {
       transition: all 250ms ease-in-out;
 
       &:has(.icon-pause) {
-         background: hsla(188, 71%, 34%, .85);
+         background: hsla(188, 71%, 60%, .4);
          border-color: hsla(189, 69%, 26%, .85);
 
          &:hover,
@@ -401,6 +399,7 @@ body {
             margin: 0 !important;
             border-radius: 0;
             font-size: 1.75rem;
+            background: hsla(0,0,0,.3)
          }
 
       }
@@ -501,7 +500,7 @@ nav.stationNav {
       color: #fff;
       display: block;
       width: 100%;
-            background:rgba(0,0,0,.15);
+      background:rgba(0,0,0,.35);
       border-radius: .5rem 0 0 .5rem;
       margin:.5rem 0 0;
       border:0;
@@ -574,11 +573,16 @@ input[type="checkbox"]:checked~.menuIconToggle {
    }
 
    #webamp {
-      top: 1rem;
+      top: 0;
       height: fit-content;
 
       #albumArt {
-         max-width: 85vw;
+         max-width: 100vw;
+
+         mask-image: -webkit-gradient(linear, left top, left bottom, 
+      color-stop(0.00,  rgba(0,0,0,1)),
+      color-stop(0.8,  rgba(0,0,0,.9)),
+      color-stop(1.00,  rgba(0,0,0,0)));
       }
 
    }
