@@ -17,6 +17,9 @@ const stations = {
   birchstreet: {
     stationName: "Birch Street Radio",
   },
+  thebridge: {
+    stationName: "The Bridge 90.9",
+  },
   chillfiltr: {
     stationName: "CHILLFILTR",
   },
@@ -48,6 +51,9 @@ const stations = {
   },
   coloradosound: {
     stationName: "The Colorado Sound",
+  },
+  thecurrent: {
+    stationName: "The Current",
   },
   d1alt: {
     stationName: "D1 Alternative",
@@ -82,6 +88,9 @@ const stations = {
   },
   indie1023: {
     stationName: "Indie 102.3",
+  },
+  indie312: {
+    stationName: "Indie312",
   },
   indie617: {
     stationName: "indie617",
@@ -148,6 +157,9 @@ const stations = {
   plazaone: {
     stationName: "Nightwave Plaza",
   },
+  thepoint: {
+    stationName: "The Point",
+  },
   qcindie: {
     stationName: "QCIndie",
   },
@@ -182,20 +194,11 @@ const stations = {
   soniccoast: {
     stationName: "The Sonic Coast",
   },
-  thebridge: {
-    stationName: "The Bridge 90.9",
-  },
-  thecurrent: {
-    stationName: "The Current",
-  },
   tmm1: {
     stationName: "The Music Machine 1",
   },
   tmm2: {
     stationName: "The Music Machine 2",
-  },
-  thepoint: {
-    stationName: "The Point",
   },
   thesummit: {
     stationName: "The Summit",
