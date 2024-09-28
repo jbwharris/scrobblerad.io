@@ -98,6 +98,9 @@ const stations = {
   indie88: {
     stationName: "Indie88",
   },
+  indieblend: {
+    stationName: "The Indie Blend",
+  },
   indiediscotheque: {
     stationName: "Indie Discotheque",
   },
