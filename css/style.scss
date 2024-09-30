@@ -1,6 +1,7 @@
 :root {
    --albumArt: url("../img/defaultArt.png");
    --media-footer: 8rem;
+   --sr-pink: hsla(322deg, 100%, 65%, 1);
 }
 
 html {
@@ -184,7 +185,7 @@ body {
    }
 
 
-   a:not(.gitLink) {
+   a:not(.iconLink) {
      text-decoration: none;
      color: var(--bs-body-color);
      font-weight: 700;
@@ -193,7 +194,7 @@ body {
 
      &::before {
         content: '';
-        background-color: hsla(322deg 100% 65%);
+        background-color: var(--sr-pink);
         position: absolute;
         left: 0;
         bottom: 0px;
@@ -209,14 +210,14 @@ body {
       }
    }
 
-   .gitLink  {
+   .iconLink  {
       position: relative;
       font-size: 2rem;
       color: var(--bs-body-color);
       text-decoration:none;
 
       &:hover {
-         color: #eee;
+         color: var(--sr-pink);
       }
    }
 
