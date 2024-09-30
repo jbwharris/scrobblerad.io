@@ -1,10 +1,9 @@
 @font-face {
   font-family: 'iconfont';
-  src: url('../fonts/iconfont.eot?1kez7b');
-  src: url('../fonts/iconfont.eot?1kez7b#iefix') format('embedded-opentype'),
-    url('../fonts/iconfont.ttf?1kez7b') format('truetype'),
-    url('../fonts/iconfont.woff?1kez7b') format('woff'),
-    url('../fonts/iconfont.svg?1kez7b#iconfont') format('svg');
+  src:
+    url('../fonts/iconfont.ttf?339zzs') format('truetype'),
+    url('../fonts/iconfont.woff?339zzs') format('woff'),
+    url('../fonts/iconfont.svg?339zzs#iconfont') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,7 +23,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 
 .icon-show-panels:before {
   content: "\e90f";
@@ -82,4 +80,7 @@
 }
 .icon-headphones:before {
   content: "\e910";
+}
+.icon-spotify:before {
+  content: "\ea94";
 }
