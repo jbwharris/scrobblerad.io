@@ -414,7 +414,6 @@ class RadioPlayer {
             this.updateArt = true;
             this.isPlaying = true;
             firstRun = false;
-            this.getStreamingData();
         }
 
         const debouncedSetupAudio = this.debounce(() => {
