@@ -32,6 +32,9 @@
 .icon-hide-panels:before {
   content: "\e911";
 }
+.icon-chevron-down:before {
+  content: "\e912";
+}
 .icon-github:before {
   content: "\e90e";
 }
