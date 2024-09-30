@@ -705,9 +705,13 @@ class RadioPlayer {
                 let stationUrl = this.addCacheBuster(this.currentStationData[this.stationName].apiUrl);
 
                 const fetchOptions = {
-                    method: this.currentStationData[this.stationName].method || 'GET',
-                    headers: this.currentStationData[this.stationName].headers || {},
+                  method: this.currentStationData[this.stationName].method || 'GET',
+                  headers: {
+                    ...this.currentStationData[this.stationName].headers,
+                    'X-Exclude-From-Cache': 'true' // Custom header to signal the service worker
+                  },
                 };
+
 
                 fetch(stationUrl, fetchOptions)
                     .then((response) => {

@@ -38,13 +38,23 @@ self.addEventListener("activate", (activateEvent) => {
 
 // Fetch event: Use Stale-While-Revalidate strategy
 self.addEventListener("fetch", (fetchEvent) => {
+  const request = fetchEvent.request;
+
+  // Exclude requests with custom header from caching
+  if (request.headers.get('X-Exclude-From-Cache')) {
+    return fetchEvent.respondWith(fetch(request));
+  }
+
   fetchEvent.respondWith(
-    caches.match(fetchEvent.request).then((cachedResponse) => {
-      const networkFetch = fetch(fetchEvent.request).then((networkResponse) => {
-        return caches.open(staticPlayer).then((cache) => {
-          cache.put(fetchEvent.request, networkResponse.clone());  // Update cache
-          return networkResponse;
-        });
+    caches.match(request).then((cachedResponse) => {
+      const networkFetch = fetch(request).then((networkResponse) => {
+        if (request.method === "GET") {
+          return caches.open(staticPlayer).then((cache) => {
+            cache.put(request, networkResponse.clone());
+            return networkResponse;
+          });
+        }
+        return networkResponse;
       });
       return cachedResponse || networkFetch;
     })
