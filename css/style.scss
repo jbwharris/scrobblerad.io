@@ -41,14 +41,16 @@ body {
    body {
       backdrop-filter: blur(2rem) contrast(25%) brightness(140%);
       --sr-lightness: 75%;
-      --sidebar-bg: rgba(255,255,255,.5);
+      --sidebar-bg: rgba(255,255,255,.35);
       --bs-body-color: hsla(50deg,15%,15%,1) !important;
       --bs-heading-color: hsla(50deg,15%,15%,1) !important;
-      --sidebar-headers: rgba(255,255,255,.75);
+      --sidebar-headers: rgba(255,255,255,.65);
       --sidebar-gradient: linear-gradient(90deg, rgba(255,255,255,0) 0%, hsla(188deg, 68%, var(--sr-lightness),1) 0%, hsla(303.4, 79.5%, var(--sr-lightness),1) 100%);
       --btn-border-color: hsla(200deg,15%,var(--sr-lightness),1) !important;
       --play-button: hsla(189, 69%, var(--sr-lightness), .85);
       --play-button-border: hsla(189, 69%, calc(var(--sr-lightness) - 10%), .85);
+      --spinner-bg: hsla(303.4, 79.5%, var(--sr-lightness), .85);
+      --spinner-border: hsla(303.4, 79.5%, calc(var(--sr-lightness) - 10%), .85);
    }
 }
 
@@ -276,6 +278,10 @@ body {
       &:has(.spinner-grow) {
          background: var(--spinner-bg);
          border-color: var(--spinner-border);
+
+         i {
+            color: var(--bs-body-color) !important;
+         }
       }
 
    }
