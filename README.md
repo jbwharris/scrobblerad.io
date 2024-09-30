@@ -15,6 +15,9 @@ A PWA and website to listen to cool radio stations and easily scrobble to [LastF
 - Mobile swipe navigation
 - Light and Dark Mode support
 
+<img width="798" alt="Light and dark mode screenshots" src="https://github.com/user-attachments/assets/b7dd3ff9-0724-4293-b981-dcd425f9521e">
+
+
 ## FAQ
 ### Why another radio streaming app?
 There are a zillion radio streaming apps out there, but there really aren’t any that did so with a scrobbling first focus. That was my primary goal, to gather a bunch of great radio stations that have publicly accessible API metadata and make an app that could scrobble the songs to LastFM, Listenbrainz and LibreFM. For years I had struggled with the idea of finding a reliable way to scrobble radio on the go. There had been an early iOS app that did it pretty well, but as LastFM had faded in popularity there just never seemed to be any apps that focused on being able to accurately scrobble online radio. If you'd like to use this with Android and [Pano Scrobbler](https://github.com/kawaiiDango/pano-scrobbler), it should work without much issue. 
