@@ -6,6 +6,9 @@ const assets = [
   "/js/main-dist.js",
   "/js/stations-dist.js",
   "/img/defaultArt.png",
+  "css/external/bootstrap.min.css",
+  "js/external/bootstrap.min.js",
+  "js/external/filter.min.js"
 ];
 
 // Install event: Caches the assets
