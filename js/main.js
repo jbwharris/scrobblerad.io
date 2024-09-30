@@ -1,35 +1,34 @@
 const urlCoverArt = "img/defaultArt.png";
-const stationKeys = Object.keys(stations);
-let skipCORS = '';
+let stationKeys = Object.keys(stations); // Change to let to allow modification
+let skipCORS = ''; // This will store the result of CORS check
 
 async function generateRadioButtons() {
-  const skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/');
+  skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/'); // Use the outer variable
 
   const stationSelectDiv = document.getElementById('stationSelect');
-  
+
   // Clear the container to prevent duplicates
   stationSelectDiv.innerHTML = '';
 
   const fragment = document.createDocumentFragment();
 
-  // Iterate through station keys and remove stations with CORS if skipCORS is false
-  Object.keys(stations).forEach((stationKey) => {
+  // Filter station keys based on the CORS condition
+  stationKeys = stationKeys.filter((stationKey) => {
     const station = stations[stationKey];
-    // Remove the station if CORS is enabled and we need to skip CORS stations
     if (skipCORS === false && station.cors) {
-      delete stations[stationKey];
+      delete stations[stationKey]; // Remove from stations object
+      return false; // Filter out this station key
     }
+    return true; // Keep the station
   });
 
-  // Now filter and generate buttons for remaining stations
-  const filteredStationKeys = Object.keys(stations); // Now this contains only non-CORS stations
-
-  filteredStationKeys.forEach((stationKey) => {
+  // Now generate buttons for the remaining stations
+  stationKeys.forEach((stationKey) => {
     const station = stations[stationKey];
     const button = document.createElement('button');
     button.name = stationKey; // Set the button's name to the stationKey
     button.textContent = station.stationName;
-    
+
     const input = document.createElement('input');
     input.type = 'radio';
     input.name = 'station';
@@ -59,7 +58,7 @@ async function generateRadioButtons() {
     const leftPanel = document.getElementById("panel1");
     const centrePanel = document.getElementById("panel2");
     const rightPanel = document.getElementById("panel3");
-    const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels"); // Target either icon class
+    const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels");
 
     // Toggle the panels
     leftPanel.classList.toggle("show");
@@ -68,7 +67,6 @@ async function generateRadioButtons() {
 
     // Check if we have an icon to toggle
     if (iconElement) {
-      // Toggle between the two icon classes
       if (iconElement.classList.contains("icon-hide-panels")) {
         iconElement.classList.remove("icon-hide-panels");
         iconElement.classList.add("icon-show-panels");
@@ -79,7 +77,6 @@ async function generateRadioButtons() {
     }
   });
 }
-
 
 async function isCORSEnabled(url) {
   try {
@@ -104,6 +101,7 @@ async function isCORSEnabled(url) {
     }
   }
 }
+
 
 
 function animateElement(element, duration = 2000) {
@@ -416,6 +414,7 @@ class RadioPlayer {
             this.updateArt = true;
             this.isPlaying = true;
             firstRun = false;
+            this.getStreamingData();
         }
 
         const debouncedSetupAudio = this.debounce(() => {
@@ -558,8 +557,6 @@ class RadioPlayer {
                 album = match[3]?.trim() || '';
                 albumArt = match[4]?.trim() || urlCoverArt;
                 updated = match[5]?.trim() || '';
-
-                console.log("match[5]?.trim()", match[5]?.trim());
 
                 if (this.currentStationData[this.stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -1124,8 +1121,7 @@ convertTimestamp(timestamp, timezone) {
             return url;
         } else {
             return url.includes('?') ? `${url}&t=${timestamp}` : `${url}?t=${timestamp}`;
-        }
-        
+        } 
     }
 }
 
