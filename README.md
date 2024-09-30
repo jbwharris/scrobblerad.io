@@ -1,19 +1,19 @@
 # [scrobblerad.io](https://scrobblerad.io)
-A PWA and website to listen to cool radio stations and easily scrobble to [LastFM](https://last.fm) with [Web Scrobbler](https://web-scrobbler.com)
+A PWA and website to listen to cool radio stations and easily scrobble to [LastFM](https://last.fm), [LibreFm](https://libre.fm) and [ListenBrainz](https://listenbrainz.org) with [Web Scrobbler](https://web-scrobbler.com)
 
-[![HTML5](https://img.shields.io/badge/HTML-FF4500?style=for-the-badge&logo=html5&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/CSS-0077B5?&style=for-the-badge&logo=css3&logoColor=white)](#) [![HTML5](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](#)
+[![HTML5](https://img.shields.io/badge/HTML-FF4500?style=for-the-badge&logo=html5&logoColor=white)](#) [![CSS3](https://img.shields.io/badge/CSS-0077B5?&style=for-the-badge&logo=css3&logoColor=white)](#) [![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](#)
 
 ![image](https://github.com/user-attachments/assets/bedece54-1ae3-44b0-a683-360698c612b7)
 
-
-
-
 ## Features 
-- A diverse set of over 75 different online radio stations from around the world. Featuring [KEXP](https://kexp.org), [BBC6](https://www.bbc.co.uk/sounds/play/live:bbc_6music), various NPR stations and many more...
+- A diverse set of over 90 different online radio stations from around the world. Featuring [KEXP](https://kexp.org), [BBC6](https://www.bbc.co.uk/sounds/play/live:bbc_6music), various NPR stations and many more...
 - MediaSession controls, so you can easily switch between stations using the media controls on your keyboard
 - Song and artist data filtered using Web Scrobbler's [Metadata Filter](https://github.com/web-scrobbler/metadata-filter)
+- Additional filtering to ensure the best possible scrobble data to submit
 - Album data from LastFM API
 - Apple CarPlay support
+- Mobile swipe navigation
+- Light and Dark Mode support
 
 ## FAQ
 ### Why another radio streaming app?
