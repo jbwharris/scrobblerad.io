@@ -71,6 +71,9 @@ const stations = {
   dkfmclassic: {
     stationName: "DKFM Classic",
   },
+  easternalt: {
+    stationName: "Eastern Alternative Radio",
+  }, 
   eightradio: {
     stationName: "8Radio",
   }, 
