@@ -12,5 +12,9 @@ const stationData = {
       "https://api.radioking.io/widget/radio/eastern-alternative-radio/track/current",
     timestamp: "end_at",
     timezone: "UTC",
+    filter: [
+      "Eastern Alternative Radio",
+    ],
+
   }
 };
