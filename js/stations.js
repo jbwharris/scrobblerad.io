@@ -276,7 +276,7 @@ const stations = {
     stationName: "XPN",
   },
   xpn2: {
-    stationName: "XPN2",
+    stationName: "XPoNential Radio",
   },
   ynotradio: {
     stationName: "Y-Not Radio",

@@ -207,21 +207,29 @@ class Page {
     }
 
     setupMediaSession(song, artist, artworkUrl) {
+        let albumDisplay = '';
+        if (song.includes("currently loading")) {
+            albumDisplay = '';
+        } else if (song && artist) {
+            albumDisplay = `Now playing on ${this.displayStationName}`;
+        }
+
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: song,
                 artist: artist || '',
-                album: `Now playing on ${this.displayStationName}` || '',
+                album: albumDisplay || '',
                 duration: Infinity,
                 startTime: 0,
                 artwork: [{ src: artworkUrl }],
             });
 
+
             // Update document title
-            if (song && artist) {
+            if ((!artist && song.includes("currently loading") || (!song && !artist))) {
+                document.title = `${this.displayStationName} currently loading`;
+            } else if ((song && artist) || !song.includes("currently loading")) {
                 document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
-            } else if (song && !artist) {
-                document.title = `${song} | ${this.displayStationName} on scrobblerad.io`;
             }
 
             const actionHandlers = {
@@ -400,6 +408,8 @@ class RadioPlayer {
 
         this.currentStationData = stationData;
 
+        document.title = `${this.currentStationData[stationName].stationName} currently loading`;
+
         // Clear any existing streaming intervals
         if (this.streamingInterval) {
             clearInterval(this.streamingInterval);
@@ -447,7 +457,6 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            document.title = `${this.currentStationData[stationName].stationName} currently loading`;
             page.setupMediaSession(`${this.currentStationData[stationName].stationName} currently loading`, '', urlCoverArt);
 
 
@@ -612,7 +621,7 @@ class RadioPlayer {
         album = replaceSpecialCharacters(album);
 
         // If the album is labeled as "single," set the album to the song title
-        if (/single/i.exec(album)) {
+        if (/single/i.exec(album) || (album.toLowerCase().includes('single'))) {
             return [song, artist, song, albumArt, updated];
         }
 
@@ -680,6 +689,12 @@ class RadioPlayer {
                             lfmListeners = null;
                             lfmPlaycount = null;
                         }
+
+                        // If there is no album after all the checks, set the album to the song title
+                        if (lfmSong && !lfmAlbum) {
+                            lfmAlbum = lfmSong;
+                        }
+
                         resolve([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount]);
                     })
                     .catch(error => {
@@ -735,14 +750,13 @@ class RadioPlayer {
                             }
 
                         // Compare the current data response with the previous one
-                        if (this.isDataSameAsPrevious(data)) {
+                        if (this.isDataSameAsPrevious(data) && !this.song.includes("currently loading")) {
                             // Data response is the same as the previous one, no need to process further
                             return;
                         }
 
                         // Store the current data response for future comparison
                         this.previousDataResponse = data;
-
 
                         // Process the new data response
                         this.processData(data);
@@ -900,7 +914,7 @@ class RadioPlayer {
 
         // Handle timestamp conversion and formatting
         const { apiUpdatedTime } = this.formatTimeInTimezone(timezone, timestamp, updated);
-        console.log('apiUpdatedTime before ISO conversion', apiUpdatedTime);
+        console.log('apiUpdatedTime', apiUpdatedTime);
         apiUpdatedData = new Date(apiUpdatedTime).toISOString();
 
         // Convert formatted times to epoch
@@ -920,34 +934,33 @@ class RadioPlayer {
         return { staleData };
     }
 
-convertTimestamp(timestamp, timezone) {
-    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
-    const isEpoch = /^\d+(\.\d+)?$/.test(timestamp);
-    const isUTC = typeof timestamp === 'string' && timestamp.endsWith('Z');
+    convertTimestamp(timestamp, timezone) {
+        const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
+        const isEpoch = /^\d+(\.\d+)?$/.test(timestamp);
+        const isUTC = typeof timestamp === 'string' && timestamp.endsWith('Z');
 
-    // Updated regex for both 'MM/DD/YYYY HH:MM:SS' and 'YYYY-MM-DD HH:MM:SS'
-    const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
+        // Updated regex for both 'MM/DD/YYYY HH:MM:SS' and 'YYYY-MM-DD HH:MM:SS'
+        const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
 
-    if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
-        if (isUTC) {
+        if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
+            if (isUTC) {
+                timestamp = new Date(timestamp).toISOString();
+            }
+        } else if (isEpoch) {
+            if (timestamp < 1e12) {
+                timestamp *= 1000; // Convert seconds to milliseconds
+            }
             timestamp = new Date(timestamp).toISOString();
+        } else if (dateWithoutTimezoneRegex.test(timestamp)) {
+            const timestampTimezonePart = new Date(timestamp).toLocaleString('en-US', {
+                timeZone: timezone,
+                timeZoneName: 'short',
+            }).split(' ').pop(); // Get timezone abbreviation
+            timestamp = new Date(`${timestamp} ${timestampTimezonePart}`).toISOString();
         }
-    } else if (isEpoch) {
-        if (timestamp < 1e12) {
-            timestamp *= 1000; // Convert seconds to milliseconds
-        }
-        timestamp = new Date(timestamp).toISOString();
-    } else if (dateWithoutTimezoneRegex.test(timestamp)) {
-        const timestampTimezonePart = new Date(timestamp).toLocaleString('en-US', {
-            timeZone: timezone,
-            timeZoneName: 'short',
-        }).split(' ').pop(); // Get timezone abbreviation
-        timestamp = new Date(`${timestamp} ${timestampTimezonePart}`).toISOString();
+
+        return timestamp;
     }
-
-    return timestamp;
-}
-
 
     formatTimeInTimezone(timezone, timestamp, updated) {
         let apiUpdatedTime = '';
