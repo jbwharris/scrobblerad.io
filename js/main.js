@@ -222,6 +222,7 @@ class Page {
                 artwork: [{ src: artworkUrl }],
             });
 
+
             // Update document title
             if (!artist && song.includes("currently loading") || (!song && !artist)) {
                 return;
@@ -233,18 +234,11 @@ class Page {
                 nexttrack: () => this.radioPlayer.skipForward(),
                 previoustrack: () => this.radioPlayer.skipBackward(),
                 play: () => this.radioPlayer.togglePlay(),
-                pause: null, // Set pause action to null or a no-op to prevent use
-                stop: () => this.radioPlayer.stopStream() // Custom stop function
+                pause: () => this.radioPlayer.togglePlay(),
             };
 
-            // Set up the stop action handler
-            navigator.mediaSession.setActionHandler('stop', actionHandlers.stop);
-
-            // Set up play/pause/next/previous action handlers
             for (const [action, handler] of Object.entries(actionHandlers)) {
-                if (action !== 'pause' && handler) { // Prevent setting 'pause' but allow others
-                    navigator.mediaSession.setActionHandler(action, handler);
-                }
+                navigator.mediaSession.setActionHandler(action, handler);
             }
         }
     }
@@ -1130,18 +1124,6 @@ class RadioPlayer {
         const currentStationKey = stationKeys[this.currentIndex];
         this.handleStationSelect(true, currentStationKey, true);
     }
-
-    stopStream() {
-        if (this.radioPlayer) {
-            this.radioPlayer.pause(); // Pause the stream
-            this.radioPlayer.currentTime = 0; // Reset to the beginning (optional for live streams)
-            this.radioPlayer.src = ''; // Clear the source to fully stop the stream
-        }
-
-        // You can also update any UI elements if needed, like disabling buttons
-        console.log('Stream stopped');
-    }
-
 
     addCacheBuster(url) {
         const timestamp = new Date().getTime();
