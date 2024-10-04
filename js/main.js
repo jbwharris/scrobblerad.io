@@ -233,7 +233,8 @@ class Page {
                 nexttrack: () => this.radioPlayer.skipForward(),
                 previoustrack: () => this.radioPlayer.skipBackward(),
                 play: () => this.radioPlayer.togglePlay(),
-                stop: () => this.radioPlayer.togglePlay() // Custom stop function
+                pause: null, // Set pause action to null or a no-op to prevent use
+                stop: () => this.radioPlayer.stopStream() // Custom stop function
             };
 
             // Set up the stop action handler
@@ -241,13 +242,12 @@ class Page {
 
             // Set up play/pause/next/previous action handlers
             for (const [action, handler] of Object.entries(actionHandlers)) {
-                if (action !== 'stop') { // Stop is already set separately
+                if (action !== 'pause' && handler) { // Prevent setting 'pause' but allow others
                     navigator.mediaSession.setActionHandler(action, handler);
                 }
             }
         }
     }
-
 }
 
 class RadioPlayer {
@@ -1130,6 +1130,18 @@ class RadioPlayer {
         const currentStationKey = stationKeys[this.currentIndex];
         this.handleStationSelect(true, currentStationKey, true);
     }
+
+    stopStream() {
+        if (this.radioPlayer) {
+            this.radioPlayer.pause(); // Pause the stream
+            this.radioPlayer.currentTime = 0; // Reset to the beginning (optional for live streams)
+            this.radioPlayer.src = ''; // Clear the source to fully stop the stream
+        }
+
+        // You can also update any UI elements if needed, like disabling buttons
+        console.log('Stream stopped');
+    }
+
 
     addCacheBuster(url) {
         const timestamp = new Date().getTime();
