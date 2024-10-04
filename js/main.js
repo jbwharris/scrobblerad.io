@@ -233,7 +233,7 @@ class Page {
                 nexttrack: () => this.radioPlayer.skipForward(),
                 previoustrack: () => this.radioPlayer.skipBackward(),
                 play: () => this.radioPlayer.togglePlay(),
-                stop: () => this.radioPlayer.stopStream() // Custom stop function
+                stop: () => this.radioPlayer.togglePlay() // Custom stop function
             };
 
             // Set up the stop action handler
