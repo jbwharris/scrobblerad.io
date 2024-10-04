@@ -102,8 +102,6 @@ async function isCORSEnabled(url) {
   }
 }
 
-
-
 function animateElement(element, duration = 2000) {
     element.classList.add("animated", "fadeIn");
     setTimeout(() => {
@@ -224,10 +222,9 @@ class Page {
                 artwork: [{ src: artworkUrl }],
             });
 
-
             // Update document title
-            if ((!artist && song.includes("currently loading") || (!song && !artist))) {
-                document.title = `${this.displayStationName} currently loading`;
+            if (!artist && song.includes("currently loading") || (!song && !artist)) {
+                return;
             } else if ((song && artist) || !song.includes("currently loading")) {
                 document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
             }
@@ -237,13 +234,21 @@ class Page {
                 previoustrack: () => this.radioPlayer.skipBackward(),
                 play: () => this.radioPlayer.togglePlay(),
                 pause: () => this.radioPlayer.togglePlay(),
+                stop: () => this.radioPlayer.stopStream() // Custom stop function
             };
 
+            // Set up the stop action handler
+            navigator.mediaSession.setActionHandler('stop', actionHandlers.stop);
+
+            // Set up play/pause/next/previous action handlers
             for (const [action, handler] of Object.entries(actionHandlers)) {
-                navigator.mediaSession.setActionHandler(action, handler);
+                if (action !== 'stop') { // Stop is already set separately
+                    navigator.mediaSession.setActionHandler(action, handler);
+                }
             }
         }
     }
+
 }
 
 class RadioPlayer {
@@ -630,7 +635,6 @@ class RadioPlayer {
 
         return [song, artist, album, albumArt, updated];
     }
-
 
     getLfmMeta(currentSong, currentArtist, currentAlbum) {
         return new Promise((resolve, reject) => {
@@ -1122,6 +1126,7 @@ class RadioPlayer {
         this.shouldReloadStream = true;
         console.log('reload working');
         this.playButton.lastElementChild.className = "spinner-grow text-light";
+        document.getElementById("panel1")
         this.calculateNextAndPreviousIndices();
         const currentStationKey = stationKeys[this.currentIndex];
         this.handleStationSelect(true, currentStationKey, true);
