@@ -12,5 +12,6 @@ const stationData = {
     needPath: true,
     timestamp: "0.last_seen",
     timezone: "America/Edmonton",
+    filter: ["Creating A Better World"],
   }
 };

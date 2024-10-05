@@ -17,6 +17,9 @@ const stations = {
   birchstreet: {
     stationName: "Birch Street Radio",
   },
+  blowupradio: {
+    stationName: "BlowUpRadio",
+  },
   thebridge: {
     stationName: "The Bridge 90.9",
   },
@@ -129,6 +132,9 @@ const stations = {
   kexp: {
     stationName: "KEXP",
   },
+  kosu: {
+    stationName: "KOSU - The Spy",
+  },
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
   },
@@ -209,6 +215,9 @@ const stations = {
   thesummit: {
     stationName: "The Summit",
   },
+  trendradio: {
+    stationName: "Trend Radio",
+  },
   triplejunearthed: {
     stationName: "Triple J Unearthed",
   },
@@ -247,6 +256,9 @@ const stations = {
   },
   wmse: {
     stationName: "WMSE Radio",
+  },
+  wnmc: {
+    stationName: "WNMC",
   },
   wnrn: {
     stationName: "WNRN",
