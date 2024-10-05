@@ -116,7 +116,7 @@ class Page {
         this.radioPlayer = radioPlayer;
 
         this.cacheDOMElements();
-        this.setupMediaSession('', '', '');
+        this.setupMediaSession('', '', '', false);
 
         // Cache the template element
         this.template = document.querySelector('#meta');
@@ -153,7 +153,7 @@ class Page {
     }
 
     refreshCurrentData(values) {
-        const [song, artist, album, artworkUrl, listeners, playcount, , currentStationData] = values;
+        const [song, artist, album, artworkUrl, listeners, playcount, , currentStationData, errorMessage] = values;
 
         setTimeout(() => {
             const updateMetadata = () => {
@@ -192,7 +192,7 @@ class Page {
                 // Simulate a click on #panel2 after the animation
                 document.querySelector('#panel2').click();
 
-                this.setupMediaSession(song, artist, artworkUrl);
+                this.setupMediaSession(song, artist, artworkUrl, errorMessage);
             };
 
             // Prefetch the image and call updateMetadata once it's loaded
@@ -204,9 +204,9 @@ class Page {
         }, 1500);
     }
 
-    setupMediaSession(song, artist, artworkUrl) {
+    setupMediaSession(song, artist, artworkUrl, errorMessage) {
         let albumDisplay = '';
-        if (song.includes("currently loading")) {
+        if (errorMessage) {
             albumDisplay = '';
         } else if (song && artist) {
             albumDisplay = `Now playing on ${this.displayStationName}`;
@@ -224,9 +224,9 @@ class Page {
 
 
             // Update document title
-            if (!artist && song.includes("currently loading") || (!song && !artist)) {
+            if (!artist && !errorMessage || (!song && !artist)) {
                 return;
-            } else if ((song && artist) || !song.includes("currently loading")) {
+            } else if ((song && artist) || !errorMessage) {
                 document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
             }
 
@@ -262,6 +262,7 @@ class RadioPlayer {
         this.firstRun = true;
         this.streamingInterval = null; // Initialize streamingInterval here
         this.canAutoplay = false;
+        this.errorMessage = false;
 
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
@@ -455,7 +456,7 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            page.setupMediaSession(`${this.currentStationData[stationName].stationName} currently loading`, '', urlCoverArt);
+            page.setupMediaSession(`${this.currentStationData[stationName].stationName} currently loading`, '', urlCoverArt, true);
 
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
@@ -466,7 +467,6 @@ class RadioPlayer {
 
         debouncedSetupAudio();
     }
-
 
     cleanupArtist(artist) {
         // Define patterns to find additional artists or features.
@@ -545,6 +545,17 @@ class RadioPlayer {
 
             if (match) {
                 [artist, song, album] = match.slice(1, 4).map((str) => str?.trim());
+
+                // New check for artist format "Last, First" or "Band, The"
+                if (artist.includes(', ')) {
+                    const parts = artist.split(', ').map(part => part.trim());
+                    if (parts.length === 2) {
+                        artist = `${parts[1]} ${parts[0]}`; // Rearrange "Last, First" to "First Last"
+                    } else if (parts.length > 2) {
+                        artist = `${parts.slice(-1)[0]} ${parts.slice(0, -1).join(' ')}`; // Handle "Band, The" to "The Band"
+                    }
+                }
+
                 if (this.currentStationData[this.stationName].flipMeta) {
                     [song, artist] = [artist, song];
                 }
@@ -608,9 +619,9 @@ class RadioPlayer {
 
 
         if (checkInvalidContent(song) || checkInvalidContent(artist)) {
-            return ['Station may be taking a break', null, null, urlCoverArt];
+            return ['Station may be taking a break', null, null, urlCoverArt, true];
         } else if ((!song && !artist)) {
-            return ['Station data is currently missing', null, null, urlCoverArt];
+            return ['Station data is currently missing', null, null, urlCoverArt, true];
         }
 
         // Apply replaceSpecialCharacters before returning
@@ -822,7 +833,7 @@ class RadioPlayer {
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true, this.currentStationData]);
+                page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true, this.currentStationData], true);
                 return;
             }
 
@@ -840,7 +851,6 @@ class RadioPlayer {
                 timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
             }
 
-
             if (this.currentStationData[this.stationName].altPath && !song) {
                 if ([this.stationName] == 'indie1023') {
                     timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[2])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[3])}`;
@@ -856,7 +866,7 @@ class RadioPlayer {
             // Handle stale data or invalid song
             if (song === 'No streaming data currently available' || staleData) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData]);
+                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData], this.errorMessage);
                 return;
             }
 
@@ -875,7 +885,7 @@ class RadioPlayer {
                     this.lfmMetaChanged = true;
                     
                     const page = new Page(this.stationName, this);
-                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData]);
+                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
                 }).catch(error => {
                     console.error('Error processing data:', error);
                 });
@@ -887,12 +897,13 @@ class RadioPlayer {
 
         let staleData = '';
 
-        if (!timezone && !timestamp && !updated) {
+        if (!timezone && !timestamp && !updated || timestamp === undefined) {
             return staleData;
         }
 
         let apiUpdatedData;
-        let timezoneTime = new Date().toLocaleString("en-US", { timeZone: timezone, 
+        let timezoneTime = new Date().toLocaleString("en-US", { 
+        timeZone: timezone, 
         year: 'numeric', 
         month: '2-digit', 
         day: '2-digit', 
@@ -935,12 +946,15 @@ class RadioPlayer {
         const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
         const isEpoch = /^\d+(\.\d+)?$/.test(timestamp);
         const isUTC = typeof timestamp === 'string' && timestamp.endsWith('Z');
-
-        // Updated regex for both 'MM/DD/YYYY HH:MM:SS' and 'YYYY-MM-DD HH:MM:SS'
         const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
 
         if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
             if (isUTC) {
+                console.log('is UTC', timestamp);
+                timestamp = new Date(timestamp).toISOString();
+            } else if (timestamp.endsWith('+0000')) { 
+                // Handling '2024-10-05T19:01:06+0000' format
+                timestamp = timestamp.replace('+0000', 'Z'); // Convert to 'Z' for UTC
                 timestamp = new Date(timestamp).toISOString();
             }
         } else if (isEpoch) {
