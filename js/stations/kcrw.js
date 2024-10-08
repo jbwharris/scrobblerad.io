@@ -6,7 +6,7 @@ const stationData = {
     albumArt: "albumImageLarge",
     stationName: "KCRW Eclectic 24",
     location: "Los Angeles, CA 🇺🇸",
-    streamUrl: "https://kcrw.streamguys1.com/kcrw_192k_mp3_e24",
+    streamUrl: "https://streams.kcrw.com/e24_mp3",
     apiUrl: "https://tracklist-api.kcrw.com/music",
     timestamp: "datetime",
     timestamp: "America/Los_Angeles",
