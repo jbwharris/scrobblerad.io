@@ -478,6 +478,16 @@ class RadioPlayer {
             cleanedArtist = cleanedArtist.replace(pattern, '');
         });
 
+        // New check for artist format "Last, First" or "Band, The"
+        if (artist.includes(', ')) {
+            const parts = artist.split(', ').map(part => part.trim());
+            if (parts.length === 2) {
+                artist = `${parts[1]} ${parts[0]}`; // Rearrange "Last, First" to "First Last"
+            } else if (parts.length > 2) {
+                artist = `${parts.slice(-1)[0]} ${parts.slice(0, -1).join(' ')}`; // Handle "Band, The" to "The Band"
+            }
+        }
+
         return cleanedArtist.trim();
     }   
 
@@ -511,28 +521,42 @@ class RadioPlayer {
             .replace(/--/g, '-')                     // Double hyphens
             .trim() || '';                           // Fallback if string is empty
 
+        const filterSongDetails = song => {
+            if (!song) return '';  // Return an empty string if song is undefined
+            return song
+                .replace(/\s*\(.*?version.*?\)/gi, '')  // Removes text in brackets containing "version"
+                .replace(/\s-\s.*version.*$/i, '')      // Removes " - Radio Version" or similar
+                .replace(/\s*\(.*?edit.*?\)/gi, '')     // Removes text in brackets containing "edit"
+                .replace(/\s-\s.*edit.*$/i, '')         // Removes " - Radio Edit" or similar
+                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
+                .replace(/\s*-\s*\d{4}\s*Remastered.*/i, '') // Removes " - 2001 Remastered" or similar
+                .trim();
+        };
+
         const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
 
-        let song = getMetadata('song');
-        let artist = getMetadata('artist');
-        let album = getMetadata('album');
+        let song = filterSongDetails(getMetadata('song'));
+        let artist = this.applyFilters('artist', getMetadata('artist'));
+        let album = this.applyFilters('album', getMetadata('album'));
         let albumArt = getMetadata('albumArt');
-        let updated = '';
+        let spinUpdated = '';
         let dataPath = data.title;
 
         if (this.currentStationData[this.stationName].altPath && !song) {
-            song = getMetadata('song2');
-            artist = getMetadata('artist2');
-            album = getMetadata('album2');
+            song = filterSongDetails(getMetadata('song2'));
+            artist = this.applyFilters('artist', getMetadata('artist2'));
+            album = this.applyFilters('album', getMetadata('album2'));
             albumArt = getMetadata('albumArt');
         }
 
         if (this.currentStationData[this.stationName].spinPath) {
-            song = data.song || '';
-            artist = data.artist || '';
-            album = data.album || '';
+            song = filterSongDetails(data.song) || '';
+            artist = this.applyFilters('artist', data.artist) || '';
+            album = this.applyFilters('album', data.album) || '';
             albumArt = data.albumArt || '';
-            updated = data.updated || '';
+            spinUpdated = data.spinUpdated || '';
+
+            console.log('albumArt from spinPath', albumArt);
         }
 
         if (this.currentStationData[this.stationName].orbPath) {
@@ -546,15 +570,9 @@ class RadioPlayer {
             if (match) {
                 [artist, song, album] = match.slice(1, 4).map((str) => str?.trim());
 
-                // New check for artist format "Last, First" or "Band, The"
-                if (artist.includes(', ')) {
-                    const parts = artist.split(', ').map(part => part.trim());
-                    if (parts.length === 2) {
-                        artist = `${parts[1]} ${parts[0]}`; // Rearrange "Last, First" to "First Last"
-                    } else if (parts.length > 2) {
-                        artist = `${parts.slice(-1)[0]} ${parts.slice(0, -1).join(' ')}`; // Handle "Band, The" to "The Band"
-                    }
-                }
+                song = filterSongDetails(song);
+                artist = this.applyFilters('artist', artist);
+                album = this.applyFilters('album', album);
 
                 if (this.currentStationData[this.stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -569,11 +587,11 @@ class RadioPlayer {
             const match = regexPattern.exec(data);
 
             if (match) {
-                song = match[1]?.trim() || '';
-                artist = match[2]?.trim() || '';
-                album = match[3]?.trim() || '';
+                song = filterSongDetails(match[1]?.trim()) || '';
+                artist = this.applyFilters('artist', match[2]?.trim()) || '';
+                album = this.applyFilters('album', match[3]?.trim()) || '';
                 albumArt = match[4]?.trim() || urlCoverArt;
-                updated = match[5]?.trim() || '';
+                spinUpdated = match[5]?.trim() || '';
 
                 if (this.currentStationData[this.stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -586,20 +604,6 @@ class RadioPlayer {
         // Cleanup the artist name
         if (artist) {
             artist = this.cleanupArtist(artist);
-        }
-
-        // Apply filtering before returning
-        if (song) {
-            song = this.applyFilters('track', song)
-                .replace(/\s*\(.*?version.*?\)/gi, '')   // Removes text in brackets containing "version"
-                .replace(/\s-\s.*version.*$/i, '') // Removes " - Radio Version" or similar
-                .replace(/\s*\(.*?edit.*?\)/gi, '')      // Removes text in brackets containing "edit"
-                .replace(/\s-\s.*edit.*$/i, '') // Removes " - Radio Edit" or similar
-                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
-                .replace(/\s*-\s*\d{4}\s*Remastered.*/i, '') // Removes " - 2001 Remastered" or similar
-                .trim();
-            artist = this.applyFilters('artist', artist);
-            album = this.applyFilters('album', album);
         }
 
         // Helper function to check if a string contains any of the filtered values (case-insensitive)
@@ -617,11 +621,10 @@ class RadioPlayer {
             return containsFilteredValue(text, filteredValues) || containsFilteredValue(text, [stationNameValue]);
         };
 
-
         if (checkInvalidContent(song) || checkInvalidContent(artist)) {
-            return ['Station may be taking a break', null, null, urlCoverArt, true];
+            return ['Station may be taking a break', null, null, urlCoverArt, '', '', true];
         } else if ((!song && !artist)) {
-            return ['Station data is currently missing', null, null, urlCoverArt, true];
+            return ['Station data is currently missing', null, null, urlCoverArt, '', '',  true];
         }
 
         // Apply replaceSpecialCharacters before returning
@@ -631,63 +634,106 @@ class RadioPlayer {
 
         // If the album is labeled as "single," set the album to the song title
         if (/single/i.exec(album) || (album.toLowerCase().includes('single'))) {
-            return [song, artist, song, albumArt, updated];
+            return [song, artist, song, albumArt, spinUpdated, '', false];
         }
 
         // If albumArt is empty, assign the fallback URL
         albumArt = albumArt || urlCoverArt;
 
-        return [song, artist, album, albumArt, updated];
+        return [song, artist, album, albumArt, spinUpdated, '', false];
     }
 
-    getLfmMeta(currentSong, currentArtist, currentAlbum) {
+    getLfmMeta(currentSong, currentArtist, currentAlbum, currentArt, currentListeners, currentPlaycount, queryType) {
         return new Promise((resolve, reject) => {
             if (currentSong !== '' && currentArtist !== '') {
                 let lfmMethod = '';
                 let lfmQueryField = '';
-                let lfmDataField = '';
+                let queryDataField = '';
+                let queryUrl;
+
 
                 if (currentAlbum) {
                     lfmMethod = 'album.getInfo';
                     lfmQueryField = 'album';
-                    lfmDataField = currentAlbum;
-                } else {
+                    queryDataField = currentAlbum;
+                } else if (queryType == 'artist') {
+                    lfmMethod = 'artist.search';
+                    lfmQueryField = 'artist';
+                } else if ((queryType == 'song') || (queryType == 'musicbrainz') || (queryType == false)) {
                     lfmMethod = 'track.getInfo';
                     lfmQueryField = 'track';
-                    lfmDataField = currentSong;
+                    queryDataField = currentSong;
                 }
 
-                const lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(this.applyFilters('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(this.applyFilters(lfmQueryField, lfmDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
 
-                fetch(lfmQueryUrl)
+                if (queryType == 'musicbrainz') {
+                    queryUrl = `https://musicbrainz.org/ws/2/release?fmt=json&query=title:+"${encodeURIComponent(this.applyFilters('track', currentSong))}"^3%20${encodeURIComponent(currentSong)}%20artistname:+"${encodeURIComponent(this.applyFilters('artist', currentArtist))}"^4${encodeURIComponent(this.applyFilters('artist', currentArtist))}`;
+                } else if (queryType == 'artist') {
+                    queryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(this.applyFilters('artist', currentArtist))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
+                } else {
+                    queryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(this.applyFilters('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(this.applyFilters(lfmQueryField, queryDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
+                }
+
+                fetch(queryUrl)
                     .then(response => response.json())
-                    .then(lfmData => {
-                        let lfmArt = '';
-                        let lfmAlbum = '';
-                        let lfmSong = '';
-                        let lfmArtist = '';
+                    .then(queryData => {
+                        let lfmArt, lfmAlbum, lfmSong, lfmArtist, mbArtist;
                         let lfmListeners = null;
                         let lfmPlaycount = null;
 
-                        if (lfmData.error !== 6) {
+                        if (queryData.error !== 6) {
                             if (currentAlbum) {
-                                lfmArt = lfmData.album?.image[3]["#text"] || urlCoverArt;
-                                lfmAlbum = this.applyFilters('album', lfmData.album?.name) || currentAlbum || '';
+                                lfmArt = queryData.album?.image[3]["#text"] || urlCoverArt;
+                                lfmAlbum = this.applyFilters('album', queryData.album?.name) || currentAlbum || '';
                                 lfmSong = currentSong || 'No streaming data currently available';
-                                lfmArtist = this.applyFilters('artist', lfmData.album?.artist) || currentArtist || '';
-                                lfmListeners = lfmData.album.listeners || null;
-                                lfmPlaycount = lfmData.album.playcount || null;
-                            } else {
-                                lfmArt = lfmData.track?.album?.image[3]["#text"] || urlCoverArt;
-                                lfmAlbum = this.applyFilters('album', lfmData.track?.album?.title) || currentAlbum || '';
-                                lfmSong = this.applyFilters('track', lfmData.track?.name) || currentSong || 'No streaming data currently available';
-                                lfmArtist = this.applyFilters('artist', lfmData.track?.artist?.name) || currentArtist || '';
-                                lfmListeners = lfmData.track.listeners || null;
-                                lfmPlaycount = lfmData.track.playcount || null;
+                                lfmArtist = this.applyFilters('artist', queryData.album?.artist) || currentArtist || '';
+                                lfmListeners = queryData.album?.listeners || null;
+                                lfmPlaycount = queryData.album?.playcount || null;
+                            } else if ((queryType == 'song') || (queryType == false)) {
+                                lfmArt = queryData.track.album?.image[3]["#text"] || urlCoverArt;
+                                lfmAlbum = this.applyFilters('album', queryData.track?.album?.title) || currentAlbum || '';
+                                lfmSong = this.applyFilters('track', queryData.track?.name) || currentSong || 'No streaming data currently available';
+                                lfmArtist = this.applyFilters('artist', queryData.track?.artist?.name) || currentArtist || '';
+                                lfmListeners = queryData.track?.listeners || null;
+                                lfmPlaycount = queryData.track?.playcount || null;
+
+                               if (queryData.track.album?.mbid && (lfmArt == urlCoverArt)) {
+                                    lfmArt = `https://coverartarchive.org/release/${queryData.track.album?.mbid}/front-500`;
+                                }
+                            } else if (queryType == 'artist') {
+                                lfmArtist = this.applyFilters('artist', queryData.results.artistmatches.artist[0]?.name) || currentArtist || '';
+                                if (lfmArtist != currentArtist) {
+                                    // restart the query with a better artist
+                                    this.getLfmMeta(currentSong, lfmArtist, currentAlbum || '', '', '', '', 'artist').then(resolve).catch(reject);
+                                    return;
+                                } else {
+                                    lfmArt = urlCoverArt;
+                                    lfmAlbum = this.applyFilters('album', currentAlbum) || '';
+                                    lfmSong = this.applyFilters('track', currentSong) || 'No streaming data currently available';
+                                    lfmArtist = this.applyFilters('track', currentArtist) || '';
+                                    lfmListeners = null;
+                                    lfmPlaycount = null;
+                                }
+                            } else if (queryType == 'musicbrainz') {
+                                mbArtist = queryData.releases[0]['artist-credit'][0]?.name;
+
+                                if (mbArtist.includes(currentArtist)) {
+                                    lfmArt = `https://coverartarchive.org/release/${queryData.releases[0]?.id}/front-500`;
+                                }
+
+                                lfmAlbum = this.applyFilters('album', currentAlbum) || '';
+                                lfmSong = this.applyFilters('track', currentSong) || 'No streaming data currently available';
+                                lfmArtist = this.applyFilters('track', currentArtist) || '';
+                                lfmListeners = currentListeners || null;
+                                lfmPlaycount = currentPlaycount || null;
                             }
+                        } else if (queryData.error == 6) {
+                            // Search for artist name and see if last.fm has something better
+                            this.getLfmMeta(currentSong, currentArtist, '', '', '', '', 'artist').then(resolve).catch(reject);
+                            return;
                         } else if (lfmMethod === 'album.getInfo') {
                             // Retry with track.getInfo if album.getInfo fails
-                            this.getLfmMeta(currentSong, currentArtist, '').then(resolve).catch(reject);
+                            this.getLfmMeta(currentSong, currentArtist, '', '', '', '', 'song').then(resolve).catch(reject);
                             return;
                         } else {
                             lfmArt = urlCoverArt;
@@ -698,12 +744,27 @@ class RadioPlayer {
                             lfmPlaycount = null;
                         }
 
+
+                        if (currentArt && currentArt != urlCoverArt) {
+                            lfmArt = currentArt;
+                        }
+
+                        // If there is no album after all the checks, set the album to the song title
+                        if ((lfmArt == urlCoverArt) && !queryType) {
+                            // Check MusicBrainz if there still isn't an album cover
+                            this.getLfmMeta(currentSong, currentArtist, '', '', lfmListeners, lfmPlaycount, 'musicbrainz').then(resolve).catch(reject);
+                            return;
+                        } else if (!lfmArt && (queryType == 'musicbrainz')) {
+                            lfmArt = urlCoverArt;
+                        }
+
                         // If there is no album after all the checks, set the album to the song title
                         if (lfmSong && !lfmAlbum) {
                             lfmAlbum = lfmSong;
                         }
 
-                        resolve([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount]);
+                        resolve([lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount, queryType]);
+
                     })
                     .catch(error => {
                         console.error("Error fetching Last.fm metadata:", error);
@@ -714,6 +775,25 @@ class RadioPlayer {
             }
         });
     }
+
+    checkUrlValidity(url) {
+        return new Promise((resolve, reject) => {
+            fetch(url)
+                .then(response => {
+                    console.log('URL validation response for', url, response.status); // Debug the response status
+                    if (response.ok) {
+                        resolve(true); // URL is valid
+                    } else {
+                        resolve(false); // URL is not valid
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching URL:', url, error);
+                    resolve(false); // Consider URL invalid if fetch fails
+                });
+        });
+    }
+
 
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
@@ -752,13 +832,11 @@ class RadioPlayer {
                                 const doc = parser.parseFromString(htmlContent, 'text/html');
                                 data = this.extractDataFromHTML(doc);
                             } else if (contentType.includes('text/html') && this.currentStationData[this.stationName].phpString) {
-
-                                console.log('data', data);
                                 data = data;
                             }
 
                         // Compare the current data response with the previous one
-                        if (this.isDataSameAsPrevious(data) && !this.song.includes("currently loading")) {
+                        if (this.isDataSameAsPrevious(data)) {
                             // Data response is the same as the previous one, no need to process further
                             return;
                         }
@@ -794,12 +872,12 @@ class RadioPlayer {
         const artist = replaceEnDashWithEmDash(doc.querySelector('span.artist')?.textContent.trim() || '');
         const album = replaceEnDashWithEmDash(doc.querySelector('span.release')?.textContent.trim() || '');
         const albumArt = doc.querySelector('img')?.src || '';
-        const updated = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
+        const spinUpdated = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
 
-       // console.log(`${song} - ${artist} - ${album} - ${albumArt}`);
+       // console.log(`${song} - ${artist} - ${album} - ${albumArt} - ${spinUpdated}`);
 
         // Return the extracted data in the format expected by processData
-        return {song, artist, album, albumArt, updated};
+        return {song, artist, album, albumArt, spinUpdated};
     }
 
    // Function to compare the current data response with the previous one
@@ -825,79 +903,84 @@ class RadioPlayer {
       );
     }                               
 
-    processData(data) {
-        // Check if data and stationName are available
-        if (data && this.stationName) {
-            const extractedData = this.extractSongAndArtist(data, this.stationName);
+ processData(data) {
+    if (data && this.stationName) {
+        const extractedData = this.extractSongAndArtist(data, this.stationName);
 
-            // Ensure extractedData is valid and handle cases where no song or artist is found
-            if (!extractedData || extractedData.length === 0) {
-                const page = new Page(this.stationName, this);
-                page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true, this.currentStationData], true);
-                return;
-            }
+        // Ensure extractedData is valid and handle cases where no song or artist is found
+        if (!extractedData || extractedData.length === 0) {
+            const page = new Page(this.stationName, this);
+            page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true, this.currentStationData], true);
+            return;
+        }
 
-            this.hasLoadedData = true;
-            const [song, artist, album, albumArt, updated] = extractedData;
+        this.hasLoadedData = true;
+        const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;
 
-            // Predefined values
-            const timezone = this.currentStationData[this.stationName].timezone;
-            let timestamp;
+        // Predefined values
+        const timezone = this.currentStationData[this.stationName].timezone;
+        let timestamp;
 
+        if ([this.stationName] == 'indie1023') {
+            timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
+            console.log('102.3 timestamp', timestamp);
+        } else {
+            timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+        }
+
+        if (this.currentStationData[this.stationName].altPath && !song) {
             if ([this.stationName] == 'indie1023') {
-                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
+                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[2])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[3])}`;
                 console.log('102.3 timestamp', timestamp);
             } else {
-                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
-            }
-
-            if (this.currentStationData[this.stationName].altPath && !song) {
-                if ([this.stationName] == 'indie1023') {
-                    timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[2])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[3])}`;
-                    console.log('102.3 timestamp', timestamp);
-                } else {
-                    timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
-                }
-            }
-
-            // Format and check stale data in a separate function
-            const { staleData } = this.checkStaleData(timezone, timestamp, updated);
-
-            // Handle stale data or invalid song
-            if (song === 'No streaming data currently available' || staleData) {
-                const page = new Page(this.stationName, this);
-                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData], this.errorMessage);
-                return;
-            }
-
-            // Handle last.fm metadata
-            if (!this.lfmMetaChanged || song.toLowerCase() !== this.song.toLowerCase()) {
-                this.getLfmMeta(song, artist, album).then(lfmValues => {
-                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
-
-                    this.song = lfmSong;
-                    this.artist = lfmArtist;
-                    this.album = lfmAlbum;
-                    this.artworkUrl = lfmArt === urlCoverArt ? this.upsizeImgUrl(albumArt) || urlCoverArt : this.upsizeImgUrl(lfmArt);
-                    this.listeners = lfmListeners;
-                    this.playcount = lfmPlaycount;
-                    
-                    this.lfmMetaChanged = true;
-                    
-                    const page = new Page(this.stationName, this);
-                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
-                }).catch(error => {
-                    console.error('Error processing data:', error);
-                });
+                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
             }
         }
-    }
 
-    checkStaleData(timezone, timestamp, updated) {
+        // Format and check stale data in a separate function
+        const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated);
+
+        // Handle stale data or invalid song
+        if (song === 'No streaming data currently available' || staleData || errorMsg) {
+            const page = new Page(this.stationName, this);
+            page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData], this.errorMessage);
+            return;
+        }
+
+        // Validate the album art URL asynchronously
+        const albumArtPromise = this.checkUrlValidity(albumArt).then(isValid => isValid ? albumArt : urlCoverArt);
+
+        // Handle last.fm metadata and validated album art asynchronously
+        Promise.all([
+            albumArtPromise, 
+            this.getLfmMeta(song, artist, album, albumArt, '', '', false)
+        ]).then(([validatedAlbumArt, lfmValues]) => {
+            const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
+
+            // Set the metadata and artwork, using validatedAlbumArt
+            this.song = lfmSong;
+            this.artist = lfmArtist;
+            this.album = lfmAlbum;
+            this.artworkUrl = lfmArt === urlCoverArt ? this.upsizeImgUrl(validatedAlbumArt) || urlCoverArt : this.upsizeImgUrl(lfmArt);
+            this.listeners = lfmListeners;
+            this.playcount = lfmPlaycount;
+
+            this.lfmMetaChanged = true;
+
+            const page = new Page(this.stationName, this);
+            page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
+        }).catch(error => {
+            console.error('Error processing data:', error);
+        });
+    }
+}
+
+
+    checkStaleData(timezone, timestamp, spinUpdated) {
 
         let staleData = '';
 
-        if (!timezone && !timestamp && !updated || timestamp === undefined) {
+        if ((!timezone && !timestamp && !spinUpdated) || (!timestamp && spinUpdated == true) || (timestamp === undefined && !this.currentStationData[this.stationName].spinPath)) {
             return staleData;
         }
 
@@ -921,7 +1004,7 @@ class RadioPlayer {
         }
 
         // Handle timestamp conversion and formatting
-        const { apiUpdatedTime } = this.formatTimeInTimezone(timezone, timestamp, updated);
+        const { apiUpdatedTime } = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
         console.log('apiUpdatedTime', apiUpdatedTime);
         apiUpdatedData = new Date(apiUpdatedTime).toISOString();
 
@@ -973,8 +1056,12 @@ class RadioPlayer {
         return timestamp;
     }
 
-    formatTimeInTimezone(timezone, timestamp, updated) {
+
+    formatTimeInTimezone(timezone, timestamp, spinUpdated) {
         let apiUpdatedTime = '';
+
+
+        console.log('timestamp', timestamp, 'spinUpdated', spinUpdated);
 
         // Function to convert '6:33 PM' format to '18:33'
         const convertTo24HourFormat = (time12h) => {
@@ -1006,9 +1093,9 @@ class RadioPlayer {
             timeZoneName: 'short',
         }).split(' ').pop(); // This isolates the 'CDT', 'EDT', etc.
 
-        // If there's an updated time provided, convert to 24-hour format and append to the date
-        if (updated) {
-            const updated24Hour = convertTo24HourFormat(updated); // Convert updated time
+        // If there's an spinUpdated time provided, convert to 24-hour format and append to the date
+        if (spinUpdated && (spinUpdated != true)) {
+            const updated24Hour = convertTo24HourFormat(spinUpdated); // Convert updated time
             apiUpdatedTime = `${currentDatePart} ${updated24Hour} ${currentTimezonePart}`; // Append to the formatted date
         }
 
