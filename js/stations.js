@@ -200,6 +200,9 @@ const stations = {
   socalsound: {
     stationName: "The SoCal Sound",
   },
+  soma80sunderground: {
+    stationName: "SomaFM 80s Underground",
+  },
   somaindiepop: {
     stationName: "SomaFM Indie Pop Rocks!",
   },
