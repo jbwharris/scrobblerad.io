@@ -1,4 +1,7 @@
 const stations = {
+  absoluteradio: {
+    stationName: "Absolute Radio",
+  },
   altradio: {
     stationName: "AltRadio",
   },
@@ -268,6 +271,9 @@ const stations = {
   },
   wnxp: {
     stationName: "WNXP",
+  },
+  worldwidefm: {
+    stationName: "Worldwide FM",
   },
   wpkn: {
     stationName: "WPKN",
