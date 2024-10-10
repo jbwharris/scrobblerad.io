@@ -782,6 +782,7 @@ class RadioPlayer {
                 .then(response => {
                     console.log('URL validation response for', url, response.status); // Debug the response status
                     if (response.ok) {
+                        console.log('does the code get here?', url);
                         resolve(true); // URL is valid
                     } else {
                         resolve(false); // URL is not valid
@@ -793,7 +794,6 @@ class RadioPlayer {
                 });
         });
     }
-
 
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
@@ -948,33 +948,44 @@ class RadioPlayer {
             return;
         }
 
-        // Handle last.fm metadata
+        // Ensure this code doesn't run unless there's new data to process
         if (!this.lfmMetaChanged || (song.toLowerCase() !== this.song.toLowerCase())) {
-            // Start validating the URL asynchronously
-            const albumArtPromise = this.checkUrlValidity(albumArt).then(isValid => isValid ? albumArt : urlCoverArt);
+            
+            // First, get the metadata from last.fm
+            this.getLfmMeta(song, artist, album, albumArt, '', '', false).then(lfmValues => {
+                const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
 
-            albumArtPromise.then(validatedArt => {
-                this.getLfmMeta(song, artist, album, validatedArt, '', '', false).then(lfmValues => {
-                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
+                this.song = lfmSong;
+                this.artist = lfmArtist;
+                this.album = lfmAlbum;
 
-                    this.song = lfmSong;
-                    this.artist = lfmArtist;
-                    this.album = lfmAlbum;
-                    this.artworkUrl = lfmArt === urlCoverArt ? this.upsizeImgUrl(validatedArt) || urlCoverArt : this.upsizeImgUrl(lfmArt);
+                // Validate the album art only after getting lfmArt
+                const artworkToValidate = lfmArt === urlCoverArt ? albumArt : lfmArt;
+
+                // Start validating the album art URL asynchronously
+                this.checkUrlValidity(artworkToValidate).then(isValid => {
+                    const validatedArt = isValid ? artworkToValidate : urlCoverArt;
+
+                    // Upsize the validated album art if needed
+                    this.artworkUrl = this.upsizeImgUrl(validatedArt) || urlCoverArt;
                     this.listeners = lfmListeners;
                     this.playcount = lfmPlaycount;
 
+                    // Mark metadata as changed
                     this.lfmMetaChanged = true;
 
+                    // Refresh the page with updated data
                     const page = new Page(this.stationName, this);
                     page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
                 }).catch(error => {
-                    console.error('Error processing data:', error);
+                    console.error('Error during album art validation:', error);
                 });
+
             }).catch(error => {
-                console.error('Error during album art validation:', error);
+                console.error('Error processing data:', error);
             });
         }
+
     }
 }
 
