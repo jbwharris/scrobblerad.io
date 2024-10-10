@@ -183,7 +183,10 @@ const stations = {
   },
   radiolaurier: {
     stationName: "Radio Laurier",
-  }, 
+  },
+  radionovanuit: {
+    stationName: "Radio Nova - La Nuit",
+  },
   radioparadiseglobal: {
     stationName: "Radio Paradise Global Mix",
   },
