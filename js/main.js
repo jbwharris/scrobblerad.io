@@ -205,6 +205,7 @@ class Page {
     }
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
+
         let albumDisplay = '';
         if (errorMessage) {
             albumDisplay = '';
@@ -456,7 +457,7 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            page.setupMediaSession(`${this.currentStationData[stationName].stationName} currently loading`, '', urlCoverArt, true);
+            page.setupMediaSession(`${this.currentStationData[stationName].stationName} currently loading`, '', urlCoverArt, false);
 
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
@@ -782,7 +783,6 @@ class RadioPlayer {
                 .then(response => {
                     console.log('URL validation response for', url, response.status); // Debug the response status
                     if (response.ok) {
-                        console.log('does the code get here?', url);
                         resolve(true); // URL is valid
                     } else {
                         resolve(false); // URL is not valid
@@ -944,7 +944,7 @@ class RadioPlayer {
         // Handle stale data or invalid song
         if (song === 'No streaming data currently available' || staleData || errorMsg) {
             const page = new Page(this.stationName, this);
-            page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData], this.errorMessage);
+            page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
             return;
         }
 
