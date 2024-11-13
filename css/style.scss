@@ -697,18 +697,6 @@ input[type="checkbox"]:checked~.menuIconToggle {
    #webamp #albumArt {
       max-width: 75vw;
    }
-
-   .metainfo p {
-      -webkit-line-clamp: 1;
-   }
-
-}
-
-@media screen and (max-width:430px) and (max-height:932px) {
-   .metainfo p {
-      -webkit-line-clamp: 1;
-   }
-
 }
 
 
