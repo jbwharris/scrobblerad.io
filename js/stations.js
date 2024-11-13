@@ -230,6 +230,9 @@ const stations = {
   triplejunearthed: {
     stationName: "Triple J Unearthed",
   },
+  uncertainfm: {
+    stationName: "UncertainFM",
+  },
   wber: {
     stationName: "WBER",
   },
@@ -244,6 +247,12 @@ const stations = {
   },
   wers: {
     stationName: "WERS",
+  },
+  wext: {
+    stationName: "WEXT",
+    tags: [
+      "AAA", "NPR", "United States", "New York"
+    ],
   },
   wfmu: {
     stationName: "WFMU",
