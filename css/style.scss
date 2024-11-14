@@ -305,8 +305,6 @@ body {
 
    .metainfo p {
       overflow: hidden;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
       width: 100%;
       display: block;
       margin-bottom: .5rem;
@@ -476,7 +474,6 @@ body {
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   text-wrap: balance;
 
    >* {
       min-height: 1.5rem;
