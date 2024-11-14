@@ -531,6 +531,7 @@ class RadioPlayer {
                 .replace(/\s-\s.*edit.*$/i, '')         // Removes " - Radio Edit" or similar
                 .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
                 .replace(/\s*-\s*\d{4}\s*Remastered.*/i, '') // Removes " - 2001 Remastered" or similar
+                .replace(/\s*-\s*Remastered.*/i, '') // Removes " - 2001 Remastered" or similar
                 .trim();
         };
 
@@ -811,33 +812,48 @@ class RadioPlayer {
                 fetch(stationUrl, fetchOptions)
                     .then((response) => {
                         const contentType = response.headers.get('content-type');
-                        if (contentType.includes('application/json') || contentType.includes('application/vnd.api+json' || this.currentStationData[this.stationName].phpString )) {
+                        
+                        // Check if contentType exists before calling includes
+                        if (contentType && (contentType.includes('application/json') || 
+                            contentType.includes('application/vnd.api+json') || 
+                            this.currentStationData[this.stationName].phpString)) {
+                            
                             return response.json().then((data) => ({ data, contentType }));
-                        } else if (contentType.includes('text/html') || contentType.includes('application/javascript')) {
+                            
+                        } else if (contentType && (contentType.includes('text/html') || 
+                            contentType.includes('application/javascript'))) {
+                            
                             return response.text().then((data) => ({ data, contentType }));
+                            
                         } else {
-                            throw new Error(`Unsupported content type: ${contentType}`);
+                            throw new Error(`Unsupported content type or missing content-type header: ${contentType}`);
                         }
                     })
                     .then(({ data, contentType }) => {
-                            if (contentType.includes('text/html') && !this.currentStationData[this.stationName].phpString) {
-                                // Parse the HTML response
-                                const parser = new DOMParser();
-                                const doc = parser.parseFromString(data, 'text/html');
-                                data = this.extractDataFromHTML(doc);
-                            } else if (contentType.includes('application/javascript')) {
-                                // Extract the HTML content from the JavaScript response
-                                const htmlContent = this.extractHTMLFromJS(data);
-                                const parser = new DOMParser();
-                                const doc = parser.parseFromString(htmlContent, 'text/html');
-                                data = this.extractDataFromHTML(doc);
-                            } else if (contentType.includes('text/html') && this.currentStationData[this.stationName].phpString) {
-                                data = data;
-                            }
+                        if (contentType && contentType.includes('text/html') && 
+                            !this.currentStationData[this.stationName].phpString) {
+                            
+                            // Parse the HTML response
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(data, 'text/html');
+                            data = this.extractDataFromHTML(doc);
+                            
+                        } else if (contentType && contentType.includes('application/javascript')) {
+                            
+                            // Extract the HTML content from the JavaScript response
+                            const htmlContent = this.extractHTMLFromJS(data);
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(htmlContent, 'text/html');
+                            data = this.extractDataFromHTML(doc);
+                            
+                        } else if (contentType && contentType.includes('text/html') && 
+                                   this.currentStationData[this.stationName].phpString) {
+                            
+                            data = data;
+                        }
 
                         // Compare the current data response with the previous one
                         if (this.isDataSameAsPrevious(data)) {
-                            // Data response is the same as the previous one, no need to process further
                             return;
                         }
 
@@ -853,6 +869,7 @@ class RadioPlayer {
             }
         }
     }
+
 
     // Helper function to extract HTML content from a JavaScript response
     extractHTMLFromJS(js) {
@@ -927,6 +944,9 @@ class RadioPlayer {
             console.log('102.3 timestamp', timestamp);
         } else {
             timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+            if (timestamp == 0 || timestamp == '') {
+                timestamp = undefined;
+            }
         }
 
         if (this.currentStationData[this.stationName].altPath && !song) {
