@@ -10,6 +10,6 @@ const stationData = {
     apiUrl: "https://api.live365.com/station/a23389",
     timestamp: "current-track.start",
     timezone: "America/New_York",
-    filter: ["Uncertain", "Take Care of Yourselves Please", "Cover Lover"],
+    filter: ["Uncertain", "Take Care of Yourselves Please", "Cover Lover", "(BREAK)", "Playing at Shadows"],
   }
 };
