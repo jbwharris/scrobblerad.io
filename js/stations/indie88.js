@@ -9,6 +9,5 @@ const stationData = {
     timestamp: "updated",
     timezone: "America/Toronto",
     orbPath: true,
-    flipMeta: true,
   }
 };
