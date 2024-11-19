@@ -305,6 +305,9 @@ const stations = {
   wyomingsounds: {
     stationName: "Wyoming Sounds",
   },
+  wzbc: {
+    stationName: "WZBC",
+  },  
   xpn: {
     stationName: "XPN",
   },
