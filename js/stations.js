@@ -141,6 +141,9 @@ const stations = {
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
   },
+  kpiss: {
+    stationName: "KPISS",
+  },
   krsm: {
     stationName: "KRSM",
   },
@@ -164,6 +167,12 @@ const stations = {
   },
   midtownradio: {
     stationName: "Midtown Radio",
+  },
+  tmm1: {
+    stationName: "The Music Machine 1",
+  },
+  tmm2: {
+    stationName: "The Music Machine 2",
   },
   newsounds: {
     stationName: "New Sounds",
@@ -209,17 +218,14 @@ const stations = {
   soma80sunderground: {
     stationName: "SomaFM 80s Underground",
   },
+  somafolkfwd: {
+    stationName: "SomaFM Folk Forward",
+  },
   somaindiepop: {
     stationName: "SomaFM Indie Pop Rocks!",
   },
   soniccoast: {
     stationName: "The Sonic Coast",
-  },
-  tmm1: {
-    stationName: "The Music Machine 1",
-  },
-  tmm2: {
-    stationName: "The Music Machine 2",
   },
   thesummit: {
     stationName: "The Summit",

@@ -1,13 +1,15 @@
 const stationData = {
   ynotradio: {
     stationName: "Y-Not Radio",
-    albumArt: "iImg",
+    artist: "current-track.artist",
+    song: "current-track.title",
+    albumArt: "current-track.art",
     location: "Philiadelphia, PA 🇺🇸",
     webUrl: "https://www.ynotradio.net/",
     streamUrl: "https://streaming.live365.com/a54553",
-    apiUrl: "https://scraper2.onlineradiobox.com/us.iradiophillynot?l=0",
-    timestamp: "updated",
+    apiUrl: "https://api.live365.com/station/a54553",
+    timestamp: "current-track.end",
     timezone: "America/New_York",
-    orbPath: true,
+    isFuture: true,
   }
 };
