@@ -782,7 +782,7 @@ class RadioPlayer {
         return new Promise((resolve, reject) => {
             fetch(url)
                 .then(response => {
-                    console.log('URL validation response for', url, response.status); // Debug the response status
+                 //   console.log('URL validation response for', url, response.status); // Debug the response status
                     if (response.ok) {
                         resolve(true); // URL is valid
                     } else {
@@ -903,7 +903,6 @@ class RadioPlayer {
         return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
     }
 
-
     changeTimeZone(date, timeZone) {
       if (typeof date === 'string') {
         return new Date(
@@ -920,98 +919,106 @@ class RadioPlayer {
       );
     }                               
 
- processData(data) {
-    // Check if data and stationName are available
-    if (data && this.stationName) {
-        const extractedData = this.extractSongAndArtist(data, this.stationName);
+     processData(data) {
+        // Check if data and stationName are available
+        if (data && this.stationName) {
+            const extractedData = this.extractSongAndArtist(data, this.stationName);
 
-        // Ensure extractedData is valid and handle cases where no song or artist is found
-        if (!extractedData || extractedData.length === 0) {
-            const page = new Page(this.stationName, this);
-            page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true, this.currentStationData], true);
-            return;
-        }
-
-        this.hasLoadedData = true;
-        const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;
-
-        // Predefined values
-        const timezone = this.currentStationData[this.stationName].timezone;
-        let timestamp;
-
-        if ([this.stationName] == 'indie1023') {
-            timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
-            console.log('102.3 timestamp', timestamp);
-        } else {
-            timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
-            if (timestamp == 0 || timestamp == '') {
-                timestamp = undefined;
+            // Ensure extractedData is valid and handle cases where no song or artist is found
+            if (!extractedData || extractedData.length === 0) {
+                const page = new Page(this.stationName, this);
+                page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true, this.currentStationData], true);
+                return;
             }
-        }
 
-        if (this.currentStationData[this.stationName].altPath && !song) {
+            this.hasLoadedData = true;
+            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;
+
+            // Predefined values
+            const timezone = this.currentStationData[this.stationName].timezone;
+            let timestamp;
+
             if ([this.stationName] == 'indie1023') {
-                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[2])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[3])}`;
+                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
                 console.log('102.3 timestamp', timestamp);
             } else {
-                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
+                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+                if (timestamp == 0 || timestamp == '') {
+                    timestamp = undefined;
+                }
             }
-        }
 
-        // Format and check stale data in a separate function
-        const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated);
+            if (this.currentStationData[this.stationName].altPath && !song) {
+                if ([this.stationName] == 'indie1023') {
+                    timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[2])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[3])}`;
+                    console.log('102.3 timestamp', timestamp);
+                } else {
+                    timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
+                }
+            }
 
-        // Handle stale data or invalid song
-        if (song === 'No streaming data currently available' || staleData || errorMsg) {
-            const page = new Page(this.stationName, this);
-            page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
-            return;
-        }
+            // Format and check stale data in a separate function
+            const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated, this.getPath(data, this.currentStationData[this.stationName].duration));
 
-        // Ensure this code doesn't run unless there's new data to process
-        if (!this.lfmMetaChanged || (song.toLowerCase() !== this.song.toLowerCase())) {
-            
-            // First, get the metadata from last.fm
-            this.getLfmMeta(song, artist, album, albumArt, '', '', false).then(lfmValues => {
-                const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
+            console.log("staleData", staleData, this.song, "this.song", song, "song");
 
-                this.song = lfmSong;
-                this.artist = lfmArtist;
-                this.album = lfmAlbum;
+            if ((staleData === "Live365 past") && (this.song)) {
+                if (song.toLowerCase() !== this.song.toLowerCase()) {
+                    return;   
+                }
+            }
 
-                // Validate the album art only after getting lfmArt
-                const artworkToValidate = lfmArt === urlCoverArt ? albumArt : lfmArt;
+            // Handle stale data or invalid song
+            if ((staleData && staleData !== "Live365 past" ) || song === 'No streaming data currently available' || errorMsg) {
+                const page = new Page(this.stationName, this);
+                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
+                return;
+            }
 
-                // Start validating the album art URL asynchronously
-                this.checkUrlValidity(artworkToValidate).then(isValid => {
-                    const validatedArt = isValid ? artworkToValidate : urlCoverArt;
+            // Ensure this code doesn't run unless there's new data to process
+            if (!this.lfmMetaChanged || (song.toLowerCase() !== this.song.toLowerCase())) {
+                
+                // First, get the metadata from last.fm
+                this.getLfmMeta(song, artist, album, albumArt, '', '', false).then(lfmValues => {
+                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
 
-                    // Upsize the validated album art if needed
-                    this.artworkUrl = this.upsizeImgUrl(validatedArt) || urlCoverArt;
-                    this.listeners = lfmListeners;
-                    this.playcount = lfmPlaycount;
+                    this.song = lfmSong;
+                    this.artist = lfmArtist;
+                    this.album = lfmAlbum;
 
-                    // Mark metadata as changed
-                    this.lfmMetaChanged = true;
+                    // Validate the album art only after getting lfmArt
+                    const artworkToValidate = lfmArt === urlCoverArt ? albumArt : lfmArt;
 
-                    // Refresh the page with updated data
-                    const page = new Page(this.stationName, this);
-                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
+                    // Start validating the album art URL asynchronously
+                    this.checkUrlValidity(artworkToValidate).then(isValid => {
+                        const validatedArt = isValid ? artworkToValidate : urlCoverArt;
+
+                        // Upsize the validated album art if needed
+                        this.artworkUrl = this.upsizeImgUrl(validatedArt) || urlCoverArt;
+                        this.listeners = lfmListeners;
+                        this.playcount = lfmPlaycount;
+
+                        // Mark metadata as changed
+                        this.lfmMetaChanged = true;
+
+                        // Refresh the page with updated data
+                        const page = new Page(this.stationName, this);
+                        page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
+                    }).catch(error => {
+                        console.error('Error during album art validation:', error);
+                    });
+
                 }).catch(error => {
-                    console.error('Error during album art validation:', error);
+                    console.error('Error processing data:', error);
                 });
+            }
 
-            }).catch(error => {
-                console.error('Error processing data:', error);
-            });
         }
-
     }
-}
 
 
 
-    checkStaleData(timezone, timestamp, spinUpdated) {
+    checkStaleData(timezone, timestamp, spinUpdated, duration) {
 
         let staleData = '';
 
@@ -1051,6 +1058,19 @@ class RadioPlayer {
         // Calculate time difference
         const timeDifference = timezoneTime - apiUpdatedData;
         console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
+
+        // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
+
+        console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 10000, "=", apiUpdatedData + (duration * 1000));
+
+        if (this.currentStationData[this.stationName].isFuture && (((duration * 1000) + apiUpdatedData) < Date.now())) {
+            if (((duration * 1000) + apiUpdatedData) > Date.now()) {
+                console.log('song end is still in the future');
+            }
+
+            console.log('song data ends in the past');
+            staleData = "Live365 past";
+        }
 
         // Check if the data is stale (older than 15 minutes)
         if (timeDifference > 900000 && apiUpdatedTime !== "") {
