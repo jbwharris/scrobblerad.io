@@ -213,6 +213,8 @@ class Page {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
 
+        console.log('song', song, 'artist', artist);
+
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: song,
@@ -225,9 +227,10 @@ class Page {
 
 
             // Update document title
-            if (!artist && !errorMessage || (!song && !artist)) {
+            if (!song && !artist || artist == 'currently loading') {
+                document.title = '';
                 return;
-            } else if ((song && artist) || !errorMessage) {
+            } else if (song && artist || !errorMessage) {
                 document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
             }
 
@@ -455,7 +458,7 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            page.setupMediaSession(`${this.currentStationData[stationName].stationName}`, 'currently loading', urlCoverArt, false);
+            page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
 
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
