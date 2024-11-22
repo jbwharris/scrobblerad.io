@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>ScrobbleRadio | scrobble awesome radio</title>
+  <!-- Matomo Tag Manager -->
+  <script>
+    var _mtm = window._mtm = window._mtm || [];
+    _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+    (function() {
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.async=true; g.src='https://slideaway.ca/matomo/js/container_z6jWItoN.js'; s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <!-- End Matomo Tag Manager -->
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="icon" href="img/icons/icon.svg" />
+
+  <!-- pwa support -->
+  <link rel="manifest" href="manifest.json" />
+  <!-- ios support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar" content="black-translucent" />
+  <!-- The page color schemes -->
+  <meta name="color-scheme" content="light dark">
+  <!-- Optional Meta Theme Color is also supported on Safari and Chrome -->
+  <meta name="theme-color" content="#eeeeee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+
+  <meta property="og:title" content="scrobblerad.io - Awesome radio, everyday!">
+  <meta property="og:site_name" content="scrobblerad.io">
+  <meta property="og:url" content="https://scrobblerad.io">
+  <meta property="og:description" content="scrobblerad.io is a curated list of radio stations that play great music. Independent stations that play new, interesting and bold music without the constraints of tiny corporate radio playlists. If you love music discovery and finding the next great jam, scrobblerad.io is for you.">
+  <meta property="og:type" content="music.radio_station">
+  <meta property="og:image" content="https://scrobblerad.io/img/social-thumb.png">
+  <!-- Bootstrap CSS v5.0.2 -->
+  <link rel="stylesheet" href="css/external/bootstrap.min.css">
+  <link rel="stylesheet" href="css/iconfont.css">
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body class="d-flex flex-column" ontouchstart="" data-bs-theme="dark">
+  <div class="container-fluid" id="player">
+    <div class="row">
+      <main class="flex-shrink-0 col">
+        <div class="container-fluid px-0" id="metadata">
+          <div class="row mobile-swipe">
+            <div class="col col-xxl-2 col-md-3 align-self-end project-info panels off-canvas off-canvas-left show" id="panel1">
+
+              <h3 class="fw-bold h5 sidebar-text">ScrobbleRadio FAQ</h3>
+              <div class="accordion" id="accordionFaq">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIntro" aria-expanded="false" aria-controls="collapseIntro">
+                      What is ScrobbleRadio?
+                    </button>
+                  </h2>
+                  <div id="collapseIntro" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      ScrobbleRadio is a streaming radio player for a curated list of radio stations from around the world. There are a ton of radio streaming apps out there, but none that did so with a <a href="https://www.businessinsider.com/guides/tech/what-is-last-fm-scrobbling" target="_blank">scrobbling</a> first focus. That was the primary goal, to gather a bunch of great radio stations that have publicly accessible metadata and make an app that could scrobble the songs to <a href="https://last.fm" target="_blank">last.fm</a>, <a href="https://libre.fm" target="_blank">libre.fm</a> and <a href="https://listenbrainz.org" target="_blank">ListenBrainz</a>. For years I had struggled with finding a reliable way to scrobble radio on the go. There were many apps that allowed you to scrobble music, or listen to radio streams, but rarely both.
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMusic" aria-expanded="false" aria-controls="collapseMusic">
+                      What kinds of music are available in ScrobbleRadio?
+                    </button>
+                  </h2>
+                  <div id="collapseMusic" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      <p>ScrobbleRadio is primarily focused on Indie and the many facets of music that can branch off that genre. A lot of the stations are very freeform and can play a broad selection of music that can venture into rock, alternative, hip-hop, pop, jazz, soul, funk, country, electronic or dance from a wide span of eras. Many of the stations are public radio, college stations or listener supported organizations. If your goal is music exploration and hearing tons of different, interesting and challenging music, you've found the right place.</p>
+                      <p>Given the nature of these stations, sometimes they might be playing talk segments, or some genre you're simply not interested in. That's cool, just skip to the next station like you would with your car radio. You genuinely never know what you might hear next. </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseScrobble" aria-expanded="false" aria-controls="collapseScrobble">
+                      How do I scrobble music on this site?
+                    </button>
+                  </h2>
+                  <div id="collapseScrobble" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      ScrobbleRadio relies on <a href="https://web-scrobbler.com">Web Scrobbler</a> browsers extensions for iOS/iPadOS (Safari), and desktop browsers (Chrome, Firefox, Safari and other modern browsers) on macOS, Windows and Linux. Android scrobbling can be done by <a href="https://github.com/kawaiiDango/pano-scrobbler" target="_blank">Pano Scrobbler</a>. I considered building scrobbling functionality for the site, but relying on existing, robust scrobbling apps that support <a href="https://last.fm" target="_blank">last.fm</a>, <a href="https://libre.fm" target="_blank">libre.fm</a>, <a href="https://listenbrainz.org" target="_blank">ListenBrainz</a> and <a href="https://github.com/krateng/maloja" target="_blank">Maloja</a> just made more sense.
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseListen" aria-expanded="false" aria-controls="collapseListen">
+                      What if I don't scrobble music?
+                    </button>
+                  </h2>
+                  <div id="collapseListen" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      <p>That's totally fine. ScrobbleRadio was built with scrobbling music in mind, but it's a perfectly functional radio player if that's not your thing. The goal of this app was to reliably be able to show the metadata from streaming radio sources and try to fill in gaps in album and album art whenever possible.</p>
+                      <p>This app has been briefly tested to function on Android, but has been first and foremost been optimized to work well on macOS, iOS and iPadOS.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccuracy" aria-expanded="false" aria-controls="collapseAccuracy">
+                      My scrobble didn't match properly on last.fm, why did this happen?
+                    </button>
+                  </h2>
+                  <div id="collapseAccuracy" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      <p>ScrobbleRadio does its best to clean up the data coming from a radio station source, but it can be imperfect. Music metadata is complex and easy to get mixed up. Songs with guest vocalists and collaborations are a nightmare and given the data is coming radio stations around the world, there is little consistency. This app is a best effort to clean-up the incoming data, removing data like (2007 Remaster), (Radio Edit) or (Clean Version). It checks with the last.fm api whether there's corrections for the song and artist. But sometimes there's just things you can't account for like human error (spelling mistakes), or maybe a long song name getting truncated in the stations database.</p>
+
+                      <p>If 100% scrobble accuracy is necessary for you, there is a setting in Web Scrobbler called "Scrobble recognized or edited tracks (default)" which would only scrobble a song if it's properly identified or edited. Then there is a Cache that you can review the disallowed scrobbles and edit them manually.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                      How does Apple Carplay support work?
+                    </button>
+                  </h2>
+                  <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                    <div class="accordion-body">
+                      <p>This website can be used with Apple Carplay and pretty much anywhere else that supports the mediaSession API. While this is an web app that can be run anywhere, it does have some playback quirks when being used in a car. This app relies on the built-in Now Playing app in Carplay to show the song data. Unfortunately there doesn't seem to be anything similar for Android Auto 🤷🏼‍♂️</p>
+
+                      <ul>
+                        <li>Playback on iOS can be initiated before you start driving. Simply open the site in Safari, pick a station and playback should start and the song, artist, station name and album cover should be visible on screen.</li>
+                        <li>You can use the in-car media controls to switch between stations. Playback will continue for the current station until the new audio stream begins loading. There is an on-screen notice of what station is loading. You can skip multiple stations if you're looking for a particular station.</li>
+                        <li>If playback stops while driving due to poor mobile data coverage, the app will keep trying to load the feed. If it pauses for awhile, try skipping to the next station and back again and it should initiate a new session. As iOS only allows access to play/pause, next and previous track, unfortunately there's no way to reload a feed directly with Carplay.</li>
+                        <li>Resume playback after leaving the car and coming back seems to be hit-and-miss. If it's been a short period of time, it will sometimes just resume playing the session. Otherwise you'll just need to go into Safari and start playing music again.</li>
+                        <li><em>Be sure to obey local traffic laws and not use your phone while driving.</em></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <footer class="p-3 text-center text-md-left">
+                <p class="fs-6">Built with ❤️ in 🇨🇦<br />
+                  by <a href="https://jbwharr.is">jbwharris</a><br />
+                  <a href="https://github.com/jbwharris/scrobblerad.io" class="iconLink" target="_blank"><i class="icon-github" aria-hidden="true"></i></a></p>
+                <p class="fs-6">Monthly radio<br />
+                  discovery playlist<br />
+                  <a href="https://music.apple.com/ca/playlist/jaybeedub-mixtape/pl.u-dkelCypyBM" class="iconLink"><i class="icon-apple" aria-hidden="true"></i><span class="visually-hidden">opens Apple Music JayBeeDub Mixtape in a new tab</span></a>
+                  <a href="https://open.spotify.com/playlist/2MJuX8Lx1IyvEzSXTcUw42?go=1&sp_cid=1b8011ab28a385db6cd8f67005590e9d" class="iconLink"><i class="icon-spotify" aria-hidden="true" target="_blank"></i><span class="visually-hidden">opens Spotify Music JayBeeDub Mixtape in a new tab</span></a>
+                </p>
+
+              </footer>
+            </div>
+
+            <div class="col col-xxl-8 col-md-6 panels" id="panel2">
+
+              <div class="playermeta px-0 row album-controls">
+                <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
+                  <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="ScrobbleRadio - scrobble awesome radio">
+                </div>
+                <div class="col col-xxl-5 col-md-10 p-2 metainfo">
+                  <p class="fs-3 d-sm-none">Swipe left to pick a station to get started</p>
+                  <p class="fs-3 d-none d-md-block">Pick a station to get started</p>
+                </div>
+              </div>
+            </div>
+            <div class="col col-xxl-2 col-md-3 panels off-canvas off-canvas-right show" id="panel3">
+
+              <nav class="stationNav">
+                <h3 class="sidebar-text fw-bold h5">Choose A Station</h3>
+                <div class="d-flex flex-column position-relative" id="stationSelect">
+                  <div class="loader">
+                    <div class="spinner-grow text-light">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div>s
+                </div>
+              </nav>
+            </div>
+          </div>
+          <div class="media-controls-wrapper">
+            <div class="media-controls">
+              <button id="skipBack" type="button" class="btn btn-dark btn-lg mt-3" title="Previous Station">
+                <i class="icon-backward"></i>
+              </button>
+              <button id="playButton" type="button" class="btn btn-dark btn-lg mt-3" title="Play / Pause">
+                <i class="icon-play"></i>
+              </button>
+              <button id="reloadStream" type="button" class="btn btn-dark btn-lg mt-3" title="Reload Steam">
+                <i class="icon-reload"></i>
+              </button>
+              <button id="skipForward" type="button" class="btn btn-dark btn-lg mt-3" title="Next Station">
+                <i class="icon-forward"></i>
+              </button>
+            </div>
+
+            <button class="btn btn-dark btn-lg" type="button" id="togglePanels" title="Toggle side panels"><i class="icon-hide-panels"></i> <span class="visually-hidden">Toggle side panels</span></button>
+          </div>
+
+      </main>
+    </div>
+  </div>
+
+  <template id="meta">
+    <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
+      <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
+    </div>
+    <div class="col col-xxl-5 col-md-10 p-2 metainfo">
+      <p id="title" class="text-capitalize h3"></p>
+      <p id="artist" class="text-capitalize h4"></p>
+      <p id="album" class="text-capitalize"></p>
+      <p id="listeners" class="text-capitalize"></p>
+      <a href="" id="radioNameLink" class="btn btn-info mb-1" target="_blank">
+        <span id="radioName" class="fs-6"></span>
+        <span id="stationLocation" class="fs-6"></span>
+      </a>
+    </div>
+  </template>
+
+  <!-- Bootstrap JavaScript Libraries -->
+  <script src="js/external/bootstrap.min.js"></script>
+  <script src="js/external/filter.min.js"></script>
+
+  <script src="js/stations.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Matomo -->
+  <script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(["setDoNotTrack", true]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u = "//slideaway.ca/matomo/";
+    _paq.push(['setTrackerUrl', u + 'matomo.php']);
+    _paq.push(['setSiteId', '2']);
+    var d = document,
+      g = d.createElement('script'),
+      s = d.getElementsByTagName('script')[0];
+    g.async = true;
+    g.src = u + 'matomo.js';
+    s.parentNode.insertBefore(g, s);
+  })();
+  </script>
+  <!-- End Matomo Code -->
+
+</body>
+
+</html>
