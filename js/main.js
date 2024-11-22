@@ -1102,16 +1102,24 @@ class RadioPlayer {
             }
             timestamp = new Date(timestamp).toISOString();
         } else if (dateWithoutTimezoneRegex.test(timestamp)) {
-            const timestampTimezonePart = new Date(timestamp).toLocaleString('en-US', {
-                timeZone: timezone,
-                timeZoneName: 'short',
-            }).split(' ').pop(); // Get timezone abbreviation
-            timestamp = new Date(`${timestamp} ${timestampTimezonePart}`).toISOString();
+            const date = new Date(timestamp);
+
+            // Calculate the timezone offset
+            const offsetMinutes = date.getTimezoneOffset();
+            const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
+            const offsetRemainingMinutes = Math.abs(offsetMinutes) % 60;
+            const sign = offsetMinutes > 0 ? '-' : '+';
+
+            const timezoneOffset = `${sign}${String(offsetHours).padStart(2, '0')}${String(offsetRemainingMinutes).padStart(2, '0')}`;
+
+            // Replace the space with 'T' and append the timezone offset
+            timestamp = timestamp.replace(' ', 'T') + timezoneOffset;
+
+            timestamp = new Date(timestamp).toISOString();
         }
 
         return timestamp;
     }
-
 
     formatTimeInTimezone(timezone, timestamp, spinUpdated) {
         let apiUpdatedTime = '';
