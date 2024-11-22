@@ -187,9 +187,6 @@ const stations = {
   qcindie: {
     stationName: "QCIndie",
   },
-  radiocaroline: {
-    stationName: "Radio Caroline",
-  },
   radiolaurier: {
     stationName: "Radio Laurier",
   },
