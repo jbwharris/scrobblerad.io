@@ -209,7 +209,7 @@ class Page {
         let albumDisplay = '';
         if (errorMessage) {
             albumDisplay = '';
-        } else if (song && artist) {
+        } else if ((song && artist) && artist !== 'currently loading') {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
 
