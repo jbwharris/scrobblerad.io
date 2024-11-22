@@ -408,8 +408,6 @@ class RadioPlayer {
 
         this.currentStationData = stationData;
 
-        document.title = `${this.currentStationData[stationName].stationName} currently loading`;
-
         // Clear any existing streaming intervals
         if (this.streamingInterval) {
             clearInterval(this.streamingInterval);
@@ -457,7 +455,7 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            page.setupMediaSession(`${this.currentStationData[stationName].stationName} currently loading`, '', urlCoverArt, false);
+            page.setupMediaSession(`${this.currentStationData[stationName].stationName}`, 'currently loading', urlCoverArt, false);
 
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
@@ -1060,10 +1058,10 @@ class RadioPlayer {
         console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
 
         // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
-
-        console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 10000, "=", apiUpdatedData + (duration * 1000));
-
         if (this.currentStationData[this.stationName].isFuture && (((duration * 1000) + apiUpdatedData) < Date.now())) {
+            
+            console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 10000, "=", apiUpdatedData + (duration * 1000));
+
             if (((duration * 1000) + apiUpdatedData) > Date.now()) {
                 console.log('song end is still in the future');
             }
