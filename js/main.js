@@ -209,7 +209,9 @@ class Page {
         let albumDisplay = '';
         if (errorMessage) {
             albumDisplay = '';
-        } else if ((song && artist) && artist !== 'currently loading') {
+        } else if (artist == 'currently loading') {
+            albumDisplay = '🔄'
+        } else if ((song && artist) && artist !== 'currently loading' ) {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
 
