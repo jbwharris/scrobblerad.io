@@ -1104,22 +1104,42 @@ class RadioPlayer {
         } else if (dateWithoutTimezoneRegex.test(timestamp)) {
             const date = new Date(timestamp);
 
-            // Calculate the timezone offset
-            const offsetMinutes = date.getTimezoneOffset();
-            const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
-            const offsetRemainingMinutes = Math.abs(offsetMinutes) % 60;
-            const sign = offsetMinutes > 0 ? '-' : '+';
+            // Calculate the timezone offset for the specified timezone
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: timezone,
+                hour12: false,
+                timeZoneName: 'shortOffset',
+            });
 
-            const timezoneOffset = `${sign}${String(offsetHours).padStart(2, '0')}${String(offsetRemainingMinutes).padStart(2, '0')}`;
+            const parts = formatter.formatToParts(date);
+            let offsetPart = parts.find(part => part.type === 'timeZoneName')?.value;
 
-            // Replace the space with 'T' and append the timezone offset
-            timestamp = timestamp.replace(' ', 'T') + timezoneOffset;
+            // Clean up the offset to remove "GMT" prefix and ensure +HHMM or -HHMM
+            if (offsetPart.startsWith('GMT')) {
+                offsetPart = offsetPart.replace('GMT', '');
+            }
+
+            // Extract the sign and hours from the offset, ensuring proper HHMM format
+            const match = offsetPart.match(/([+-])(\d+)/);
+            if (match) {
+                const sign = match[1];
+                const hours = match[2].padStart(2, '0'); // Pad hours to 2 digits
+                const minutes = '00'; // Default minutes to 00
+                offsetPart = `${sign}${hours}${minutes}`;
+            }
+
+            // Reformat the timestamp and append the correct timezone offset
+            timestamp = timestamp.replace(' ', 'T') + offsetPart;
 
             timestamp = new Date(timestamp).toISOString();
         }
 
         return timestamp;
     }
+
+
+
+
 
     formatTimeInTimezone(timezone, timestamp, spinUpdated) {
         let apiUpdatedTime = '';
