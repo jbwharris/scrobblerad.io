@@ -210,7 +210,7 @@ class Page {
         if (errorMessage) {
             albumDisplay = '';
         } else if (artist == 'currently loading') {
-            albumDisplay = '--------------'
+            albumDisplay = '🔄'
         } else if ((song && artist) && artist !== 'currently loading' ) {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
@@ -977,7 +977,7 @@ class RadioPlayer {
             // Handle stale data or invalid song
             if ((staleData && staleData !== "Live365 past" ) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData([(errorMsg || staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
+                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
                 return;
             }
 
