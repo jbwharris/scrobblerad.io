@@ -1135,6 +1135,8 @@ class RadioPlayer {
 
             // Reformat the timestamp and append the correct timezone offset
             timestamp = timestamp.replace(' ', 'T') + offsetPart;
+            timestamp = timestamp.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2").replace(/([-+]\d{2})(\d{2})$/, "$1:$2");
+            console.log('timestamp before error', timestamp);
 
             timestamp = new Date(timestamp).toISOString();
         }
