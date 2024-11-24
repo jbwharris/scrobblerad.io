@@ -526,17 +526,20 @@ class RadioPlayer {
             .trim() || '';                           // Fallback if string is empty
 
         const filterSongDetails = song => {
-            if (!song) return '';  // Return an empty string if song is undefined
+            if (!song) return ''; // Return an empty string if song is undefined
             return song
-                .replace(/\s*\(.*?version.*?\)/gi, '')  // Removes text in brackets containing "version"
-                .replace(/\s-\s.*version.*$/i, '')      // Removes " - Radio Version" or similar
-                .replace(/\s*\(.*?edit.*?\)/gi, '')     // Removes text in brackets containing "edit"
-                .replace(/\s-\s.*edit.*$/i, '')         // Removes " - Radio Edit" or similar
-                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/i, '') // Removes text in parentheses or square brackets containing "Mix"
-                .replace(/\s*-\s*\d{4}\s*Remastered.*/i, '') // Removes " - 2001 Remastered" or similar
-                .replace(/\s*-\s*Remastered.*/i, '') // Removes " - 2001 Remastered" or similar
+                .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
+                .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
+                .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
+                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
+                .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
+                .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
+                .replace(/\s*-\s*Remaster(ed)?/gi, '')          // Removes "- Remaster" or "- Remastered"
                 .trim();
         };
+
+
 
         const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
 
@@ -974,7 +977,7 @@ class RadioPlayer {
             // Handle stale data or invalid song
             if ((staleData && staleData !== "Live365 past" ) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
+                page.refreshCurrentData([(errorMsg || staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
                 return;
             }
 
