@@ -10,7 +10,7 @@ const stationData = {
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/50e451b6a93e91ee0a00028e/now?format=json&style=v2&show_song=true",
     filter: ["WYEP"],
-    timestamp: "onNow.song._start_time",
+    timestamp: "onNow.song._end_time",
     timezone: "America/New_York",
   }
 };

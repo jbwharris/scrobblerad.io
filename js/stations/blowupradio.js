@@ -10,5 +10,6 @@ const stationData = {
     apiUrl: "https://api.live365.com/station/a42405",
     timestamp: "current-track.start",
     timezone: "America/New_York",
+    isFuture: true,
   }
 };
