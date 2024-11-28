@@ -450,6 +450,8 @@ body {
    position: relative;
    top: -2rem;
    transition: all .3s ease-in;
+   max-height: 500px;
+   overflow: hidden;
 }
 
 #metadata {
