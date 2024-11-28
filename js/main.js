@@ -116,7 +116,7 @@ class Page {
         this.radioPlayer = radioPlayer;
 
         this.cacheDOMElements();
-        this.setupMediaSession('', '', '', false);
+        // this.setupMediaSession('', '', '', false);
 
         // Cache the template element
         this.template = document.querySelector('#meta');
@@ -210,7 +210,7 @@ class Page {
         if (errorMessage) {
             albumDisplay = '';
         } else if (artist == 'currently loading') {
-            albumDisplay = '🔄'
+            albumDisplay = '------------'
         } else if ((song && artist) && artist !== 'currently loading' ) {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
