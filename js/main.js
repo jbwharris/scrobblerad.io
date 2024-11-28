@@ -116,7 +116,7 @@ class Page {
         this.radioPlayer = radioPlayer;
 
         this.cacheDOMElements();
-        // this.setupMediaSession('', '', '', false);
+        this.setupMediaSession(this.displayStationName, 'currently loading', urlCoverArt, false);
 
         // Cache the template element
         this.template = document.querySelector('#meta');
