@@ -215,8 +215,6 @@ class Page {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
 
-        console.log('song', song, 'artist', artist);
-
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: song,
@@ -564,7 +562,7 @@ class RadioPlayer {
             albumArt = data.albumArt || '';
             spinUpdated = data.spinUpdated || '';
 
-            console.log('albumArt from spinPath', albumArt);
+           // console.log('albumArt from spinPath', albumArt);
         }
 
         if (this.currentStationData[this.stationName].orbPath) {
@@ -788,7 +786,6 @@ class RadioPlayer {
         return new Promise((resolve, reject) => {
             fetch(url)
                 .then(response => {
-                 //   console.log('URL validation response for', url, response.status); // Debug the response status
                     if (response.ok) {
                         resolve(true); // URL is valid
                     } else {
@@ -896,8 +893,6 @@ class RadioPlayer {
         const album = replaceEnDashWithEmDash(doc.querySelector('span.release')?.textContent.trim() || '');
         const albumArt = doc.querySelector('img')?.src || '';
         const spinUpdated = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
-
-       // console.log(`${song} - ${artist} - ${album} - ${albumArt} - ${spinUpdated}`);
 
         // Return the extracted data in the format expected by processData
         return {song, artist, album, albumArt, spinUpdated};
@@ -1046,19 +1041,10 @@ class RadioPlayer {
 
     if (timestamp) {
         apiUpdatedData = this.convertTimestamp(timestamp, timezone);
-        console.log('timestamp after conversion', timestamp);
     } else{
         // Handle timestamp conversion and formatting
         apiUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
     }
-
-    // Handle timestamp conversion and formatting
-   // apiUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
-
-
-    console.log('apiUpdatedTime line 1056', apiUpdatedData)
-    // No need to call new Date().toISOString() here if apiUpdatedTime is already formatted
-    // apiUpdatedData = apiUpdatedTime;
 
     // Convert formatted times to epoch
     timezoneTime = Date.parse(timezoneTime);
@@ -1066,7 +1052,6 @@ class RadioPlayer {
 
     // Calculate time difference
     const timeDifference = timezoneTime - apiUpdatedData;
-    console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
 
     // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
     if (this.currentStationData[this.stationName].isFuture && (((duration * 1000) + apiUpdatedData) < Date.now())) {
@@ -1103,15 +1088,15 @@ convertTimestamp(timestamp, timezone, spinUpdated) {
         if (timestamp < 1e12) { // If it's in seconds, convert to milliseconds
             timestamp *= 1000;
         }
-        console.log('Converted timestamp to milliseconds:', timestamp);
+      //  console.log('Converted timestamp to milliseconds:', timestamp);
         timestamp = new Date(timestamp).toISOString();
-        console.log('ISO Timestamp:', timestamp);
+      //  console.log('ISO Timestamp:', timestamp);
         return timestamp;
     }
 
     // Handle ISO format timestamps with 'Z' (UTC)
     if (isUTC) {
-        console.log('Timestamp is in valid ISO format with Z (UTC):', timestamp);
+      //  console.log('Timestamp is in valid ISO format with Z (UTC):', timestamp);
         return timestamp.trim();
     }
 
@@ -1126,7 +1111,6 @@ convertTimestamp(timestamp, timezone, spinUpdated) {
     // Handle timestamps without a timezone
     else if (dateWithoutTimezoneRegex.test(timestamp)) {
         timestamp = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
-        console.log('timestamp before error', timestamp);
         timestamp = new Date(timestamp).toISOString();
     }
 
@@ -1135,13 +1119,11 @@ convertTimestamp(timestamp, timezone, spinUpdated) {
         const [datePart, timePart] = timestamp.split(' ');
         const [month, day, year] = datePart.split('-');
         const formattedTimestamp = `${year}-${month}-${day}T${timePart}`;
-        console.log('formattedTimestamp before timezone:', formattedTimestamp);
 
         timestamp = this.formatTimeInTimezone(timezone, formattedTimestamp, spinUpdated);
-        console.log('timestamp after formatTimeInTimezone:', timestamp);
         timestamp = timestamp.replace(/([-+]\d{2})(\d{2})$/, "$1:$2"); // Adjust timezone offset
         timestamp = new Date(timestamp).toISOString();
-        console.log('Converted ISO timestamp:', timestamp);
+        // console.log('Converted ISO timestamp:', timestamp);
     }
 
     return timestamp;
@@ -1212,9 +1194,7 @@ formatTimeInTimezone(timezone, timestamp, spinUpdated) {
         timestamp = timestamp.replace(' ', 'T').replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2").replace(/([-+]\d{2})(\d{2})$/, "$1:$2") + offsetPart;
 
         apiUpdatedTime = timestamp;
-        console.log('apiUpdatedTime after being assigned', apiUpdatedTime, 'timestamp', timestamp);
     }
-    console.log('apiUpdatedTime beforer being returned', apiUpdatedTime);
     return apiUpdatedTime;
 }
 
