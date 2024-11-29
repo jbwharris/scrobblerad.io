@@ -206,9 +206,6 @@ class Page {
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
 
-        console.log('setupMediaSession song', song, 'artist', artist);
-
-
         let albumDisplay = '';
         if (errorMessage) {
             albumDisplay = '';
@@ -462,7 +459,6 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
-            console.log('handleStationSelect running');
             page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
 
 
@@ -1092,8 +1088,6 @@ class RadioPlayer {
         const isUTC = typeof timestamp === 'string' && timestamp.trim().endsWith('Z');
         const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
         const mmddyyyyRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/; // New regex for MM-DD-YYYY HH:mm:ss
-
-        console.log('Initial timestamp:', timestamp);
 
         // Handle Unix Epoch timestamps (seconds since Unix epoch)
         if (isEpoch) {
