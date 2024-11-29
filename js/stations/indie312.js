@@ -11,5 +11,7 @@ const stationData = {
     timestamp: "current-track.start",
     timezone: "America/Chicago",
     filter: ["Indie312", "Live365", "ADBREAK"],
+    isFuture: true,
+    duration: "current-track.duration",
   }
 };

@@ -206,6 +206,9 @@ class Page {
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
 
+        console.log('setupMediaSession song', song, 'artist', artist);
+
+
         let albumDisplay = '';
         if (errorMessage) {
             albumDisplay = '';
@@ -259,6 +262,7 @@ class RadioPlayer {
         this.isPlaying = null;
         this.stationName = "";
         this.previousDataResponse = null;
+        this.prevExtractedData = null;
         this.pauseTimeout = null; // Timer for pause duration
         this.shouldReloadStream = false; // Flag to indicate if the stream should be reloaded
         this.stations = document.querySelectorAll('.station');
@@ -458,6 +462,7 @@ class RadioPlayer {
             newAudio.load();
 
             const page = new Page(this.stationName, this);
+            console.log('handleStationSelect running');
             page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
 
 
@@ -967,6 +972,13 @@ class RadioPlayer {
                 }
             }
 
+            // Compare the extractedData response with the previous one
+            if (JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) {
+                return;
+            } else {
+                this.prevExtractedData = extractedData;
+            }
+
             // Handle stale data or invalid song
             if ((staleData && staleData !== "Live365 past" ) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationName, this);
@@ -1015,188 +1027,188 @@ class RadioPlayer {
         }
     }
 
-
-
     checkStaleData(timezone, timestamp, spinUpdated, duration) {
-    let staleData = '';
+        let staleData = '';
 
-    if ((!timezone && !timestamp && !spinUpdated) || (!timestamp && spinUpdated == true) || (timestamp === undefined && !this.currentStationData[this.stationName].spinPath)) {
-        return staleData;
-    }
-
-    let apiUpdatedData;
-    let timezoneTime = new Date().toLocaleString("en-US", { 
-        timeZone: timezone, 
-        year: 'numeric', 
-        month: '2-digit', 
-        day: '2-digit', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit', 
-        hour12: false,
-        timeZoneName: 'short'
-    });
-
-    timezoneTime = new Date(timezoneTime).toISOString();
-
-    if (timestamp) {
-        apiUpdatedData = this.convertTimestamp(timestamp, timezone);
-    } else{
-        // Handle timestamp conversion and formatting
-        apiUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
-    }
-
-    // Convert formatted times to epoch
-    timezoneTime = Date.parse(timezoneTime);
-    apiUpdatedData = Date.parse(apiUpdatedData);
-
-    // Calculate time difference
-    const timeDifference = timezoneTime - apiUpdatedData;
-
-    // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
-    if (this.currentStationData[this.stationName].isFuture && (((duration * 1000) + apiUpdatedData) < Date.now())) {
-        console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 1000, "=", apiUpdatedData + (duration * 1000));
-
-        if (((duration * 1000) + apiUpdatedData) > Date.now()) {
-            console.log('song end is still in the future');
+        if ((!timezone && !timestamp && !spinUpdated) || (!timestamp && spinUpdated == true) || (timestamp === undefined && !this.currentStationData[this.stationName].spinPath)) {
+            return staleData;
         }
 
-        console.log('song data ends in the past');
-        staleData = "Live365 past";
-    }
+        let apiUpdatedData;
+        let timezoneTime = new Date().toLocaleString("en-US", { 
+            timeZone: timezone, 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: false,
+            timeZoneName: 'short'
+        });
 
-    // Check if the data is stale (older than 15 minutes)
-    if (timeDifference > 900000 && apiUpdatedData !== "") {
-        staleData = 'Streaming data is stale';
-    }
+        timezoneTime = new Date(timezoneTime).toISOString();
 
-    return { staleData };
-}
-
-
-convertTimestamp(timestamp, timezone, spinUpdated) {
-    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
-    const isEpoch = /^\d+(\.\d+)?$/.test(timestamp); // Check if the timestamp is an epoch timestamp
-    const isUTC = typeof timestamp === 'string' && timestamp.trim().endsWith('Z');
-    const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
-    const mmddyyyyRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/; // New regex for MM-DD-YYYY HH:mm:ss
-
-    console.log('Initial timestamp:', timestamp);
-
-    // Handle Unix Epoch timestamps (seconds since Unix epoch)
-    if (isEpoch) {
-        if (timestamp < 1e12) { // If it's in seconds, convert to milliseconds
-            timestamp *= 1000;
+        if (timestamp) {
+            apiUpdatedData = this.convertTimestamp(timestamp, timezone);
+        } else {
+            // Handle timestamp conversion and formatting
+            apiUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
         }
-      //  console.log('Converted timestamp to milliseconds:', timestamp);
-        timestamp = new Date(timestamp).toISOString();
-      //  console.log('ISO Timestamp:', timestamp);
+
+        // Convert formatted times to epoch
+        timezoneTime = Date.parse(timezoneTime);
+        apiUpdatedData = Date.parse(apiUpdatedData);
+
+        // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
+        if (duration && this.currentStationData[this.stationName].isFuture) {
+            console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 1000, "=", apiUpdatedData + (duration * 1000));
+
+            apiUpdatedData = (duration * 1000) + apiUpdatedData;
+
+            if (apiUpdatedData < Date.now()) {
+                console.log('song data ends in the past');
+                staleData = "Live365 past";
+            }
+        }
+
+
+        // Calculate time difference
+        const timeDifference = timezoneTime - apiUpdatedData;
+        console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
+
+
+        // Check if the data is stale (older than 15 minutes)
+        if (timeDifference > 900000 && apiUpdatedData !== "") {
+            staleData = 'Streaming data is stale';
+        }
+
+        return { staleData };
+    }
+
+    convertTimestamp(timestamp, timezone, spinUpdated) {
+        const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
+        const isEpoch = /^\d+(\.\d+)?$/.test(timestamp); // Check if the timestamp is an epoch timestamp
+        const isUTC = typeof timestamp === 'string' && timestamp.trim().endsWith('Z');
+        const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
+        const mmddyyyyRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/; // New regex for MM-DD-YYYY HH:mm:ss
+
+        console.log('Initial timestamp:', timestamp);
+
+        // Handle Unix Epoch timestamps (seconds since Unix epoch)
+        if (isEpoch) {
+            if (timestamp < 1e12) { // If it's in seconds, convert to milliseconds
+                timestamp *= 1000;
+            }
+          //  console.log('Converted timestamp to milliseconds:', timestamp);
+            timestamp = new Date(timestamp).toISOString();
+          //  console.log('ISO Timestamp:', timestamp);
+            return timestamp;
+        }
+
+        // Handle ISO format timestamps with 'Z' (UTC)
+        if (isUTC) {
+          //  console.log('Timestamp is in valid ISO format with Z (UTC):', timestamp);
+            return timestamp.trim();
+        }
+
+        // Handle ISO format timestamps without 'Z'
+        if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
+            if (timestamp.endsWith('+0000')) {
+                timestamp = timestamp.replace('+0000', 'Z'); // Convert to 'Z' for UTC
+                timestamp = new Date(timestamp).toISOString();
+            }
+        }
+
+        // Handle timestamps without a timezone
+        else if (dateWithoutTimezoneRegex.test(timestamp)) {
+            timestamp = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
+            timestamp = new Date(timestamp).toISOString();
+        }
+
+        // Handle MM-DD-YYYY HH:mm:ss format
+        else if (mmddyyyyRegex.test(timestamp)) {
+            const [datePart, timePart] = timestamp.split(' ');
+            const [month, day, year] = datePart.split('-');
+            const formattedTimestamp = `${year}-${month}-${day}T${timePart}`;
+
+            timestamp = this.formatTimeInTimezone(timezone, formattedTimestamp, spinUpdated);
+            timestamp = timestamp.replace(/([-+]\d{2})(\d{2})$/, "$1:$2"); // Adjust timezone offset
+            timestamp = new Date(timestamp).toISOString();
+            // console.log('Converted ISO timestamp:', timestamp);
+        }
+
         return timestamp;
     }
 
-    // Handle ISO format timestamps with 'Z' (UTC)
-    if (isUTC) {
-      //  console.log('Timestamp is in valid ISO format with Z (UTC):', timestamp);
-        return timestamp.trim();
-    }
+    formatTimeInTimezone(timezone, timestamp, spinUpdated) {
+        let apiUpdatedTime = '';
 
-    // Handle ISO format timestamps without 'Z'
-    if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
-        if (timestamp.endsWith('+0000')) {
-            timestamp = timestamp.replace('+0000', 'Z'); // Convert to 'Z' for UTC
-            timestamp = new Date(timestamp).toISOString();
-        }
-    }
+        console.log('timestamp', timestamp, 'spinUpdated', spinUpdated);
 
-    // Handle timestamps without a timezone
-    else if (dateWithoutTimezoneRegex.test(timestamp)) {
-        timestamp = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
-        timestamp = new Date(timestamp).toISOString();
-    }
+        const convertTo24HourFormat = (time12h) => {
+            const [time, modifier] = time12h.split(' ');
+            let [hours, minutes] = time.split(':');
 
-    // Handle MM-DD-YYYY HH:mm:ss format
-    else if (mmddyyyyRegex.test(timestamp)) {
-        const [datePart, timePart] = timestamp.split(' ');
-        const [month, day, year] = datePart.split('-');
-        const formattedTimestamp = `${year}-${month}-${day}T${timePart}`;
+            if (modifier === 'PM' && hours !== '12') {
+                hours = parseInt(hours, 10) + 12;
+            } else if (modifier === 'AM' && hours === '12') {
+                hours = '00';
+            }
 
-        timestamp = this.formatTimeInTimezone(timezone, formattedTimestamp, spinUpdated);
-        timestamp = timestamp.replace(/([-+]\d{2})(\d{2})$/, "$1:$2"); // Adjust timezone offset
-        timestamp = new Date(timestamp).toISOString();
-        // console.log('Converted ISO timestamp:', timestamp);
-    }
+            return `${hours}:${minutes}`;
+        };
 
-    return timestamp;
-}
-
-formatTimeInTimezone(timezone, timestamp, spinUpdated) {
-    let apiUpdatedTime = '';
-
-    console.log('timestamp', timestamp, 'spinUpdated', spinUpdated);
-
-    const convertTo24HourFormat = (time12h) => {
-        const [time, modifier] = time12h.split(' ');
-        let [hours, minutes] = time.split(':');
-
-        if (modifier === 'PM' && hours !== '12') {
-            hours = parseInt(hours, 10) + 12;
-        } else if (modifier === 'AM' && hours === '12') {
-            hours = '00';
-        }
-
-        return `${hours}:${minutes}`;
-    };
-
-    // Format the current date and time in the specified timezone
-    const currentDatePart = new Date().toLocaleString('en-US', {
-        timeZone: timezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour12: false,
-    });
-
-    const currentTimezonePart = new Date().toLocaleString('en-US', {
-        timeZone: timezone,
-        timeZoneName: 'short',
-    }).split(' ').pop();
-
-    // If there's a spinUpdated time, convert it to 24-hour format
-    if (spinUpdated && spinUpdated !== true) {
-        const updated24Hour = convertTo24HourFormat(spinUpdated);
-        apiUpdatedTime = `${currentDatePart} ${updated24Hour} ${currentTimezonePart}`;
-    }
-
-    // Format the API-supplied timestamp, if provided, with timezone handling
-    if (timestamp) {
-        const date = new Date(timestamp);
-        const formatter = new Intl.DateTimeFormat('en-US', {
+        // Format the current date and time in the specified timezone
+        const currentDatePart = new Date().toLocaleString('en-US', {
             timeZone: timezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
             hour12: false,
-            timeZoneName: 'shortOffset',
         });
 
-        const parts = formatter.formatToParts(date);
-        let offsetPart = parts.find(part => part.type === 'timeZoneName')?.value;
+        const currentTimezonePart = new Date().toLocaleString('en-US', {
+            timeZone: timezone,
+            timeZoneName: 'short',
+        }).split(' ').pop();
 
-        if (offsetPart.startsWith('GMT')) {
-            offsetPart = offsetPart.replace('GMT', '');
+        // If there's a spinUpdated time, convert it to 24-hour format
+        if (spinUpdated && spinUpdated !== true) {
+            const updated24Hour = convertTo24HourFormat(spinUpdated);
+            apiUpdatedTime = `${currentDatePart} ${updated24Hour} ${currentTimezonePart}`;
         }
 
-        const match = offsetPart.match(/([+-])(\d+)/);
-        if (match) {
-            const sign = match[1];
-            const hours = match[2].padStart(2, '0');
-            const minutes = '00';
-            offsetPart = `${sign}${hours}${minutes}`;
+        // Format the API-supplied timestamp, if provided, with timezone handling
+        if (timestamp) {
+            const date = new Date(timestamp);
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: timezone,
+                hour12: false,
+                timeZoneName: 'shortOffset',
+            });
+
+            const parts = formatter.formatToParts(date);
+            let offsetPart = parts.find(part => part.type === 'timeZoneName')?.value;
+
+            if (offsetPart.startsWith('GMT')) {
+                offsetPart = offsetPart.replace('GMT', '');
+            }
+
+            const match = offsetPart.match(/([+-])(\d+)/);
+            if (match) {
+                const sign = match[1];
+                const hours = match[2].padStart(2, '0');
+                const minutes = '00';
+                offsetPart = `${sign}${hours}${minutes}`;
+            }
+
+            timestamp = timestamp.replace(' ', 'T').replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2").replace(/([-+]\d{2})(\d{2})$/, "$1:$2") + offsetPart;
+
+            apiUpdatedTime = timestamp;
         }
-
-        timestamp = timestamp.replace(' ', 'T').replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2").replace(/([-+]\d{2})(\d{2})$/, "$1:$2") + offsetPart;
-
-        apiUpdatedTime = timestamp;
+        return apiUpdatedTime;
     }
-    return apiUpdatedTime;
-}
 
 
     upsizeImgUrl(url) {
