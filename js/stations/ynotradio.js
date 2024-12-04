@@ -8,8 +8,9 @@ const stationData = {
     webUrl: "https://www.ynotradio.net/",
     streamUrl: "https://streaming.live365.com/a54553",
     apiUrl: "https://api.live365.com/station/a54553",
-    timestamp: "current-track.end",
+    timestamp: "current-track.start",
+    duration: "current-track.duration",
     timezone: "America/New_York",
     isFuture: true,
-  }
-};
+  },
+}
