@@ -8,6 +8,8 @@ const stationData = {
     apiUrl: "https://public.radio.co/api/v2/seac6e5991/track/current",
     timestamp: "data.start_time",
     timezone: "America/New_York",
+    orbPath: true,
+    dataPath: true,
     filter: [
       "Inhailer",
       "WGUC",

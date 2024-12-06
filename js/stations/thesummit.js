@@ -7,7 +7,6 @@ const stationData = {
     apiUrl: "https://thesummit.fm/playlist-app/getP1CurrentSong.php",
     stringPath: true,
     phpString: true,
-    pathRegex: /"([^"]+)\s-\s([^"]+)"/,
     filter: ["The Summit", "thesummit"],
   }
 };
