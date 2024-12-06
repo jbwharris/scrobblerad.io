@@ -567,6 +567,7 @@ class RadioPlayer {
         }
 
         if (this.currentStationData[this.stationName].orbPath) {
+            //radio.co apis that have a string "song - artist" piggybacking on the orbPath function
             if (this.currentStationData[this.stationName].dataPath) {
                 dataPath = data.data.title;
             }
@@ -966,6 +967,8 @@ class RadioPlayer {
                 if (song.toLowerCase() !== this.song.toLowerCase()) {
                     return;   
                 }
+            } else if (this.song == "Station data is currently missing" && !staleData ) {
+                return;
             }
 
             // Compare the extractedData response with the previous one
@@ -1057,25 +1060,35 @@ class RadioPlayer {
         apiUpdatedData = Date.parse(apiUpdatedData);
 
         // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
-        if (duration && this.currentStationData[this.stationName].isFuture) {
-            console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 1000, "=", apiUpdatedData + (duration * 1000));
+        if (this.currentStationData[this.stationName].isFuture) {
 
-            apiUpdatedData = (duration * 1000) + apiUpdatedData;
+            if (duration) {
+                console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 1000, "=", apiUpdatedData + (duration * 1000));
+
+                apiUpdatedData = (duration * 1000) + apiUpdatedData;
+            }
 
             if (apiUpdatedData < Date.now()) {
                 console.log('song data ends in the past');
                 staleData = "Live365 past";
+            } else {
+                console.log('song data is still in the future');
             }
+        }
+
+        // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
+        if ((this.currentStationData[this.stationName].offset + apiUpdatedData) < timezoneTime) {
+            apiUpdatedData = (this.currentStationData[this.stationName].offset + apiUpdatedData);
         }
 
 
         // Calculate time difference
-        const timeDifference = timezoneTime - apiUpdatedData;
+        const timeDifference = (timezoneTime - apiUpdatedData) / 1000;
         console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
 
 
         // Check if the data is stale (older than 15 minutes)
-        if (timeDifference > 900000 && apiUpdatedData !== "") {
+        if (timeDifference > 900 && apiUpdatedData !== "") {
             staleData = 'Streaming data is stale';
         }
 
