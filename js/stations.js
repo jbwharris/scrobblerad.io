@@ -120,6 +120,9 @@ const stations = {
   indiexfm: {
     stationName: "Indie X FM",
   },
+  idobianthm: {
+    stationName: "idobi anthm",
+  },
   indy1033: {
     stationName: "Indy 103.3",
   },
