@@ -15,7 +15,7 @@ jobs:
           hostname: '${{ secrets.CPANEL_HOSTING_URL }}'
           repository_root: '${{ secrets.CPANEL_REMOTE_PATH }}'
           branch: main
-          cpanel_token: '${{ secrets.CPANEL_TOKEN }}'
+          cpanel_token: '${{ secrets.CPANEL_API_TOKEN }}'
           cpanel_username: '${{ secrets.CPANEL_USERNAME }}'
       - name: echo deploy-duration
         run: echo "Deployment took ${{ steps.deploy.outputs.duration }} milliseconds"
