@@ -222,6 +222,14 @@ class Page {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
 
+        let stationArt;
+
+        if ((artworkUrl == urlCoverArt) && stations[this.stationName].stationArt) {
+            stationArt = `img/stations/${this.stationName}.png`;
+        } else {
+            stationArt = artworkUrl;
+        }
+
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: song,
@@ -229,7 +237,7 @@ class Page {
                 album: albumDisplay || '',
                 duration: Infinity,
                 startTime: 0,
-                artwork: [{ src: artworkUrl }],
+                artwork: [{ src: stationArt }],
             });
 
 
