@@ -160,6 +160,13 @@ class Page {
                 if ((!song && !artist) || !artworkUrl || !currentStationData[this.stationName]) {
                     return;
                 }
+                let stationArt;
+
+                if ((artworkUrl == urlCoverArt) && stations[this.stationName].stationArt) {
+                    stationArt = `img/stations/${this.stationName}.png`;
+                } else {
+                    stationArt = artworkUrl;
+                }
 
                 const playerMetaElement = document.querySelector('div.playermeta');
                 playerMetaElement.textContent = ''; // Clear existing content
@@ -174,7 +181,7 @@ class Page {
                 clone.querySelector('#listeners').textContent = 
                     listeners !== null && playcount !== null ? `Listeners: ${this.formatCompactNumber(listeners)} | Plays: ${this.formatCompactNumber(playcount)}` : '';
 
-                clone.querySelector('#albumArt').src = artworkUrl; // Update the image source
+                clone.querySelector('#albumArt').src = stationArt || artworkUrl; // Update the image source
                 clone.querySelector('#albumArt').alt = `${song} by ${artist}`;
                 const radioNameLink = clone.querySelector('#radioNameLink');
                 radioNameLink.href = currentStationData[this.stationName].webUrl;
@@ -183,7 +190,7 @@ class Page {
 
                 playerMetaElement.appendChild(clone);
 
-                const backgroundUrl = artworkUrl === urlCoverArt ? `url("../${artworkUrl}")` : `url("${artworkUrl}")`;
+                const backgroundUrl = artworkUrl === urlCoverArt ? `url("../${stationArt}")` : `url("${stationArt}")`;
                 document.documentElement.style.setProperty("--albumArt", backgroundUrl);
 
                 // Animate the entire playermeta container
@@ -508,6 +515,46 @@ class RadioPlayer {
         return filter.filterField(field, value);
     }
 
+    getDataAtPath(path, data) {
+        const pathParts = path.split('.');
+        let currentData = data;
+
+        for (let part of pathParts) {
+            if (currentData && currentData.hasOwnProperty(part)) {
+                currentData = currentData[part];
+            } else {
+                return undefined;  // Return undefined if path doesn't exist
+            }
+        }
+
+        return currentData;
+    }
+
+    getLastJsonPath(path, data) {
+        if (typeof path !== "string" || !path) {
+            console.error("Invalid path passed to getLastJsonPath:", path);
+            return path; // Return the input unchanged if it's invalid
+        }
+
+        const pathParts = path.split('.');
+
+        // Check if path points to an array (e.g., 'tracks.0.artist')
+        for (let i = 0; i < pathParts.length; i++) {
+            if (/^\d+$/.test(pathParts[i])) {  // If part is a number (i.e., array index)
+                const arrayName = pathParts.slice(0, i).join('.');
+                const array = this.getDataAtPath(arrayName, data);  // Use getDataAtPath to access the data
+
+                if (Array.isArray(array)) {
+                    // Replace the index with 'last'
+                    pathParts[i] = (array.length - 1).toString(); // Get last index
+                }
+                break; // Stop once we replace the index
+            }
+        }
+
+        return pathParts.join('.');
+    }
+
     extractSongAndArtist(data, stationName) {
         const replaceSpecialCharacters = str => str
             ?.replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")     // Apostrophe variants
@@ -549,6 +596,14 @@ class RadioPlayer {
         let spinUpdated = '';
         let dataPath = data.title;
 
+        // CFMU inputs its latest songs at the end of the tracks object, so it needs to figure out what the last item in the array is, then output that
+        if (this.currentStationData[stationName].reverseArray) {
+            song = filterSongDetails(this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].song, data)));
+            artist = this.applyFilters('artist', this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].artist, data)));
+            album = this.applyFilters('album', this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].album, data)));
+        }
+
+        // some APIs have instances where there's a second place you should look for info if the first item is empty
         if (this.currentStationData[this.stationName].altPath && !song) {
             song = filterSongDetails(getMetadata('song2'));
             artist = this.applyFilters('artist', getMetadata('artist2'));
@@ -979,7 +1034,7 @@ class RadioPlayer {
             }
 
             // Handle stale data or invalid song
-            if ((staleData && staleData !== "Live365 past" ) || song === 'No streaming data currently available' || errorMsg) {
+            if ((staleData) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationName, this);
                 page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true, this.currentStationData, true]);
                 return;
@@ -1046,7 +1101,7 @@ class RadioPlayer {
             timeZoneName: 'short'
         });
 
-        timezoneTime = new Date(timezoneTime).toISOString();
+       timezoneTime = new Date(timezoneTime).toISOString();
 
         if (timestamp) {
             apiUpdatedData = this.convertTimestamp(timestamp, timezone);
@@ -1070,7 +1125,7 @@ class RadioPlayer {
 
             if (apiUpdatedData < Date.now()) {
                 console.log('song data ends in the past');
-                staleData = "Live365 past";
+                staleData = "Song data is in the past";
             } else {
                 console.log('song data is still in the future');
             }
@@ -1097,26 +1152,59 @@ class RadioPlayer {
 
     convertTimestamp(timestamp, timezone, spinUpdated) {
         const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
-        const isEpoch = /^\d+(\.\d+)?$/.test(timestamp); // Check if the timestamp is an epoch timestamp
+        const isEpoch = /^\d{10,13}$/.test(timestamp); // Check for 10 or 13 digits
         const isUTC = typeof timestamp === 'string' && timestamp.trim().endsWith('Z');
         const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
-        const mmddyyyyRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/; // New regex for MM-DD-YYYY HH:mm:ss
+        const mmddyyyyRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/; // MM-DD-YYYY HH:mm:ss
+        const yyyymmddhhmmRegex = /^20\d{10}$/; // YYYYMMDDHHMM starting with 20
 
-        // Handle Unix Epoch timestamps (seconds since Unix epoch)
-        if (isEpoch) {
-            if (timestamp < 1e12) { // If it's in seconds, convert to milliseconds
-                timestamp *= 1000;
+
+        // Handle ISO format timestamps (e.g., 2025-01-08T16:00:00.000Z)
+        if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
+            
+            // If the timestamp ends with 'Z' (UTC), return it directly
+            if (timestamp.endsWith('Z')) {
+                return new Date(timestamp).toISOString(); // Return the ISO string
             }
-          //  console.log('Converted timestamp to milliseconds:', timestamp);
+
+            // If it doesn't have a timezone offset, let's handle it properly
+            if (!timestamp.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(timestamp)) {
+                timestamp = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
+            }
+
+            return new Date(timestamp).toISOString(); // Return the ISO string
+        }
+
+
+        // Handle YYYYMMDDHHMM format (starts with 20)
+        if (yyyymmddhhmmRegex.test(timestamp)) {
+            const year = parseInt(timestamp.substring(0, 4), 10);
+            const month = parseInt(timestamp.substring(4, 6), 10) - 1; // Months are 0-indexed
+            const day = parseInt(timestamp.substring(6, 8), 10);
+            const hour = parseInt(timestamp.substring(8, 10), 10);
+            const minute = parseInt(timestamp.substring(10, 12), 10);
+
+            const date = new Date(year, month, day, hour, minute);
+            timestamp = date.toISOString();
+            return timestamp;
+        }
+
+        // Handle Unix Epoch timestamps (10-13 digits)
+        if (isEpoch) {
+            const epoch = Number(timestamp); // Ensure it's treated as a number
+            if (epoch < 1e12) { // If it's in seconds, convert to milliseconds
+                timestamp = epoch * 1000;
+            } else {
+                timestamp = epoch;
+            }
             timestamp = new Date(timestamp).toISOString();
-          //  console.log('ISO Timestamp:', timestamp);
             return timestamp;
         }
 
         // Handle ISO format timestamps with 'Z' (UTC)
         if (isUTC) {
-          //  console.log('Timestamp is in valid ISO format with Z (UTC):', timestamp);
-            return timestamp.trim();
+            console.log('getting to UTC?');
+            return new Date(timestamp).toISOString();
         }
 
         // Handle ISO format timestamps without 'Z'
@@ -1142,7 +1230,6 @@ class RadioPlayer {
             timestamp = this.formatTimeInTimezone(timezone, formattedTimestamp, spinUpdated);
             timestamp = timestamp.replace(/([-+]\d{2})(\d{2})$/, "$1:$2"); // Adjust timezone offset
             timestamp = new Date(timestamp).toISOString();
-            // console.log('Converted ISO timestamp:', timestamp);
         }
 
         return timestamp;
