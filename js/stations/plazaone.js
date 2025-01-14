@@ -4,7 +4,6 @@ const stationData = {
     song: "song.title",
     album: "song.album",
     stationName: "Nightwave Plaza",
-    albumArt: "song.artwork_src",
     location: "Internet",
     webUrl: "https://plaza.one/",
     streamUrl: "https://radio.plaza.one/mp3",

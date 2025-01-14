@@ -21,7 +21,7 @@ const stationData = {
       "Friday Vibe w",
       "FridayVibe",
       "Week-ender",
-      "DJ Lou Freeman",
+      "DJ Lou",
       "@Rootin",
       "Sledge, Sundays",
       "Elvis",
@@ -36,7 +36,9 @@ const stationData = {
       " | ",
       "Ken The Lobby Boy",
       ".com",
-      "Nils The Music Director"
+      "Nils The Music Director",
+      "Josh Tillman",
+      "New Music Showcase"
     ],
   },
 }
