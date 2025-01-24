@@ -376,7 +376,8 @@ const stations = {
     stationArt: true
   },
   wrur: {
-    stationName: "WRUR",
+    stationName: "WRUR - The Route",
+    stationArt: true
   },
   wtmd: {
     stationName: "WTMD",
