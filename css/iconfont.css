@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'iconfont';
   src:
-    url('../fonts/iconfont.ttf?339zzs') format('truetype'),
-    url('../fonts/iconfont.woff?339zzs') format('woff'),
-    url('../fonts/iconfont.svg?339zzs#iconfont') format('svg');
+    url('../fonts/iconfont.ttf?4bbqfh') format('truetype'),
+    url('../fonts/iconfont.woff?4bbqfh') format('woff'),
+    url('../fonts/iconfont.svg?4bbqfh#iconfont') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -29,6 +29,9 @@
 }
 .icon-hide-panels:before {
   content: "\e911";
+}
+.icon-bluesky:before {
+  content: "\e913";
 }
 .icon-chevron-down:before {
   content: "\e912";
