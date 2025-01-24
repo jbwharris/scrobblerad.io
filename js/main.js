@@ -175,7 +175,7 @@ class Page {
                 const clone = document.importNode(template.content, true);
 
                 // Update the template content with the current data
-                clone.querySelector('#title').textContent = song;
+                clone.querySelector('#title').innerHTML = song;
                 clone.querySelector('#artist').textContent = artist;
                 clone.querySelector('#album').textContent = album;
                 clone.querySelector('#listeners').textContent = 
@@ -427,6 +427,8 @@ class RadioPlayer {
 
         this.currentStationData = stationData;
 
+        const page = new Page(stationName, this);
+
         // Clear any existing streaming intervals
         if (this.streamingInterval) {
             clearInterval(this.streamingInterval);
@@ -434,6 +436,7 @@ class RadioPlayer {
         }
 
         if (firstRun) {
+            page.refreshCurrentData([`${this.currentStationData[stationName].stationName}<br/> currently loading`, '', '', urlCoverArt, null, null, true, this.currentStationData], true);
             this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false;
             console.log(stationName);
@@ -450,8 +453,6 @@ class RadioPlayer {
                 console.error("currentStationData is undefined or null");
                 return;
             }
-
-            const currentStationName = this.currentStationData[this.stationName].stationName;
 
             const newAudio = new Audio(this.addCacheBuster(this.currentStationData[this.stationName].streamUrl));
 
@@ -473,7 +474,6 @@ class RadioPlayer {
 
             newAudio.load();
 
-            const page = new Page(this.stationName, this);
             page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
 
 
@@ -616,7 +616,7 @@ class RadioPlayer {
             song = filterSongDetails(getMetadata('song2'));
             artist = this.applyFilters('artist', getMetadata('artist2'));
             album = this.applyFilters('album', getMetadata('album2'));
-            albumArt = getMetadata('albumArt');
+            albumArt = getMetadata('albumArt2');
         }
 
         if (this.currentStationData[this.stationName].spinPath) {
@@ -649,7 +649,7 @@ class RadioPlayer {
                     [song, artist] = [artist, song];
                 }
             } else {
-                console.log('No match found');
+                console.log('No match found', match);
             }
         }
 
@@ -1315,7 +1315,7 @@ class RadioPlayer {
 
     upsizeImgUrl(url) {
         if (url) {
-            return url.replace(/170x170|360x360|300x300/g, '500x500');
+            return url.replace(/100x100|170x170|360x360|300x300/g, '500x500');
         } else {
             return;
         }
