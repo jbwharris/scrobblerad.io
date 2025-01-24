@@ -16,5 +16,6 @@ const stationData = {
     timestamp2: "tracklist.results.0.song._end_time",
     timezone: "America/New_York",
     altPath: true,
+    filter: ["WRUR", "In Studio"],
   }
 };
