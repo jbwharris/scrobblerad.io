@@ -441,6 +441,7 @@ class RadioPlayer {
         }
 
         if (firstRun) {
+            page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
             page.refreshCurrentData([`${this.currentStationData[stationName].stationName}<br/> currently loading`, '', '', urlCoverArt, null, null, true, this.currentStationData], true);
             this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false;
@@ -449,7 +450,6 @@ class RadioPlayer {
             this.updateArt = true;
             this.isPlaying = true;
             firstRun = false;
-            page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
         }
 
         const debouncedSetupAudio = this.debounce(() => {
