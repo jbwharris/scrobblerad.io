@@ -116,7 +116,6 @@ class Page {
         this.radioPlayer = radioPlayer;
 
         this.cacheDOMElements();
-        this.setupMediaSession(this.displayStationName, 'currently loading', urlCoverArt, false);
 
         // Cache the template element
         this.template = document.querySelector('#meta');
@@ -162,7 +161,7 @@ class Page {
                 }
                 let stationArt;
 
-                if ((artworkUrl == urlCoverArt) && stations[this.stationName].stationArt) {
+                if (artworkUrl == urlCoverArt) {
                     stationArt = `img/stations/${this.stationName}.png`;
                 } else {
                     stationArt = artworkUrl;
@@ -213,6 +212,10 @@ class Page {
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
 
+        if (song.includes("<br/>")) {
+            return;
+        }
+
         let albumDisplay = '';
         if (errorMessage) {
             albumDisplay = '';
@@ -224,7 +227,7 @@ class Page {
 
         let stationArt;
 
-        if ((artworkUrl == urlCoverArt) && stations[this.stationName].stationArt) {
+        if (artworkUrl == urlCoverArt) {
             stationArt = `img/stations/${this.stationName}.png`;
         } else {
             stationArt = artworkUrl;
@@ -248,6 +251,8 @@ class Page {
             } else if (song && artist || !errorMessage) {
                 document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
             }
+
+
 
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
@@ -444,6 +449,7 @@ class RadioPlayer {
             this.updateArt = true;
             this.isPlaying = true;
             firstRun = false;
+            page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
         }
 
         const debouncedSetupAudio = this.debounce(() => {
@@ -473,9 +479,6 @@ class RadioPlayer {
             };
 
             newAudio.load();
-
-            page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
-
 
             const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
             if (radioInput) radioInput.checked = true;

@@ -1,72 +1,55 @@
 const stations = {
   absoluteradio: {
     stationName: "Absolute Radio",
-    stationArt: true
   },
   altradio: {
     stationName: "AltRadio",
-    stationArt: true
   },
   amazingradiouk: {
     stationName: "Amazing Radio UK",
-    stationArt: true
   },  
   amazingradious: {
     stationName: "Amazing Radio US",
-    stationArt: true
   }, 
   bagelradio: {
     stationName: "BagelRadio",
-    stationArt: true
   },
   bbcradio6: {
     stationName: "BBC6 Music",
-    stationArt: true
   },
   bfffm: {
     stationName: "BFF.fm",
-    stationArt: true
   },   
   birchstreet: {
     stationName: "Birch Street Radio",
-    stationArt: true
   },
   thebridge: {
     stationName: "The Bridge 90.9",
-    stationArt: true
   },
   chillfiltr: {
     stationName: "CHILLFILTR",
-    stationArt: true
   },
   chirpradio: {
     stationName: "ChirpRadio",
     cors: true,
-    stationArt: true
   },
   chly: {
     stationName: "CHLY",
-    stationArt: true
   },
   chma: {
     stationName: "CHMA",
-    stationArt: true
   },
   civl: {
     stationName: "CIVL",
-    stationArt: true
   },
   cjiq: {
     stationName: "CJIQ",
-    stationArt: true
   },
   cjmp: {
     stationName: "CJMP",
-    stationArt: true
   },
   ckua: {
     stationName: "CKUA",
-    stationArt: true
   },
   ckut: {
     stationName: "CKUT",
@@ -74,23 +57,18 @@ const stations = {
   },
   ckuw: {
     stationName: "CKUW",
-    stationArt: true
   },
   coloradosound: {
     stationName: "The Colorado Sound",
-    stationArt: true
   },
   thecurrent: {
     stationName: "The Current",
-    stationArt: true
   },
   d1alt: {
     stationName: "D1 Alternative",
-    stationArt: true
   },
   d2relax: {
     stationName: "D2 Relax",
-    stationArt: true
   },
   demostation: {
     stationName: "Demo Station",
@@ -98,51 +76,39 @@ const stations = {
   },
   dkfm: {
     stationName: "DKFM",
-    stationArt: true
   },
   dkfmclassic: {
     stationName: "DKFM Classic",
-    stationArt: true
   },
   easternalt: {
     stationName: "Eastern Alternative Radio",
-    stationArt: true
   }, 
   eightradio: {
     stationName: "8Radio",
-    stationArt: true
   }, 
   wyms: {
     stationName: "88Nine - Radio Milwaukee",
-    stationArt: true
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
-    stationArt: true
   },
   funkymoose: {
     stationName: "Funky Moose Radio",
-    stationArt: true
   },
   gorillafm: {
     stationName: "Gorilla FM",
-    stationArt: true
   },
   theindependent: {
     stationName: "The Independent",
-    stationArt: true
   },
   indie1023: {
     stationName: "Indie 102.3",
-    stationArt: true
   },
   indie617: {
     stationName: "indie617",
-    stationArt: true
   },
   indie88: {
     stationName: "Indie88",
-    stationArt: true
   },
   indieblend: {
     stationName: "The Indie Blend",
@@ -160,12 +126,8 @@ const stations = {
   idobianthm: {
     stationName: "idobi anthm",
   },
-  indy1033: {
-    stationName: "Indy 103.3",
-  },
   inhailer: {
     stationName: "Inhailer Radio",
-    stationArt: true
   },
   kalx: {
     stationName: "KALX",
@@ -175,42 +137,33 @@ const stations = {
   },
   kdhx: {
     stationName: "KDHX",
-    stationArt: true
   },
   kexp: {
     stationName: "KEXP",
-    stationArt: true
   },
   kosu: {
     stationName: "KOSU - The Spy",
-    stationArt: true
   },
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
-    stationArt: true
   },
   kpiss: {
     stationName: "KPISS",
-    stationArt: true
   },
   krsm: {
     stationName: "KRSM",
-    stationArt: true
   },
   kuom: {
     stationName: "KUOM - Radio K",
-    stationArt: true
   },  
   kutx: {
     stationName: "KUTX",
-    stationArt: true
   },
   kxlu: {
     stationName: "KXLU",
   },
   kxt: {
     stationName: "KXT",
-    stationArt: true
   },
   lemellotron: {
     stationName: "Le Mellotron",
@@ -226,11 +179,9 @@ const stations = {
   },
   tmm1: {
     stationName: "The Music Machine 1",
-    stationArt: true
   },
   tmm2: {
     stationName: "The Music Machine 2",
-    stationArt: true
   },
   newsounds: {
     stationName: "New Sounds",
@@ -241,7 +192,6 @@ const stations = {
   },
   thepoint: {
     stationName: "The Point",
-    stationArt: true
   },
   qcindie: {
     stationName: "QCIndie",
@@ -270,11 +220,9 @@ const stations = {
   },
   sabotage: {
     stationName: "Sabotage Radio",
-    stationArt: true
   },
   socalsound: {
     stationName: "The SoCal Sound",
-    stationArt: true
   },
   soma80sunderground: {
     stationName: "SomaFM 80s Underground",
@@ -290,7 +238,6 @@ const stations = {
   },
   thesummit: {
     stationName: "The Summit",
-    stationArt: true
   },
   trendradio: {
     stationName: "Trend Radio",
@@ -300,15 +247,12 @@ const stations = {
   },
   uncertainfm: {
     stationName: "UncertainFM",
-    stationArt: true
   },
   wber: {
     stationName: "WBER",
-    stationArt: true
   },
   wbfo: {
     stationName: "WBFO - The Bridge",
-    stationArt: true
   },
   wbor: {
     stationName: "WBOR",
@@ -321,14 +265,12 @@ const stations = {
   },
   wext: {
     stationName: "WEXT",
-    stationArt: true,
     tags: [
       "AAA", "NPR", "United States", "New York"
     ],
   },
   wfmu: {
     stationName: "WFMU",
-    stationArt: true
   },
   wfpk: {
     stationName: "WFPK",
@@ -341,7 +283,6 @@ const stations = {
   },
   witt: {
     stationName: "WITT",
-    stationArt: true
   },
   wluw: {
     stationName: "WLUW",
@@ -369,26 +310,21 @@ const stations = {
   },
   wprb: {
     stationName: "WPRB",
-    stationArt: true
   },
   wrir: {
     stationName: "WRIR",
-    stationArt: true
   },
   wrur: {
     stationName: "WRUR - The Route",
-    stationArt: true
   },
   wtmd: {
     stationName: "WTMD",
   },
   wuky: {
     stationName: "WUKY",
-    stationArt: true
   },
   wyep: {
     stationName: "WYEP",
-    stationArt: true
   },
   wyomingsounds: {
     stationName: "Wyoming Sounds",
