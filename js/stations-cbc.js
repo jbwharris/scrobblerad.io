@@ -26,6 +26,9 @@ const stations = {
   thebridge: {
     stationName: "The Bridge 90.9",
   },
+  cbcmusic: {
+    stationName: "CBC Music",
+  },
   chillfiltr: {
     stationName: "CHILLFILTR",
   },

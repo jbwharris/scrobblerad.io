@@ -872,6 +872,26 @@ class RadioPlayer {
             
             if (!this.stationName) return;
 
+            if ([this.stationName] == 'cbcmusic') {
+
+
+
+                const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
+
+                console.log("cbcData", cbcData);
+
+                // Compare the current data response with the previous one
+                if (this.isDataSameAsPrevious(cbcData)) {
+                    return;
+                }
+
+                // Store the current data response for future comparison
+                this.previousDataResponse = cbcData;
+
+                // Process the new data response
+                this.processData(cbcData);
+            }
+
             if (this.isPlaying && !this.shouldReloadStream) {
                 let stationUrl = this.addCacheBuster(this.currentStationData[this.stationName].apiUrl);
 
