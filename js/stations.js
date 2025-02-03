@@ -326,6 +326,9 @@ const stations = {
   wuky: {
     stationName: "WUKY",
   },
+  wusc: {
+    stationName: "WUSC",
+  },
   wyep: {
     stationName: "WYEP",
   },
