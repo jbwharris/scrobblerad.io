@@ -5,18 +5,23 @@ on:
     branches:
       - main
 jobs:
-  FTP-Deploy:
-    name: FTP-Deploy
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Upload ftp
-      uses: sebastianpopp/ftp-action@releases/v2
+    - uses: actions/checkout@v3
+    - name: Deploy to cPanel FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        host: '${{ secrets.CPANEL_HOSTING_URL }}'
-        user: '${{ secrets.CPANEL_FTP_USER }}'
-        password: '${{ secrets.CPANEL_FTP_PASSWORD }}'
-        localDir: '${{ secrets.CPANEL_REMOTE_PATH }}'
+        server: ${{ secrets.CPANEL_FTP_PATH }}
+        username: ${{ secrets.CPANEL_FTP_USER }}
+        password: ${{ secrets.CPANEL_FTP_PASSWORD }}
+        # local-dir: <local github folder -- use ./ for repository root>
+        local-dir: ./
+        # server-dir: <remote_dir -- use / for root>
+        server-dir: ${{ secrets.CPANEL_FTP_DIR }}
+        protocol: ftps
+        security: strict
+        dry-run: false
     - name: Purge cache
       uses: jakejarvis/cloudflare-purge-action@master
       env:
