@@ -5,21 +5,23 @@ on:
     branches:
       - main
 jobs:
-  FTP-Deploy:
-    name: FTP-Deploy
+  deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Upload ftp
-      uses: sebastianpopp/ftp-action@releases/v2
-      with:
-        host: '${{ secrets.CPANEL_HOSTING_URL }}'
-        user: '${{ secrets.CPANEL_FTP_USER }}'
-        password: '${{ secrets.CPANEL_FTP_PASSWORD }}'
-        localDir: '${{ secrets.CPANEL_REMOTE_PATH }}'
-    - name: Purge cache
-      uses: jakejarvis/cloudflare-purge-action@master
-      env:
-        # Zone is required by both authentication methods
-        CLOUDFLARE_ZONE: '${{ secrets.CLOUDFLARE_ZONE }}'
-        CLOUDFLARE_TOKEN: '${{ secrets.CLOUDFLARE_TOKEN }}'
+      - name: Deploy to cPanel
+        id: deploy
+        uses: pinkasey/cpanel-deploy-action@v1.0.0
+        with:
+          hostname: '${{ secrets.CPANEL_HOSTING_URL }}'
+          repository_root: '${{ secrets.CPANEL_REMOTE_PATH }}'
+          branch: main
+          cpanel_token: '${{ secrets.CPANEL_API_TOKEN }}'
+          cpanel_username: '${{ secrets.CPANEL_USERNAME }}'
+      - name: echo deploy-duration
+        run: echo "Deployment took ${{ steps.deploy.outputs.duration }} milliseconds"
+      - name: Purge cache
+        uses: jakejarvis/cloudflare-purge-action@master
+        env:
+          # Zone is required by both authentication methods
+          CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
