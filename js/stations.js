@@ -1,7 +1,4 @@
 const stations = {
-  absoluteradio: {
-    stationName: "Absolute Radio",
-  },
   altradio: {
     stationName: "AltRadio",
   },
@@ -137,6 +134,7 @@ const stations = {
   },
   kdhx: {
     stationName: "KDHX",
+    cors: true,
   },
   kexp: {
     stationName: "KEXP",
