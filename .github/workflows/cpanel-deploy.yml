@@ -18,7 +18,7 @@ jobs:
         # local-dir: <local github folder -- use ./ for repository root>
         local-dir: ./
         # server-dir: <remote_dir -- use / for root>
-        server-dir: /
+        server-dir: ${{ secrets.CPANEL_FTP_DIR }}
         protocol: ftps
         security: strict
         dry-run: false
