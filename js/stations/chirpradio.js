@@ -7,7 +7,7 @@ const stationData = {
     stationName: "ChirpRadio",
     location: "Chicago, IL 🇺🇸",
     webUrl: "https://www.chirpradio.org",
-    streamUrl: "https://peridot.streamguys1.com:5185/live",
+    streamUrl: "https://chirpradio1.streamguys1.com/live",
     apiUrl:
       "https://storage.googleapis.com/chirpradio-public/playlist.json",
     needPath: true,
