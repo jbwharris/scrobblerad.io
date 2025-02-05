@@ -1,4 +1,5 @@
 deployment:
 tasks:
-- export DEPLOYPATH=${{ secrets.CPANEL_REMOTE_PATH }}
-- /bin/cp -r * $DEPLOYPATH
+- export DEPLOYPATH=${{ secrets.CPANEL_STAGING_PATH }}
+- /bin/cp -R folder $DEPLOYPATH
+- /bin/cp file.name $DEPLOYPATH
