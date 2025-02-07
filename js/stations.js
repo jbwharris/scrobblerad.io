@@ -20,6 +20,9 @@ const stations = {
   birchstreet: {
     stationName: "Birch Street Radio",
   },
+  blacklightradio: {
+    stationName: "Blacklight Radio",
+  },
   thebridge: {
     stationName: "The Bridge 90.9",
   },
