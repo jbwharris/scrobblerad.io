@@ -1030,6 +1030,9 @@ class RadioPlayer {
             if ([this.stationName] == 'indie1023') {
                 timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
                 console.log('102.3 timestamp', timestamp);
+            } else if (this.currentStationData[this.stationName].reverseArray) {
+                timestamp = this.getPath(data, this.getLastJsonPath(this.currentStationData[this.stationName].timestamp));
+                console.log('timestamp reverse array', timestamp);
             } else {
                 timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
                 if (timestamp == 0 || timestamp == '') {
