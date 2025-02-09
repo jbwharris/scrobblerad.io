@@ -142,6 +142,9 @@ const stations = {
   kexp: {
     stationName: "KEXP",
   },
+  kfjc: {
+    stationName: "KFJC",
+  },  
   kosu: {
     stationName: "KOSU - The Spy",
   },
