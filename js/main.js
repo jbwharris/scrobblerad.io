@@ -612,6 +612,8 @@ class RadioPlayer {
             song = filterSongDetails(this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].song, data)));
             artist = this.applyFilters('artist', this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].artist, data)));
             album = this.applyFilters('album', this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].album, data)));
+
+            console.log('song, artist and album reverse array', song, artist, album)
         }
 
         // some APIs have instances where there's a second place you should look for info if the first item is empty
@@ -1031,7 +1033,7 @@ class RadioPlayer {
                 timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
                 console.log('102.3 timestamp', timestamp);
             } else if (this.currentStationData[this.stationName].reverseArray) {
-                timestamp = this.getPath(data, this.getLastJsonPath(this.currentStationData[this.stationName].timestamp));
+                timestamp = this.getPath(data, this.getLastJsonPath(this.currentStationData[this.stationName].timestamp, data)); 
                 console.log('timestamp reverse array', timestamp);
             } else {
                 timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
