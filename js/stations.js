@@ -154,6 +154,9 @@ const stations = {
   kpiss: {
     stationName: "KPISS",
   },
+  krsh: {
+    stationName: "The Krush",
+  },
   krsm: {
     stationName: "KRSM",
   },
@@ -171,6 +174,9 @@ const stations = {
   },
   lemellotron: {
     stationName: "Le Mellotron",
+  },
+  lightning100: {
+    stationName: "Lightning 100",
   },
   megashuffle: {
     stationName: "MegaShuffle",
