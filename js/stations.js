@@ -31,7 +31,6 @@ const stations = {
   },
   chirpradio: {
     stationName: "ChirpRadio",
-    cors: true,
   },
   chly: {
     stationName: "CHLY",
