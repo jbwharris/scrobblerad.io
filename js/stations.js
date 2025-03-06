@@ -30,7 +30,7 @@ const stations = {
     stationName: "CHILLFILTR",
   },
   chirpradio: {
-    stationName: "ChirpRadio",
+    stationName: "CHIRP Radio",
   },
   chly: {
     stationName: "CHLY",
@@ -70,7 +70,7 @@ const stations = {
     stationName: "D2 Relax",
   },
   demostation: {
-    stationName: "Demo Station",
+    stationName: "Demo Station 2",
     cors: true,
   },
   dkfm: {
@@ -81,7 +81,10 @@ const stations = {
   },
   easternalt: {
     stationName: "Eastern Alternative Radio",
-  }, 
+  },
+  eastvillageradio: {
+    stationName: "East Village Radio",
+  },
   eightradio: {
     stationName: "8Radio",
   }, 
@@ -117,7 +120,6 @@ const stations = {
   },
   indiegoogleplus: {
     stationName: "Indie Google+",
-    cors: true,
   },
   indiexfm: {
     stationName: "Indie X FM",
