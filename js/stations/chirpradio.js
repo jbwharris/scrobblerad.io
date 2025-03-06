@@ -4,7 +4,7 @@ const stationData = {
     song: "now_playing.track",
     album: "now_playing.release",
     albumArt: "now_playing.lastfm_urls.large_image",
-    stationName: "ChirpRadio",
+    stationName: "CHIRP Radio",
     location: "Chicago, IL 🇺🇸",
     webUrl: "https://www.chirpradio.org",
     streamUrl: "https://chirpradio1.streamguys1.com/live",
