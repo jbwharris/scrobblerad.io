@@ -538,29 +538,38 @@ nav.stationNav {
    }
 
    button {
-      padding: .4rem .5rem .4rem 1rem;
-      font-size: clamp(17px, 15.592px + 0.376vw, 21px);
+      padding: 0 .5rem 0 0;
+      font-size: clamp(0.9rem, 0.796rem + 0.522vw, 1.2rem);
       transition: all 250ms ease-in-out;
       color: var(--bs-body-color);
       display: block;
       width: 100%;
+      height: auto;
+      min-height: 45px;
       background: var(--sidebar-bg);
       border-radius: .5rem 0 0 .5rem;
       margin:.5rem 0 0;
       border:0;
       text-align:left;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
 
       &:has(input:checked) {
          background: rgb(36, 27, 196);
          background: var(--sidebar-gradient);
-         padding: 1rem .5rem 1rem 2rem;
          font-weight: 700;
+         font-size: clamp(1.2rem, 1.13rem + 0.348vw, 1.4rem);
+         min-height:60px;
+
+         img {width: 60px; height:60px;}
       }
 
       input[type="radio"] {
          display: none;
       }
 
+      img {border-radius: .5rem 0 0 .5rem; margin-right: 1rem; transition: all 250ms ease-in-out;}
    }
 
 }
@@ -699,6 +708,4 @@ input[type="checkbox"]:checked~.menuIconToggle {
       max-width: 75vw;
    }
 }
-
-
 
