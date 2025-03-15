@@ -84,6 +84,7 @@ const stations = {
   },
   eastvillageradio: {
     stationName: "East Village Radio",
+    cors: true,
   },
   eightradio: {
     stationName: "8Radio",
@@ -93,6 +94,9 @@ const stations = {
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
+  },
+  kffp: {
+    stationName: "Freeform Portland",
   },
   funkymoose: {
     stationName: "Funky Moose Radio",
