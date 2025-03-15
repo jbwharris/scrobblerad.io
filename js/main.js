@@ -35,8 +35,15 @@ async function generateRadioButtons() {
     input.value = stationKey;
     input.checked = stationKey === radioPlayer.stationName;
 
+    const img = document.createElement('img');
+    img.src = `img/stations/${stationKey}.png`;
+    img.width = '45';
+    img.height = '45';
+    img.loading = 'lazy';
+
     // Attach the input to the button
     button.appendChild(input);
+    button.prepend(img);
     fragment.appendChild(button);
   });
 
@@ -189,6 +196,9 @@ class Page {
 
                 playerMetaElement.appendChild(clone);
 
+
+                document.getElementById("playermeta").classList.remove("opacity-50");
+
                 const backgroundUrl = artworkUrl === urlCoverArt ? `url("../${stationArt}")` : `url("${stationArt}")`;
                 document.documentElement.style.setProperty("--albumArt", backgroundUrl);
 
@@ -240,7 +250,7 @@ class Page {
                 album: albumDisplay || '',
                 duration: Infinity,
                 startTime: 0,
-                artwork: [{ src: stationArt }],
+                artwork: [{ src: "stationArt" }],
             });
 
 
@@ -427,11 +437,12 @@ class RadioPlayer {
     async handleStationSelect(direction, stationName, firstRun) {
         if (!stationName || direction === false) return;
 
+        document.getElementById("playermeta").classList.add("opacity-50");
+
         const stationData = await this.loadStationData(`/js/stations/${stationName}.js`);
         if (!stationData) return;
 
         this.currentStationData = stationData;
-
         const page = new Page(stationName, this);
 
         // Clear any existing streaming intervals
@@ -461,10 +472,53 @@ class RadioPlayer {
             }
 
             const newAudio = new Audio(this.addCacheBuster(this.currentStationData[this.stationName].streamUrl));
+            newAudio.volume = 0; // Start muted for smooth fade-in
 
             newAudio.onloadedmetadata = () => {
                 this.lfmMetaChanged = false;
                 this.debouncedPlayAudio(newAudio);
+
+                // If there's an active stream, fade it out
+                if (this.audio) {
+                    let fadeDuration = 2000; // 2 seconds fade
+                    let step = 0.05; // Volume step size
+                    const fadeInterval = setInterval(() => {
+                        // Ensure newAudio never exceeds volume of 1
+                        if (newAudio.volume < 1) {
+                            newAudio.volume = Math.min(1, newAudio.volume + step);
+                        }
+
+                        // Only fade out existing audio if it's defined
+                        if (this.audio) {
+                            if (this.audio.volume > 0) {
+                                this.audio.volume = Math.max(0, this.audio.volume - step);
+                            }
+                            
+                            // If it's fully faded out, stop it
+                            if (this.audio.volume === 0) {
+                                this.audio.pause();
+                                this.audio.src = ""; // Prevent buffering
+                                this.audio = null;
+                            }
+                        }
+
+                        // Stop the interval once the new stream is fully faded in
+                        if (newAudio.volume >= 1) {
+                            clearInterval(fadeInterval);
+                            this.audio = newAudio; // Assign new audio as the active one
+                        }
+                    }, fadeDuration * step);
+                } else {
+                    // No existing audio, just fade in the new stream
+                    let fadeInInterval = setInterval(() => {
+                        if (newAudio.volume < 1) {
+                            newAudio.volume += 0.05;
+                        } else {
+                            clearInterval(fadeInInterval);
+                        }
+                    }, 50);
+                    this.audio = newAudio; // Set audio for the first time
+                }
 
                 this.streamingInterval = setInterval(() => {
                     this.getStreamingData();
@@ -582,21 +636,21 @@ class RadioPlayer {
             .replace(/--/g, '-')                     // Double hyphens
             .trim() || '';                           // Fallback if string is empty
 
-        const filterSongDetails = song => {
-            if (!song) return ''; // Return an empty string if song is undefined
-            return song
-                .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
-                .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
-                .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
-                .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
-                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
-                .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
-                .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
-                .replace(/\s*-\s*Remaster(ed)?/gi, '')          // Removes "- Remaster" or "- Remastered"
-                .trim();
-        };
-
-
+            const filterSongDetails = song => {
+                if (!song) return ''; // Return an empty string if song is undefined
+                return song
+                    .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
+                    .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
+                    .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                    .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
+                    .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
+                    .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
+                    .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
+                    .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
+                    .replace(/\s*-\s*Remaster(ed)?/gi, '') // Removes "- Remaster" or "- Remastered" (CASE-INSENSITIVE)
+                    .replace(/([\)\]])\s*\d{4}.*/, '$1') // Removes anything after a closing bracket if followed by a year (e.g., "1972")
+                    .trim();
+            };
 
         const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
 
@@ -634,6 +688,16 @@ class RadioPlayer {
            // console.log('albumArt from spinPath', albumArt);
         }
 
+        if (this.currentStationData[this.stationName].htmlPath) {
+            song = filterSongDetails(data.song) || '';
+            artist = this.applyFilters('artist', data.artist) || '';
+            album = this.applyFilters('album', data.album) || '';
+            albumArt = data.albumArt || '';
+            spinUpdated = data.spinUpdated || '';
+
+           // console.log('albumArt from spinPath', albumArt);
+        }
+
         if (this.currentStationData[this.stationName].orbPath) {
             //radio.co apis that have a string "song - artist" piggybacking on the orbPath function
             if (this.currentStationData[this.stationName].dataPath) {
@@ -659,6 +723,28 @@ class RadioPlayer {
         }
 
         if (this.currentStationData[this.stationName].stringPath) {
+
+            console.log('stringPath data', data);
+
+            const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
+            const match = regexPattern.exec(data);
+
+            if (match) {
+                song = filterSongDetails(match[1]?.trim()) || '';
+                artist = this.applyFilters('artist', match[2]?.trim()) || '';
+                album = this.applyFilters('album', match[3]?.trim()) || '';
+                albumArt = match[4]?.trim() || urlCoverArt;
+                spinUpdated = match[5]?.trim() || '';
+
+                if (this.currentStationData[this.stationName].flipMeta) {
+                    [song, artist] = [artist, song];
+                }
+            } else {
+                console.log('No match found');
+            }
+        }
+
+        if (this.currentStationData[this.stationName].htmlPath) {
             const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
             const match = regexPattern.exec(data);
 
@@ -759,14 +845,18 @@ class RadioPlayer {
 
                         if (queryData.error !== 6) {
                             if (currentAlbum) {
+                                console.log('querying lfm album');
                                 lfmArt = queryData.album?.image[3]["#text"] || urlCoverArt;
+                                console.log('lfm album art from album query', lfmArt);
                                 lfmAlbum = this.applyFilters('album', queryData.album?.name) || currentAlbum || '';
                                 lfmSong = currentSong || 'No streaming data currently available';
                                 lfmArtist = this.applyFilters('artist', queryData.album?.artist) || currentArtist || '';
                                 lfmListeners = queryData.album?.listeners || null;
                                 lfmPlaycount = queryData.album?.playcount || null;
                             } else if ((queryType == 'song') || (queryType == false)) {
+                                console.log('querying lfm song');
                                 lfmArt = queryData.track.album?.image[3]["#text"] || urlCoverArt;
+                                console.log('lfm album art from track query', lfmArt);
                                 lfmAlbum = this.applyFilters('album', queryData.track?.album?.title) || currentAlbum || '';
                                 lfmSong = this.applyFilters('track', queryData.track?.name) || currentSong || 'No streaming data currently available';
                                 lfmArtist = this.applyFilters('artist', queryData.track?.artist?.name) || currentArtist || '';
@@ -889,12 +979,12 @@ class RadioPlayer {
 
                 // Store the current data response for future comparison
                 this.previousDataResponse = cbcData;
-
                 // Process the new data response
                 this.processData(cbcData);
             }
 
             if (this.isPlaying && !this.shouldReloadStream) {
+
                 let stationUrl = this.addCacheBuster(this.currentStationData[this.stationName].apiUrl);
 
                 const fetchOptions = {
@@ -909,15 +999,13 @@ class RadioPlayer {
                         // Check if contentType exists before calling includes
                         if (contentType && (contentType.includes('application/json') || 
                             contentType.includes('application/vnd.api+json') || 
-                            this.currentStationData[this.stationName].phpString)) {
+                            (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString))) {
                             
                             return response.json().then((data) => ({ data, contentType }));
                             
                         } else if (contentType && (contentType.includes('text/html') || 
                             contentType.includes('application/javascript'))) {
-                            
                             return response.text().then((data) => ({ data, contentType }));
-                            
                         } else {
                             throw new Error(`Unsupported content type or missing content-type header: ${contentType}`);
                         }
@@ -932,17 +1020,22 @@ class RadioPlayer {
                             data = this.extractDataFromHTML(doc);
                             
                         } else if (contentType && contentType.includes('application/javascript')) {
-                            
                             // Extract the HTML content from the JavaScript response
                             const htmlContent = this.extractHTMLFromJS(data);
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
-                            
                         } else if (contentType && contentType.includes('text/html') && 
-                                   this.currentStationData[this.stationName].phpString) {
-                            
+                                    (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString)) {
                             data = data;
+
+                        } else if (contentType && contentType.includes('text/html') && 
+                                   this.currentStationData[this.stationName].htmlString) {
+                            const htmlContent = data;
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(htmlContent, 'text/html');
+
+                            data = this.extractDataFromHTML(doc);
                         }
 
                         // Compare the current data response with the previous one
@@ -976,7 +1069,13 @@ class RadioPlayer {
 
     // Helper function to extract necessary data from HTML response
     extractDataFromHTML(doc) {
-        const replaceEnDashWithEmDash = str => str.replace(/-/g, '—');
+        const replaceEnDashWithEmDash = str => str.replace(/—/g, '—');
+        const replaceHyphenWithEmDash = str => str.replace(/—/g, '—');
+
+        if (this.currentStationData[this.stationName].htmlString) {
+            const htmlString = replaceHyphenWithEmDash(doc.querySelector('div.hidden-xs')?.textContent.trim() || 'No streaming data currently available').replace(/\s+/g,' ').trim();
+            return htmlString;
+        }
 
         const song = replaceEnDashWithEmDash(doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available');
         const artist = replaceEnDashWithEmDash(doc.querySelector('span.artist')?.textContent.trim() || '');
@@ -1052,7 +1151,7 @@ class RadioPlayer {
             }
 
             // Format and check stale data in a separate function
-            const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated, this.getPath(data, this.currentStationData[this.stationName].duration));
+            const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated, this.getPath(data, this.currentStationData[this.stationName].duration), song);
 
             if ((staleData === "Live365 past") && (this.song)) {
                 if (song.toLowerCase() !== this.song.toLowerCase()) {
@@ -1117,10 +1216,13 @@ class RadioPlayer {
         }
     }
 
-    checkStaleData(timezone, timestamp, spinUpdated, duration) {
+    checkStaleData(timezone, timestamp, spinUpdated, duration, song) {
+
+        console.log('song', song, 'this.song', this.song);
+
         let staleData = '';
 
-        if ((!timezone && !timestamp && !spinUpdated) || (!timestamp && spinUpdated == true) || (timestamp === undefined && !this.currentStationData[this.stationName].spinPath)) {
+        if ((!timezone && !timestamp && !spinUpdated) || (!timestamp && spinUpdated == true) || (timestamp === undefined && !this.currentStationData[this.stationName].spinPath && !timezone)) {
             return staleData;
         }
 
@@ -1137,13 +1239,30 @@ class RadioPlayer {
             timeZoneName: 'short'
         });
 
-       timezoneTime = new Date(timezoneTime).toISOString();
+        timezoneTime = new Date(timezoneTime).toISOString();
+
 
         if (timestamp) {
+
+            console.log('timestamp', timestamp);
             apiUpdatedData = this.convertTimestamp(timestamp, timezone);
-        } else {
+        } else if (spinUpdated) {
+
+            console.log('spinUpdated', spinUpdated);
+
             // Handle timestamp conversion and formatting
             apiUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
+        } else if ((timezone && !timestamp)) {
+            console.log('timezone and no timestamp', timestamp);
+
+            if (song !== this.song) {
+                // Song changed: Set a new fallback timestamp
+                this.fallbackTimestamp = timezoneTime;
+                apiUpdatedData = this.fallbackTimestamp;
+            } else if (this.fallbackTimestamp) {
+                // Same song: Retain the previously assigned timestamp
+                apiUpdatedData = this.fallbackTimestamp;
+            }
         }
 
         // Convert formatted times to epoch
@@ -1305,6 +1424,8 @@ class RadioPlayer {
 
         // If there's a spinUpdated time, convert it to 24-hour format
         if (spinUpdated && spinUpdated !== true) {
+
+            console.log("is it getting here spinUpdated?")
             const updated24Hour = convertTo24HourFormat(spinUpdated);
             apiUpdatedTime = `${currentDatePart} ${updated24Hour} ${currentTimezonePart}`;
         }
@@ -1343,9 +1464,7 @@ class RadioPlayer {
 
     upsizeImgUrl(url) {
         if (url) {
-            return url.replace(/100x100|170x170|360x360|300x300/g, '500x500');
-        } else {
-            return;
+            return url.replace(/\d{3}x\d{3}/g, '500x500');
         }
     }
 
@@ -1397,6 +1516,12 @@ class RadioPlayer {
     }
 
     pause() {
+        if (this.playButton.classList.contains("spinner-grow")) {
+            this.audio.play();
+            return;
+        }
+
+
         this.audio.pause();
         this.isPlaying = false;
         this.playButton.lastElementChild.className = "icon-play";
@@ -1409,6 +1534,7 @@ class RadioPlayer {
         // Set a timeout to mark stream reload after 30 seconds
         this.pauseTimeout = setTimeout(() => {
             console.log("the stream should be reloaded");
+            document.getElementById("playermeta").classList.add("opacity-50");
             this.shouldReloadStream = true;
         }, 30000);
     }
