@@ -26,6 +26,10 @@ const stations = {
   thebridge: {
     stationName: "The Bridge 90.9",
   },
+  cavernfm: {
+    stationName: "Cavern.FM",
+    cors:true
+  },
   chillfiltr: {
     stationName: "CHILLFILTR",
   },
@@ -158,6 +162,9 @@ const stations = {
   },
   kpiss: {
     stationName: "KPISS",
+  },
+  kqua: {
+    stationName: "KQUA - The River",
   },
   krsh: {
     stationName: "The Krush",
