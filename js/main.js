@@ -250,7 +250,7 @@ class Page {
                 album: albumDisplay || '',
                 duration: Infinity,
                 startTime: 0,
-                artwork: [{ src: "stationArt" }],
+                artwork: [{ src: stationArt }],
             });
 
 
@@ -472,53 +472,10 @@ class RadioPlayer {
             }
 
             const newAudio = new Audio(this.addCacheBuster(this.currentStationData[this.stationName].streamUrl));
-            newAudio.volume = 0; // Start muted for smooth fade-in
 
             newAudio.onloadedmetadata = () => {
                 this.lfmMetaChanged = false;
                 this.debouncedPlayAudio(newAudio);
-
-                // If there's an active stream, fade it out
-                if (this.audio) {
-                    let fadeDuration = 2000; // 2 seconds fade
-                    let step = 0.05; // Volume step size
-                    const fadeInterval = setInterval(() => {
-                        // Ensure newAudio never exceeds volume of 1
-                        if (newAudio.volume < 1) {
-                            newAudio.volume = Math.min(1, newAudio.volume + step);
-                        }
-
-                        // Only fade out existing audio if it's defined
-                        if (this.audio) {
-                            if (this.audio.volume > 0) {
-                                this.audio.volume = Math.max(0, this.audio.volume - step);
-                            }
-                            
-                            // If it's fully faded out, stop it
-                            if (this.audio.volume === 0) {
-                                this.audio.pause();
-                                this.audio.src = ""; // Prevent buffering
-                                this.audio = null;
-                            }
-                        }
-
-                        // Stop the interval once the new stream is fully faded in
-                        if (newAudio.volume >= 1) {
-                            clearInterval(fadeInterval);
-                            this.audio = newAudio; // Assign new audio as the active one
-                        }
-                    }, fadeDuration * step);
-                } else {
-                    // No existing audio, just fade in the new stream
-                    let fadeInInterval = setInterval(() => {
-                        if (newAudio.volume < 1) {
-                            newAudio.volume += 0.05;
-                        } else {
-                            clearInterval(fadeInInterval);
-                        }
-                    }, 50);
-                    this.audio = newAudio; // Set audio for the first time
-                }
 
                 this.streamingInterval = setInterval(() => {
                     this.getStreamingData();
