@@ -511,17 +511,18 @@ class RadioPlayer {
         });
 
         // New check for artist format "Last, First" or "Band, The"
-        if (artist.includes(', ')) {
-            const parts = artist.split(', ').map(part => part.trim());
+        if (cleanedArtist.includes(', ')) {
+            const parts = cleanedArtist.split(', ').map(part => part.trim());
             if (parts.length === 2) {
-                artist = `${parts[1]} ${parts[0]}`; // Rearrange "Last, First" to "First Last"
+                cleanedArtist = `${parts[1]} ${parts[0]}`; // Rearrange "Last, First" to "First Last"
             } else if (parts.length > 2) {
-                artist = `${parts.slice(-1)[0]} ${parts.slice(0, -1).join(' ')}`; // Handle "Band, The" to "The Band"
+                cleanedArtist = `${parts.slice(-1)[0]} ${parts.slice(0, -1).join(' ')}`; // Handle "Band, The" to "The Band"
             }
         }
 
         return cleanedArtist.trim();
-    }   
+    }
+ 
 
     getFilterSet() {
         return {
@@ -610,6 +611,8 @@ class RadioPlayer {
             };
 
         const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
+        const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
+        const match = regexPattern.exec(data);
 
         let song = filterSongDetails(getMetadata('song'));
         let artist = this.applyFilters('artist', getMetadata('artist'));
@@ -651,17 +654,16 @@ class RadioPlayer {
             album = this.applyFilters('album', data.album) || '';
             albumArt = data.albumArt || '';
             spinUpdated = data.spinUpdated || '';
-
-           // console.log('albumArt from spinPath', albumArt);
         }
 
         if (this.currentStationData[this.stationName].orbPath) {
             //radio.co apis that have a string "song - artist" piggybacking on the orbPath function
-            if (this.currentStationData[this.stationName].dataPath) {
+            if (this.currentStationData[this.stationName].dataPath == true) {
                 dataPath = data.data.title;
+            } else if (this.currentStationData[this.stationName].dataPath) {
+                dataPath = data[this.currentStationData[this.stationName].dataPath];
             }
-
-            const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
+ 
             const match = regexPattern.exec(dataPath);
 
             if (match) {
@@ -681,11 +683,6 @@ class RadioPlayer {
 
         if (this.currentStationData[this.stationName].stringPath) {
 
-            console.log('stringPath data', data);
-
-            const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
-            const match = regexPattern.exec(data);
-
             if (match) {
                 song = filterSongDetails(match[1]?.trim()) || '';
                 artist = this.applyFilters('artist', match[2]?.trim()) || '';
@@ -702,8 +699,6 @@ class RadioPlayer {
         }
 
         if (this.currentStationData[this.stationName].htmlPath) {
-            const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
-            const match = regexPattern.exec(data);
 
             if (match) {
                 song = filterSongDetails(match[1]?.trim()) || '';
@@ -727,7 +722,7 @@ class RadioPlayer {
 
         // Helper function to check if a string contains any of the filtered values (case-insensitive)
         const containsFilteredValue = (text, values) => {
-            if (!text) return false; // Ensure text is defined
+            if (!text) return false; // Ensure text is defined and not null/undefined
             const lowerCaseText = text.toLowerCase();
             return values.some(value => lowerCaseText.includes(value.toLowerCase()));
         };
@@ -737,14 +732,19 @@ class RadioPlayer {
             const filteredValues = this.currentStationData[this.stationName].filter || [];
             const stationNameValue = this.currentStationData[this.stationName].stationName;
 
+            // Return true if the text contains filtered values or station name
             return containsFilteredValue(text, filteredValues) || containsFilteredValue(text, [stationNameValue]);
         };
 
+        // Check the song and artist values for invalid content
         if (checkInvalidContent(song) || checkInvalidContent(artist)) {
-            return ['Station may be taking a break', null, null, urlCoverArt, '', '', true];
+            // Returning the message indicating the station may be taking a break
+            return ['Station data contains filtered terms', null, null, urlCoverArt, '', '', true];
         } else if ((!song && !artist) || (song && !artist)) {
-            return ['Station data is currently missing', null, null, urlCoverArt, '', '',  true];
+            // Returning the message indicating missing data
+            return ['Station data is currently missing', null, null, urlCoverArt, '', '', true];
         }
+
 
         // Apply replaceSpecialCharacters before returning
         song = replaceSpecialCharacters(song);
@@ -802,18 +802,14 @@ class RadioPlayer {
 
                         if (queryData.error !== 6) {
                             if (currentAlbum) {
-                                console.log('querying lfm album');
                                 lfmArt = queryData.album?.image[3]["#text"] || urlCoverArt;
-                                console.log('lfm album art from album query', lfmArt);
                                 lfmAlbum = this.applyFilters('album', queryData.album?.name) || currentAlbum || '';
                                 lfmSong = currentSong || 'No streaming data currently available';
                                 lfmArtist = this.applyFilters('artist', queryData.album?.artist) || currentArtist || '';
                                 lfmListeners = queryData.album?.listeners || null;
                                 lfmPlaycount = queryData.album?.playcount || null;
                             } else if ((queryType == 'song') || (queryType == false)) {
-                                console.log('querying lfm song');
                                 lfmArt = queryData.track.album?.image[3]["#text"] || urlCoverArt;
-                                console.log('lfm album art from track query', lfmArt);
                                 lfmAlbum = this.applyFilters('album', queryData.track?.album?.title) || currentAlbum || '';
                                 lfmSong = this.applyFilters('track', queryData.track?.name) || currentSong || 'No streaming data currently available';
                                 lfmArtist = this.applyFilters('artist', queryData.track?.artist?.name) || currentArtist || '';
@@ -841,12 +837,15 @@ class RadioPlayer {
                                 mbArtist = queryData.releases[0]['artist-credit'][0]?.name;
 
                                 if (mbArtist.includes(currentArtist)) {
-                                    lfmArt = `https://coverartarchive.org/release/${queryData.releases[0]?.id}/front-500`;
-                                }
+                                    console.log('mbArtist', mbArtist, 'currentArtist', currentArtist);
 
+                                    lfmArt = `https://coverartarchive.org/release/${queryData.releases[0]?.id}/front-500`;
+                                    lfmArtist = this.applyFilters('track', mbArtist) || '';
+                                } else {
+                                    lfmArtist = this.applyFilters('track', currentArtist) || '';
+                                }
                                 lfmAlbum = this.applyFilters('album', currentAlbum) || '';
                                 lfmSong = this.applyFilters('track', currentSong) || 'No streaming data currently available';
-                                lfmArtist = this.applyFilters('track', currentArtist) || '';
                                 lfmListeners = currentListeners || null;
                                 lfmPlaycount = currentPlaycount || null;
                             }
@@ -922,9 +921,6 @@ class RadioPlayer {
             if (!this.stationName) return;
 
             if ([this.stationName] == 'cbcmusic') {
-
-
-
                 const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
 
                 console.log("cbcData", cbcData);
@@ -995,16 +991,30 @@ class RadioPlayer {
                             data = this.extractDataFromHTML(doc);
                         }
 
-                        // Compare the current data response with the previous one
+                        // Add a property to store the timestamp of the last data update
+                        this.lastDataUpdateTime = null;  // Initially null
+
+                        // Your existing logic to check if the data is the same
                         if (this.isDataSameAsPrevious(data)) {
+                            // Check if it's been more than 900 seconds since the last update
+                            if (this.lastDataUpdateTime && (Date.now() - this.lastDataUpdateTime) > 900000) {
+                                console.log("Data is the same, but it's now stale");
+                                // Process the data even though it's the same because it's stale
+                                this.previousDataResponse = data; // Update even if we skip processing
+                                this.processData(data);
+                            }
                             return;
+                        } else {
+                            console.log("Data changed, processing update.");
                         }
 
-                        // Store the current data response for future comparison
-                        this.previousDataResponse = data;
-
                         // Process the new data response
+                        this.previousDataResponse = data; // Update even if we skip processing
                         this.processData(data);
+
+                        // Update the timestamp to reflect the new data was processed
+                        this.lastDataUpdateTime = Date.now();
+
                     })
                     .catch((error) => {
                         console.error('Error fetching streaming data:', error);
@@ -1204,9 +1214,6 @@ class RadioPlayer {
             console.log('timestamp', timestamp);
             apiUpdatedData = this.convertTimestamp(timestamp, timezone);
         } else if (spinUpdated) {
-
-            console.log('spinUpdated', spinUpdated);
-
             // Handle timestamp conversion and formatting
             apiUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
         } else if ((timezone && !timestamp)) {
@@ -1235,13 +1242,18 @@ class RadioPlayer {
                 apiUpdatedData = (duration * 1000) + apiUpdatedData;
             }
 
-            if (apiUpdatedData < Date.now()) {
-                console.log('song data ends in the past');
-                staleData = "Song data is in the past";
+            const threshold = Date.now() - 120000; // 120 seconds (2 minutes) in the past
+
+            if (apiUpdatedData < threshold) {
+                console.log('song data is more than 120 seconds in the past');
+                staleData = "Song data is too old";
+            } else if (apiUpdatedData < Date.now()) {
+                console.log('song data is slightly in the past but still recent');
             } else {
                 console.log('song data is still in the future');
             }
         }
+
 
         // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
         if ((this.currentStationData[this.stationName].offset + apiUpdatedData) < timezoneTime) {
@@ -1381,8 +1393,6 @@ class RadioPlayer {
 
         // If there's a spinUpdated time, convert it to 24-hour format
         if (spinUpdated && spinUpdated !== true) {
-
-            console.log("is it getting here spinUpdated?")
             const updated24Hour = convertTo24HourFormat(spinUpdated);
             apiUpdatedTime = `${currentDatePart} ${updated24Hour} ${currentTimezonePart}`;
         }
