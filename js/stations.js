@@ -28,7 +28,7 @@ const stations = {
   },
   cavernfm: {
     stationName: "Cavern.FM",
-    cors:true
+    cors: true
   },
   chillfiltr: {
     stationName: "CHILLFILTR",
@@ -208,6 +208,9 @@ const stations = {
   newsounds: {
     stationName: "New Sounds",
     cors: true,
+  },
+  novaphonicfm: {
+    stationName: "Novaphonic.FM",
   },
   plazaone: {
     stationName: "Nightwave Plaza",
