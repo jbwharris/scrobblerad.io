@@ -1,7 +1,6 @@
 const stationData = {
   wmse: {
     stationName: "WMSE Radio",
-    albumArt: "iImg",
     location: "Milwaukee, WI 🇺🇸",
     webUrl: "https://wmse.org",
     streamUrl: "https://wmse.streamguys1.com/wmselivemp3",

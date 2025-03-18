@@ -1,7 +1,6 @@
 const stationData = {
   thepoint: {
     stationName: "The Point",
-    albumArt: "iImg",
     location: "Fort Wayne, ID 🇺🇸",
     webUrl: "https://wcyt.org/",
     streamUrl: "https://securestreams6.autopo.st:2553/wcyt.mp3",

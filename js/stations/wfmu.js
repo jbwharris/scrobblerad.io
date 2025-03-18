@@ -1,7 +1,6 @@
 const stationData = {
   wfmu: {
     stationName: "WFMU",
-    albumArt: "iImg",
     location: "Jersey City, NJ 🇺🇸",
     webUrl: "https://wfmu.org",
     streamUrl: "https://stream0.wfmu.org/freeform-128k.mp3",

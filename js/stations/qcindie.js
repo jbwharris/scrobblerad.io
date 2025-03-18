@@ -1,7 +1,6 @@
 const stationData = {
   qcindie: {
     stationName: "QCIndie",
-    albumArt: "iImg",
     location: "Regina, SK 🇨🇦",
     webUrl: "https://qcindie.com",
     streamUrl: "https://stream.qcindie.com/live",

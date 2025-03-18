@@ -1,7 +1,6 @@
 const stationData = {
   wmfo: {
     stationName: "WMFO",
-    albumArt: "iImg",
     location: "Medford, MS 🇺🇸",
     webUrl: "https://www.wmfo.org/",
     streamUrl: "http://webstream.wmfo.org/;?type=http",

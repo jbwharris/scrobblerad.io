@@ -1,7 +1,6 @@
 const stationData = {
   cjiq: {
     stationName: "CJIQ",
-    albumArt: "iImg",
     location: "Kitchener, ON 🇨🇦",
     webUrl: "https://www.cjiqfm.com",
     streamUrl: "https://conestoga.leanstream.co/CJIQFM",

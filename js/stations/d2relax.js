@@ -1,6 +1,5 @@
 const stationData = {
   d2relax: {
-    albumArt: "iImg",
     stationName: "D2 Relax",
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://d2relax.com",

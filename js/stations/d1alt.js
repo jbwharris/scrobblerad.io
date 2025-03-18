@@ -1,6 +1,5 @@
 const stationData = {
   d1alt: {
-    albumArt: "iImg",
     stationName: "D1 Alternative",
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://d1alternative.com",

@@ -1,6 +1,5 @@
 const stationData = {
   dkfmclassic: {
-    albumArt: "iImg",
     stationName: "DKFM Classic",
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://www.decayfm.com",

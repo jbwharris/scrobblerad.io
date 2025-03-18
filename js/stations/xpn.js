@@ -1,7 +1,6 @@
 const stationData = {
   xpn: {
     stationName: "XPN",
-    albumArt: "iImg",
     location: "Philiadelphia, PA 🇺🇸",
     webUrl: "https://wxpn.org",
     streamUrl: "https://wxpnhi.xpn.org/xpnhi-nopreroll",

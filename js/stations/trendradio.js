@@ -1,7 +1,6 @@
 const stationData = {
   trendradio: {
     stationName: "Trend Radio",
-    albumArt: "iImg",
     location: "Hertfordshire, UK 🇬🇧",
     webUrl: "https://trend.broadcast.radio",
     streamUrl: "https://uksoutha.streaming.broadcast.radio/trend?1727980113905=",

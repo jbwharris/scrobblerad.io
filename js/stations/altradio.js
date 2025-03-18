@@ -1,6 +1,5 @@
 const stationData = {
   altradio: {
-    albumArt: "iImg",
     stationName: "AltRadio",
     location: "Norfolk, VA 🇺🇸",
     webUrl: "https://altradio.org/",

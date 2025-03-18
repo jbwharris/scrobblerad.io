@@ -1,6 +1,5 @@
 const stationData = {
   dkfm: {
-    albumArt: "iImg",
     stationName: "DKFM",
     location: "Los Angeles, CA 🇺🇸",
     webUrl: "https://www.decayfm.com",

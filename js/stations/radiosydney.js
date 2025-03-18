@@ -1,7 +1,6 @@
 const stationData = {
   radiosydney: {
     stationName: "Radio Sydney",
-    albumArt: "iImg",
     location: "Sydney, Australia 🇦🇺",
     webUrl: "https://radio.sydney/",
     streamUrl: "https://cast3.asurahosting.com/proxy/radiosyd/stream",
@@ -10,7 +9,6 @@ const stationData = {
     timezone: "Australia/Sydney",
     orbPath: true,
     flipMeta: true,
-    pathRegex: /^(.*?)\s*-\s*(.*?)\s*(?:-\s*(.*))?$/g,
     filter: ["Radio Sydney"],
   }
 };

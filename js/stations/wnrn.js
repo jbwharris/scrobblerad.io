@@ -1,7 +1,6 @@
 const stationData = {
   wnrn: {
     stationName: "WNRN",
-    albumArt: "iImg",
     location: "Charlottesville, VA 🇺🇸",
     webUrl: "https://wnrn.org",
     streamUrl: "https://26223.live.streamtheworld.com/WNRNFM_128.mp3",

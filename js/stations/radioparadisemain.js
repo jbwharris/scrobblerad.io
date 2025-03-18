@@ -1,7 +1,6 @@
 const stationData = {
   radioparadisemain: {
     stationName: "Radio Paradise Main Mix",
-    albumArt: "iImg",
     location: "Eureka, CA 🇺🇸",
     webUrl: "https://radioparadise.com/",
     streamUrl: "https://stream.radioparadise.com/mp3-192",

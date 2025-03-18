@@ -1,9 +1,5 @@
 const stationData = {
   birchstreet: {
-    artist: "iArtist",
-    song: "iName",
-    album: "",
-    albumArt: "iImg",
     stationName: "Birch Street Radio",
     location: "Richmond Hill, ON 🇨🇦",
     webUrl: "https://www.birchstreetradio.com",
