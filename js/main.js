@@ -867,7 +867,10 @@ class RadioPlayer {
                 }
             }
 
-            let finalAlbumArt = currentArt && currentArt !== urlCoverArt ? currentArt : (lfmResult[0] || (mbResult ? mbResult[0] : urlCoverArt));
+            let finalAlbumArt = currentArt && !currentArt.includes('mzstatic.com') && currentArt !== urlCoverArt
+                ? currentArt
+                : (lfmResult[0] || (mbResult ? mbResult[0] : urlCoverArt));
+
 
             if (lfmData.error !== 6 ) {
                 // return album art, album, song, artist, lfm listeners & playcount
