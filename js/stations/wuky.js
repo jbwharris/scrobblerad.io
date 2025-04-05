@@ -19,6 +19,5 @@ const stationData = {
     timestamp2: "tracklist.results.0.song._end_time",
     timezone: "America/Chicago",
     altPath: true,
-    isFuture: true,
   },
 }

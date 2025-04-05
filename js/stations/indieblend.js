@@ -3,7 +3,6 @@ const stationData = {
     stationName: "The Indie Blend",
     artist: "current-track.artist",
     song: "current-track.title",
-    albumArt: "current-track.art",
     location: "Washington, DC 🇺🇸",
     webUrl: "https://live365.com/station/The-Indie-Blend-a51326",
     streamUrl: "https://das-edge13-live365-dal02.cdnstream.com/a51326",
