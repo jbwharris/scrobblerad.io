@@ -39,6 +39,10 @@ const stations = {
     stationName: "The Bridge 90.9",
     filters: [""],
   },
+  btpm: {
+    stationName: "BTPM - The Bridge",
+    filters: [""],
+  },
   cavernfm: {
     stationName: "Cavern.FM",
     cors: true,
@@ -244,6 +248,10 @@ const stations = {
     stationName: "KXLU",
     filters: [""],
   },
+  kxll: {
+    stationName: "KXLL",
+    filters: [""],
+  },
   kxt: {
     stationName: "KXT",
     filters: [""],
@@ -295,6 +303,10 @@ const stations = {
   },
   qcindie: {
     stationName: "QCIndie",
+    filters: [""],
+  },
+  racketeer: {
+    stationName: "Racketeer Radio",
     filters: [""],
   },
   radiolaurier: {
@@ -372,10 +384,6 @@ const stations = {
   },
   wber: {
     stationName: "WBER",
-    filters: [""],
-  },
-  wbfo: {
-    stationName: "WBFO - The Bridge",
     filters: [""],
   },
   wbor: {
