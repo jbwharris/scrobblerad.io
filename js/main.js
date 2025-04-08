@@ -300,6 +300,9 @@ class RadioPlayer {
         this.errorMessage = false;
         this.getLfmMeta = this.getLfmMeta.bind(this);
         this.songMetadataChanged = false;
+        this.dataTimeCheck = null;
+        this.lastDataUpdateTime = null; 
+        this.lastKnownUpdatedTime = null;
 
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
@@ -463,6 +466,7 @@ class RadioPlayer {
             this.updateArt = true;
             this.isPlaying = true;
             this.songMetadataChanged = false;
+            this.lastKnownUpdatedTime = null;
             firstRun = false;
         }
 
@@ -474,7 +478,38 @@ class RadioPlayer {
                 return;
             }
 
-            const newAudio = new Audio(this.addCacheBuster(this.currentStationData[this.stationName].streamUrl));
+            const audioSrc = this.addCacheBuster(this.currentStationData[this.stationName].streamUrl);
+            const newAudio = new Audio(audioSrc);
+            newAudio.crossOrigin = 'anonymous'; // Required for Web Audio API
+
+            // If the stream is marked as quiet, boost it
+            if (this.currentStationData[this.stationName].quietStream) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaElementSource(newAudio);
+                const gainNode = audioContext.createGain();
+
+                gainNode.gain.value = this.currentStationData[this.stationName].gainBoost || 2;
+
+                console.log('station audio boosted');
+
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Resume context if needed
+                if (audioContext.state === 'suspended') {
+                    const resumeContext = () => {
+                        audioContext.resume();
+                        window.removeEventListener('click', resumeContext);
+                    };
+                    window.addEventListener('click', resumeContext);
+                }
+
+                // IMPORTANT: Save the context + node if needed later
+                this.audioContext = audioContext;
+                this.audioGainNode = gainNode;
+            }
+
+
 
             newAudio.onloadedmetadata = () => {
                 this.lfmMetaChanged = false;
@@ -609,14 +644,17 @@ class RadioPlayer {
                 return song
                     .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
                     .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
+
                     .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
                     .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
                     .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
                     .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
                     .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
-                    .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
                     .replace(/\s*-\s*Remaster(ed)?/gi, '') // Removes "- Remaster" or "- Remastered" (CASE-INSENSITIVE)
                     .replace(/([\)\]])\s*\d{4}.*/, '$1') // Removes anything after a closing bracket if followed by a year (e.g., "1972")
+                    .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '$1') // Removes a year within a brackets (6 Music Session, March 31 2025)
+                    .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
+                    .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
                     .trim();
             };
 
@@ -828,6 +866,7 @@ class RadioPlayer {
                     lfmData.track.artist?.name || currentArtist,
                     lfmData.track.listeners || null,
                     lfmData.track.playcount || null,
+                    lfmData.track.album?.artist || '',
                 ];
             } else if (lfmData.error !== 6  && (queryType == 'album')) {
                 lfmResult = [
@@ -843,7 +882,7 @@ class RadioPlayer {
             const lfmListeners = Array.isArray(lfmResult) ? lfmResult[4] || null : null;
             const lfmPlaycount = Array.isArray(lfmResult) ? lfmResult[5] || null : null;
 
-            if (mbData.releases?.length && (lfmData.error === 6 || isLfmArtMissing)) {
+            if (mbData.releases?.length && (lfmData.error === 6 || isLfmArtMissing || lfmResult?.[7] == 'Various Artists')) {
                 mbResult = [
                         `https://coverartarchive.org/release/${mbData.releases[0]?.id}/front-500`,
                         this.applyFilters('album', mbData.releases[0]['release-group']?.title) || currentAlbum,
@@ -851,33 +890,42 @@ class RadioPlayer {
                         mbData.releases[0]['artist-credit'][0]?.name || currentArtist
                 ];
 
+
+                console.log('this.jaccardSimilarity(mbResult[3], currentArtist)', this.jaccardSimilarity(mbResult[3], currentArtist), mbResult[3], currentArtist);
+
                 if ((mbResult[3] != currentArtist ) || (mbResult[2] != currentSong)) {
 
-                    // check if the result is close enough to merit running again. Sometimes MB will fine a completely new artist or song, which isn't what we want
-                    if ((this.jaccardSimilarity(mbResult[3], currentArtist) >= .6) || (this.jaccardSimilarity(mbResult[2], currentSong) >= .6)) {
+                    // check if the result is close enough, but not the same as the existing result. Sometimes MB will find a completely new artist or song, which isn't what we want
+                    if ((s => s >= 0.6 && s !== 1)(this.jaccardSimilarity(mbResult[3], currentArtist))) {
+                        console.log('this.jaccardSimilarity(mbResult[3], currentArtist)', this.jaccardSimilarity(mbResult[3], currentArtist), mbResult[3], currentArtist);
                         this.songMetadataChanged = true;  // Flag the change
                         //if the result is similar enough to the currentArtist, rerun the function
                         return this.getLfmMeta(mbResult[2], mbResult[3], mbResult[1], mbResult[0], 'song');
                     }
                 }
 
-                if ((mbResult[0] !== '') && (!currentArt || isLfmArtMissing)) {
-                    // return album art, album, song, artist, lfm listeners & playcount
-                    return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount];
+                if ((mbResult[0] !== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >= .9) && (!currentArt || isLfmArtMissing)) {
+
+                    if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
+                        // return album art, album, song, artist, lfm listeners & playcount
+                        return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount];
+                    } else {
+                        // return album art, album, song, artist, lfm listeners & playcount
+                        return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount];
+                    }
                 }
             }
 
-            let finalAlbumArt = currentArt && !currentArt.includes('mzstatic.com') && currentArt !== urlCoverArt
-                ? currentArt
-                : (lfmResult[0] || (mbResult ? mbResult[0] : urlCoverArt));
-
+            let finalAlbumArt = currentArt && !currentArt.includes('mzstatic.com') && !currentArt.includes('blankart.jpg') && currentArt !== urlCoverArt
+                  ? currentArt
+                  : (lfmResult?.[0] || mbResult?.[0] || urlCoverArt);
 
             if (lfmData.error !== 6 ) {
                 // return album art, album, song, artist, lfm listeners & playcount
-                return [finalAlbumArt, lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null];
+                return [this.upsizeImgUrl(finalAlbumArt), lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null];
             } else {
                 // return album art, album, song, artist, lfm listeners & playcount
-                return [finalAlbumArt, currentAlbum || '', currentSong, currentArtist, null, null];
+                return [this.upsizeImgUrl(finalAlbumArt), currentAlbum || '', currentSong, currentArtist, null, null];
             }
             
 
@@ -925,13 +973,16 @@ class RadioPlayer {
     }
 
     checkUrlValidity(url) {
-        return fetch(url, { method: 'HEAD' })
-            .then(response => response.ok)
+        return fetch(url, { method: 'HEAD', redirect: 'error' })
+            .then(response => {
+                return response.ok;
+            })
             .catch(error => {
-                console.error('Error fetching URL:', url, error);
+                console.warn('URL invalid or redirected:', url, error);
                 return false;
             });
     }
+
 
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
@@ -1007,10 +1058,13 @@ class RadioPlayer {
                             const doc = parser.parseFromString(htmlContent, 'text/html');
 
                             data = this.extractDataFromHTML(doc);
-                        }
+                        }            
 
-                        // Add a property to store the timestamp of the last data update
-                        this.lastDataUpdateTime = null;  // Initially null
+                        // check if the last time it updated is still in the future
+                        if (this.lastKnownUpdatedTime > Date.now()) {
+                            console.log('last updated time is still in the future, skipping updating')
+                            return;
+                        }
 
                         // Your existing logic to check if the data is the same
                         if (this.isDataSameAsPrevious(data)) {
@@ -1029,9 +1083,7 @@ class RadioPlayer {
                                 console.log("Skipping update: song metadata was altered externally.");
                                 this.songMetadataChanged = false; // Reset flag
                                 return; // Stop further processing
-                            }
-
-                        console.log("Data changed, processing update.");
+                        }
 
                         // Process the new data response
                         this.previousDataResponse = data; // Update even if we skip processing
@@ -1128,9 +1180,17 @@ class RadioPlayer {
                 console.log('timestamp reverse array', timestamp);
             } else {
                 timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+
                 if (timestamp == 0 || timestamp == '') {
                     timestamp = undefined;
                 }
+            }
+
+           // console.log("timestamp and this.lastKnownUpdatedTime", timestamp, this.lastKnownUpdatedTime);
+
+
+            if (timestamp < this.lastKnownUpdatedTime) {
+                return
             }
 
             if (this.currentStationData[this.stationName].altPath && !song) {
@@ -1182,24 +1242,32 @@ class RadioPlayer {
                     // Validate the album art only after getting lfmArt
                     const artworkToValidate = lfmArt === urlCoverArt ? albumArt : lfmArt;
 
-                    // Start validating the album art URL asynchronously
-                    this.checkUrlValidity(artworkToValidate).then(isValid => {
-                        const validatedArt = isValid ? artworkToValidate : urlCoverArt;
-
-                        // Upsize the validated album art if needed
-                        this.artworkUrl = this.upsizeImgUrl(validatedArt) || urlCoverArt;
+                    if (!artworkToValidate || artworkToValidate === urlCoverArt) {
+                        // Skip validation
+                        this.artworkUrl = this.upsizeImgUrl(urlCoverArt) || urlCoverArt;
                         this.listeners = lfmListeners || null;
                         this.playcount = lfmPlaycount || null;
-
-                        // Mark metadata as changed
                         this.lfmMetaChanged = true;
 
-                        // Refresh the page with updated data
                         const page = new Page(this.stationName, this);
                         page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
-                    }).catch(error => {
-                        console.error('Error during album art validation:', error);
-                    });
+                    } else {
+                        // Validate the chosen art
+                        this.checkUrlValidity(artworkToValidate).then(isValid => {
+                            const validatedArt = isValid ? artworkToValidate : urlCoverArt;
+
+                            this.artworkUrl = this.upsizeImgUrl(validatedArt) || urlCoverArt;
+                            this.listeners = lfmListeners || null;
+                            this.playcount = lfmPlaycount || null;
+                            this.lfmMetaChanged = true;
+
+                            const page = new Page(this.stationName, this);
+                            page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, true, this.currentStationData], this.errorMessage);
+                        }).catch(error => {
+                            console.error('Error during album art validation:', error);
+                        });
+                    }
+
 
                 }).catch(error => {
                     console.error('Error processing data:', error);
@@ -1218,24 +1286,25 @@ class RadioPlayer {
         }
 
         let apiUpdatedData;
-        let timezoneTime = new Date().toLocaleString("en-US", { 
-            timeZone: timezone, 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: false,
-            timeZoneName: 'short'
+
+        // Fix timezoneTime creation
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
         });
 
-        timezoneTime = new Date(timezoneTime).toISOString();
-
+        const parts = formatter.formatToParts(now);
+        const lookup = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+        let timezoneTime = new Date(`${lookup.year}-${lookup.month}-${lookup.day}T${lookup.hour}:${lookup.minute}:${lookup.second}`).toISOString();
 
         if (timestamp) {
-
-            console.log('timestamp', timestamp);
             apiUpdatedData = this.convertTimestamp(timestamp, timezone);
         } else if (spinUpdated) {
             // Handle timestamp conversion and formatting
@@ -1265,26 +1334,27 @@ class RadioPlayer {
                 apiUpdatedData = apiUpdatedData + (duration * 1000); // Get end time of the song
             }
 
-            // Prevent backtracking to older songs
-            if (this.lastKnownUpdatedTime && apiUpdatedData < this.lastKnownUpdatedTime) {
-                console.log("Skipping older song data — already showing newer content.");
-                staleData = "Older than current song";
-            }
 
             const pastThreshold = Date.now() - 120000; // 120 seconds in the past
             const futureThreshold = Date.now() - 240000; // 240 seconds in the future
 
-            if ((apiUpdatedData < pastThreshold) && (apiUpdatedData > futureThreshold)) {
-                console.log('song data is more than 120 seconds in the past');
-                staleData = "Waiting for newer song data";
+            if (this.lastKnownUpdatedTime && apiUpdatedData < this.lastKnownUpdatedTime) {
+                console.log("Skipping older song data — already showing newer content.");
+            } else if ((apiUpdatedData < pastThreshold) && (this.lastKnownUpdatedTime <= apiUpdatedData)) {
+                console.log('song data is more than 120 seconds in the past, waiting to get fresher data');
+                staleData = "Waiting for fresh data";
             } else if (apiUpdatedData < Date.now()) {
                 console.log('song data is slightly in the past but still recent');
             } else {
                 console.log('song data is still in the future');
             }
 
+            if (this.lastKnownUpdatedTime >= apiUpdatedData) {
+                return { staleData };
+            }
+
             // If we make it here and pass all checks, accept the new song
-            this.lastKnownUpdatedTime = apiUpdatedData;
+            this.lastKnownUpdatedTime = timestamp;
         }
 
 
