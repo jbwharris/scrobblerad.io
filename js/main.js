@@ -907,9 +907,11 @@ class RadioPlayer {
                 if ((mbResult[0] !== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >= .9) && (!currentArt || isLfmArtMissing)) {
 
                     if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
+                        console.log('getting here 1', mbResult[0]);
                         // return album art, album, song, artist, lfm listeners & playcount
                         return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount];
                     } else {
+                        console.log('getting here 2');
                         // return album art, album, song, artist, lfm listeners & playcount
                         return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount];
                     }
@@ -973,16 +975,13 @@ class RadioPlayer {
     }
 
     checkUrlValidity(url) {
-        return fetch(url, { method: 'HEAD', redirect: 'error' })
-            .then(response => {
-                return response.ok;
-            })
+        return fetch(url, { method: 'HEAD' })
+            .then(response => response.ok)
             .catch(error => {
-                console.warn('URL invalid or redirected:', url, error);
+                console.error('Error fetching URL:', url, error);
                 return false;
             });
     }
-
 
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
