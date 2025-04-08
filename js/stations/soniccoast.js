@@ -1,9 +1,8 @@
 const stationData = {
   soniccoast: {
     stationName: "The Sonic Coast",
-    artist: "current-track.artist",
-    song: "current-track.title",
-    albumArt: "current-track.art",
+    artist: "current-track.title",
+    song: "current-track.artist",
     location: "Detroit, MI 🇺🇸",
     webUrl: "https://thesoniccoast.com/",
     streamUrl: "https://das-edge13-live365-dal02.cdnstream.com/a85042_2",

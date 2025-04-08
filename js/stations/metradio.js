@@ -8,5 +8,7 @@ const stationData = {
     spinPath: true,
     timezone: "America/Toronto",
     filter: ["Met Radio", "August 10", "devtunes"],
+    quietStream: true,
+    gainBoost: 5
   }
 };
