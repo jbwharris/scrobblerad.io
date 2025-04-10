@@ -288,6 +288,8 @@ body {
 
    }
 
+
+
    & p::before,
    & a::before {
       display: inline-block;
@@ -319,6 +321,12 @@ body {
          font-size: clamp(16px, 11.07px + 1.315vw, 30px);
       }
 
+   }
+
+   #playermeta.errorMessage {
+      p::before {
+         opacity:0;
+      }
    }
 
    #title {
