@@ -7,7 +7,7 @@ const stationData = {
     webUrl: "https://blacklightradio.com/",
     streamUrl: "https://streaming.live365.com/a62286_2",
     apiUrl: "https://api.live365.com/station/a62286",
-    timestamp: "current-track.end",
+    timestamp: "current-track.start",
     timezone: "America/Chicago",
     filter: ["Blacklight"],
     isFuture: true,
