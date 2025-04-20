@@ -206,6 +206,24 @@ class Page {
                 this.setupMediaSession(song, artist, artworkUrl, errorMessage);
             };
 
+            if (song && artist) {
+                const currentTrack = {
+                  trackTitle: song,
+                  trackArtist: artist,
+                  trackAlbum: album,
+                  trackTimestamp: Math.floor(Date.now() / 1000) // ✅ timestamp in seconds
+                };
+
+                updateNowPlaying(currentTrack);
+
+                setTimeout(() => {
+                  scrobbleIt(currentTrack);
+                }, 60000);
+
+            }
+
+
+
             const img = new Image();
             img.onload = updateMetadata;
             img.src = finalArtUrl;
@@ -213,7 +231,6 @@ class Page {
 
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
-
         if (song.includes("<br/>")) {
             return;
         }
@@ -438,6 +455,14 @@ class RadioPlayer {
     async handleStationSelect(direction, stationName, firstRun) {
         if (!stationName || direction === false) return;
 
+        if (this.shouldReloadStream) {
+            console.log('getting here on reload?');
+            document.getElementById("playermeta").classList.remove("opacity-50");
+            this.audio.load();
+            this.shouldReloadStream = false;
+            return;
+        }
+
         document.getElementById("playermeta").classList.add("opacity-50");
 
         const stationData = await this.loadStationData(`/js/stations/${stationName}.js`);
@@ -452,7 +477,7 @@ class RadioPlayer {
             this.streamingInterval = null;
         }
 
-        if (firstRun) {
+        if (firstRun && !this.shouldReloadStream) {
             page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
             page.refreshCurrentData([`Station data loading`, '', '', urlCoverArt, null, null, true]);
             this.playButton.lastElementChild.className = "spinner-grow text-light";
@@ -955,7 +980,7 @@ class RadioPlayer {
         lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(this.applyFilters('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(this.applyFilters(lfmQueryField, queryDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
 
         // Construct the MusicBrainz query URL
-        mbQueryUrl = `https://musicbrainz.org/ws/2/release?fmt=json&query=title:+"${encodeURIComponent(this.applyFilters('track', currentSong))}"^3%20${encodeURIComponent(currentSong)}%20artistname:+"${encodeURIComponent(this.applyFilters('artist', currentArtist))}"^4${encodeURIComponent(this.applyFilters('artist', currentArtist))}&limit=3`;
+        mbQueryUrl = `https://musicbrainz.org/ws/2/release?fmt=json&query=title:+"${encodeURIComponent(this.applyFilters('track', currentSong))}"^3%20${encodeURIComponent(currentSong)}%20artistname:+"${encodeURIComponent(this.applyFilters('artist', currentArtist))}"^4${encodeURIComponent(this.applyFilters('artist', currentArtist))}%20artistname:+"-Various Artists"^4-various artists%20format:+"cd"^4cd&limit=3`;
 
         return [lfmQueryUrl, mbQueryUrl];
     }
@@ -1053,9 +1078,13 @@ class RadioPlayer {
                             data = this.extractDataFromHTML(doc);
                         }            
 
+                       // console.log('this.lastKnownUpdatedTime', this.lastKnownUpdatedTime, Date.now());
+
                         // check if the last time it updated is still in the future
                         if (this.lastKnownUpdatedTime > Date.now()) {
-                            console.log('last updated time is still in the future, skipping updating')
+                            console.log('this.lastKnownUpdatedTime > Date.now')
+
+                           // console.log('last updated time is still in the future, skipping updating', this.lastKnownUpdatedTime)
                             return;
                         }
 
@@ -1166,9 +1195,10 @@ class RadioPlayer {
            // console.log("timestamp and this.lastKnownUpdatedTime", timestamp, this.lastKnownUpdatedTime);
 
 
-            if (timestamp < this.lastKnownUpdatedTime) {
-                return
-            }
+            // if (timestamp < this.lastKnownUpdatedTime) {
+            //     console.log('song is still in the future')
+            //     return
+            // }
 
             if (this.currentStationData[this.stationName].altPath && (!song || !timestamp)) {
                 if ([this.stationName] == 'indie1023') {
@@ -1329,11 +1359,10 @@ class RadioPlayer {
 
         // some stations have duration data and tend to switch the track too early. This makes an adjustment so that the station doesn't jump away from the current too quickly if it's still in the window the song should still be playing
         if (duration) {
-            console.log('duration', duration)
             if (duration <= 600) {
 
                 apiUpdatedData = apiUpdatedData + (duration * 1000);
-                console.log('apiUpdatedData', apiUpdatedData)
+               // console.log('apiUpdatedData', apiUpdatedData)
             } else {
                 apiUpdatedData = apiUpdatedData + duration; // Get end time of the song
                 console.log('apiUpdatedData else', apiUpdatedData)
@@ -1345,28 +1374,48 @@ class RadioPlayer {
 
         // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
         if (this.currentStationData[this.stationName].isFuture) {
-            const pastThreshold = Date.now() - 240000; // 240 seconds in the past
+          const now = Date.now();
+          const pastThreshold = now - 240000; // 240 seconds ago
 
-            if (this.lastKnownUpdatedTime && apiUpdatedData < this.lastKnownUpdatedTime) {
-                console.log("Skipping older song data — already showing newer content.");
-            } else if ((apiUpdatedData < pastThreshold) && (this.lastKnownUpdatedTime <= apiUpdatedData)) {
-                console.log('song data is more than 240 seconds in the past, waiting to get fresher data');
-                staleData = "Waiting for fresh data";
-            } else if (apiUpdatedData < Date.now()) {
-                console.log('song data is slightly in the past but still recent');
-            } else {
-                console.log('song data is still in the future');
-            }
+          if (!this.lastKnownUpdatedTime) {
+            // First time setting it
+            this.lastKnownUpdatedTime = apiUpdatedData;
+          }
 
-            if (this.lastKnownUpdatedTime >= apiUpdatedData) {
-                return { staleData };
-            }
+          // 1. Reject obviously old data
+          if (apiUpdatedData < this.lastKnownUpdatedTime) {
+            console.log("Skipping older song data — already showing newer content.");
+            staleData =  "Live365 past";
+            return { staleData };
+          }
 
-            // If we make it here and pass all checks, accept the new song
-            this.lastKnownUpdatedTime = timestamp;
+          // 2. Reject data that's *too far in the past*
+          if (apiUpdatedData < pastThreshold) {
+            console.log("Song data is over 240 seconds old, waiting for fresh data.");
+            staleData = "Waiting for fresh data";
+            return { staleData };
+          }
+
+          // 3. Warn if it's slightly behind
+          if (apiUpdatedData < now) {
+            console.log("Song data is slightly in the past but still recent.");
+          }
+
+          // 4. Check if it's oddly in the future
+          if (apiUpdatedData > now + 2000) { // allow a 2s buffer
+            console.log("⏩ Song data appears to be in the future.");
+            // Optionally reject future data:
+            // return { staleData: "Song data is from the future" };
+          }
+
+          // 5. All checks passed — accept the song
+          this.lastKnownUpdatedTime = apiUpdatedData;
+          // console.log("✅ Accepting new song data");
         }
 
 
+
+        this.lastKnownUpdatedTime = apiUpdatedData;
 
         // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
         if ((this.currentStationData[this.stationName].offset + apiUpdatedData) < timezoneTime) {
@@ -1544,7 +1593,7 @@ class RadioPlayer {
         // Check if the stream should be reloaded based on page visibility
         if (this.shouldReloadStream) {
             console.log("the stream is reloading");
-            this.handleStationSelect(null, this.stationName, true); // Reload the stream
+            this.handleStationSelect(null, this.stationName, false); // Reload the stream
             this.shouldReloadStream = false; // Reset the flag
         } else {
             // Attempt to play audio
@@ -1624,12 +1673,12 @@ class RadioPlayer {
     }
 
     addCacheBuster(url) {
-        const timestamp = new Date().getTime();
-        if (this.stationName === 'radiowestern') {
+        const timestamp = Date.now();
+        const skipCacheBuster = ['radiowestern', 'kexp'];
+        if (skipCacheBuster.includes(this.stationName)) {
             return url;
-        } else {
-            return url.includes('?') ? `${url}&t=${timestamp}` : `${url}?t=${timestamp}`;
-        } 
+        }
+        return url.includes('?') ? `${url}&t=${timestamp}` : `${url}?t=${timestamp}`;
     }
 }
 
@@ -1670,4 +1719,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             behavior: 'smooth' // Change to 'auto' if you don't want smooth scrolling
         });
     }
+
 }, { once: true });
+
