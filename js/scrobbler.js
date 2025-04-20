@@ -231,7 +231,7 @@ function updateAuthButton() {
     button.innerHTML = '<i class="icon-lastfm"></i> Login with Last.fm';
     button.onclick = () => {
       const apiKey = APIKEY; // make sure this is defined
-      const callbackUrl = encodeURIComponent(window.location.origin + window.location.pathname);
+      const callbackUrl = encodeURIComponent('https://scrobblerad.io/');
       const authUrl = `https://www.last.fm/api/auth/?api_key=${apiKey}&cb=${callbackUrl}`;
       window.location.href = authUrl;
     };
