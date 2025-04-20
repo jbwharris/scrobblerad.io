@@ -362,7 +362,7 @@ class RadioPlayer {
             if (event.target && event.target.matches("input[name='station']")) {
                 this.handleStationSelect(event, event.target.value, true);
 
-                // Scroll the selected station into view
+                //Scroll the selected station into view
                 event.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         });
