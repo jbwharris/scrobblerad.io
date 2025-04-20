@@ -309,6 +309,11 @@ const stations = {
     stationName: "Racketeer Radio",
     filters: [""],
   },
+  radiofrancefip: {
+    stationName: "Radio France",
+    cors: true,
+    filters: [""],
+  },
   radiolaurier: {
     stationName: "Radio Laurier",
     filters: [""],
