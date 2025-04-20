@@ -8,7 +8,9 @@ const stationData = {
     streamUrl: "https://das-edge13-live365-dal02.cdnstream.com/a51326",
     apiUrl: "https://api.live365.com/station/a51326",
     timestamp: "current-track.start",
+    duration: "current-track.duration",
     timezone: "America/New_York",
-    filter: ["The Indie Blend", "Live365", "ADBREAK", "Ad Break"],
+    filter: ["Indie Blend", "Live365", "ADBREAK", "Ad Break", "WHFS"],
+    isFuture: true,
   }
 };
