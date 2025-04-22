@@ -4,58 +4,68 @@ const APIKEY = "1eda135bc7d7e3ef4815d11f9990d60c";
 const SECRET = "d006f6c9ede4f8d566110fdd5369dbe6";
 
 function authenticateFM(callback) {
-  const existingKey = Cookies.get("scrobbleradio-lastfm-key");
 
-  if (existingKey) {
-    console.log("Already authenticated");
-    if (callback) callback(); // run logic
-    return;
-  }
+    // Check if already authenticated
+    const existingKey = Cookies.get("scrobbleradio-lastfm-key");
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get("token");
+    if (existingKey) {
+        updateAuthButton();
+        if (callback) callback();
+        return;
+    }
 
-  if (!token) {
-    const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.href)}`;
-    window.location.href = authUrl;
-  } else {
-    const sig = md5(
-      "api_key" + APIKEY +
-      "methodauth.getSession" +
-      "token" + token +
-      SECRET
-    );
+    // Extract token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
 
+    // If no token, redirect to Last.fm for authentication
+    if (!token) {
+        const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent('https://scrobblerad.io')}`;
+        window.location.href = authUrl;
+        return;
+    }
+
+    // Prepare request to exchange token for session key
+    const sig = md5(`api_key${APIKEY}methodauth.getSessiontoken${token}${SECRET}`);
     const body = new URLSearchParams({
-      method: "auth.getSession",
-      api_key: APIKEY,
-      token: token,
-      api_sig: sig,
-      format: "json"
+        method: "auth.getSession",
+        api_key: APIKEY,
+        token: token,
+        api_sig: sig,
+        format: "json"
     });
 
+    // Fetch session key from Last.fm
     fetch(lastFmBaseScrobbleUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body
     })
-      .then(res => res.json())
-      .then(data => {
+    .then(res => res.json())
+    .then(data => {
+        console.log("Step 8: Session Data:", data);
         if (data?.session?.key) {
-          Cookies.set("scrobbleradio-lastfm-key", data.session.key, { expires: 30 });
-          console.log("Authenticated with Last.fm");
+            const userKey = data.session.key;
 
-          // Remove ?token from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
+            // Save userKey to cookie
+            Cookies.set("scrobbleradio-lastfm-key", userKey, {
+                expires: 30,
+                path: '/',
+                sameSite: 'Lax'
+            });
 
-          if (callback) callback(); // run logic
+            // Update UI and call callback
+            updateAuthButton();
+            if (callback) callback();
         } else {
-          console.error("Failed to get session key:", data);
+            console.error("Failed to get session key:", data);
         }
-      })
-      .catch(err => console.error("Auth error:", err));
-  }
+    })
+    .catch(err => console.error("Auth error:", err));
 }
+
+
+
 
 function updateNowPlaying(track) {
  // console.log("🎵 Now Playing update triggered for", track);
@@ -100,7 +110,6 @@ function updateNowPlaying(track) {
 }
 
 function scrobbleIt(track) {
-
   const userKey = Cookies.get("scrobbleradio-lastfm-key");
 
   if (!track.trackTitle || !track.trackArtist || !track.trackTimestamp) {
@@ -216,32 +225,41 @@ function updateHistory(track) {
 }
 
 
-function updateAuthButton() {
-  const button = document.getElementById("lastfm-auth");
-  const userKey = Cookies.get("scrobbleradio-lastfm-key");
-
-  if (userKey) {
-    button.innerHTML = '<i class="icon-lastfm"></i> Logout of Last.fm';
-    button.onclick = () => {
-      Cookies.remove("scrobbleradio-lastfm-key");
-      alert("Logged out of Last.fm");
-      location.reload(); // optional: just call updateAuthButton() instead of reloading
-    };
-  } else {
-    button.innerHTML = '<i class="icon-lastfm"></i> Login with Last.fm';
-    button.onclick = () => {
-      const apiKey = APIKEY; // make sure this is defined
-      const callbackUrl = encodeURIComponent('https://scrobblerad.io/');
-      const authUrl = `https://www.last.fm/api/auth/?api_key=${apiKey}&cb=${callbackUrl}`;
-      window.location.href = authUrl;
-    };
-  }
-}
-
-
-// Run this once on page load to set the initial button state
-updateAuthButton();
-
 // Attach to global scope
 window.updateNowPlaying = updateNowPlaying;
 window.scrobbleIt = scrobbleIt;
+
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (token) {
+        authenticateFM(() => {
+            updateAuthButton();
+        });
+    } else {
+        updateAuthButton();
+    }
+});
+
+function updateAuthButton() {
+    const button = document.getElementById("lastfm-auth");
+    const userKey = Cookies.get("scrobbleradio-lastfm-key");
+
+    if (button) {
+        if (!userKey) {
+            button.innerHTML = '<i class="icon-lastfm"></i> Login with Last.fm';
+            button.onclick = () => {
+                const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.href)}`;
+                window.location.href = authUrl;
+            };
+        } else {
+            button.innerHTML = '<i class="icon-lastfm"></i> Logout of Last.fm';
+            button.onclick = () => {
+                Cookies.remove("scrobbleradio-lastfm-key");
+                alert("Logged out of Last.fm");
+                updateAuthButton();
+            };
+        }
+    }
+}
