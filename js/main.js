@@ -658,6 +658,7 @@ class RadioPlayer {
             .replace(/\s*\[.*?\]/g, '')              // Strips text in square brackets
             .replace(/[*/|\\]/g, '')                 // Asterisks, pipes, and slashes
             .replace(/--/g, '-')                     // Double hyphens
+            .replace(/\s*\(Current Track\)\s*/gi, '') // Removes "(Current Track) " from full string
             .trim() || '';                           // Fallback if string is empty
 
             const filterSongDetails = song => {
@@ -676,6 +677,7 @@ class RadioPlayer {
                     .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '$1') // Removes a year within a brackets (6 Music Session, March 31 2025)
                     .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
                     .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
+                    .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
                     .trim();
             };
 
@@ -1213,7 +1215,7 @@ class RadioPlayer {
             // Format and check stale data in a separate function
             const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated, this.getPath(data, this.currentStationData[this.stationName].duration), song);
 
-            if ((staleData === "Live365 past") && (this.song)) {
+            if ((staleData === "Live365 past" || staleData === "Still future") && (this.song)) {
                 if (song.toLowerCase() !== this.song.toLowerCase()) {
                     return;   
                 }
@@ -1413,8 +1415,6 @@ class RadioPlayer {
           // console.log("✅ Accepting new song data");
         }
 
-
-
         this.lastKnownUpdatedTime = apiUpdatedData;
 
         // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
@@ -1425,6 +1425,11 @@ class RadioPlayer {
         // Calculate time difference
         const timeDifference = (timezoneTime - apiUpdatedData) / 1000;
         console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
+
+        if (timeDifference < 0 ) {
+            staleData = "Still future";
+            return { staledata }
+        }
 
 
         // Check if the data is stale (older than 15 minutes)
