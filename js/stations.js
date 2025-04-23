@@ -478,6 +478,10 @@ const stations = {
     stationName: "WTMD",
     filters: [""],
   },
+  wudr: {
+    stationName: "WUDR - Flyer Radio",
+    filters: [""],
+  },
   wuky: {
     stationName: "WUKY",
     filters: [""],
