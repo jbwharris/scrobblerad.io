@@ -317,6 +317,7 @@ body {
       display: block;
       margin-bottom: .5rem;
       font-size: clamp(16px, 15.231px + 0.192vw, 18px);
+      text-wrap: balance;
 
       &.h3 {
          font-size: clamp(22px, 15.662px + 1.69vw, 40px);
