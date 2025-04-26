@@ -9,5 +9,7 @@ const stationData = {
     timezone: "America/Vancouver",
     orbPath: true,
     filter: ["CJMP"],
+    quietStream: true,
+    gainBoost: 2
   }
 };

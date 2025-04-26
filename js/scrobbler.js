@@ -128,7 +128,7 @@ function scrobbleIt(track) {
 
 
   if (isDuplicate) {
-    console.log("⏭️ Skipping duplicate scrobble:", track);
+    console.log("🚫 Skipping duplicate scrobble:", track);
     return;
   }
 

@@ -9,6 +9,6 @@ const stationData = {
     timezone: "America/Toronto",
     filter: ["Met Radio", "August 10", "devtunes"],
     quietStream: true,
-    gainBoost: 5
+    gainBoost: 3
   }
 };

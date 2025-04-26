@@ -8,5 +8,7 @@ const stationData = {
     spinPath: true,
     timezone: "America/Los_Angeles",
     filter: ["KFFP"],
+    quietStream: true,
+    gainBoost: 3
   }
 };

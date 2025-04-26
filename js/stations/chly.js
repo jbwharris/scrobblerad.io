@@ -8,5 +8,7 @@ const stationData = {
     timezone: "America/Vancouver",
     spinPath: true,
     filter: ["CHLY", "earshot Daily", "Sean Savage"],
+    quietStream: true,
+    gainBoost: 3
   }
 };

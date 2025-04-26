@@ -1,15 +1,15 @@
 const stationData = {
   newsounds: {
-    artist: "current_playlist_item.catalog_entry.composer.name",
-    song: "current_playlist_item.catalog_entry.title",
     stationName: "New Sounds",
     albumArt: "song.artwork_src",
     location: "New York, NY ",
     webUrl: "https://newsounds.org",
     streamUrl: "https://q2stream.wqxr.org/q2-web",
-    apiUrl: "https://api.wnyc.org/api/v1/whats_on/q2/",
-    needPath: true,
-    timestamp: "expires",
+    apiUrl: "https://scraper2.onlineradiobox.com/us.wqxrnewsoundsradio?l=0",
+    timestamp: "updated",
+    pathRegex: /^(.*)-(.*)$/,
+    orbPath: true,
+    flipMeta: true,
     timezone: "America/New_York",
   }
 };

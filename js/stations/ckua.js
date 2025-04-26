@@ -13,5 +13,7 @@ const stationData = {
     timestamp: "0.last_seen",
     timezone: "America/Edmonton",
     filter: ["Creating A Better World"],
+    quietStream: true,
+    gainBoost: 3
   }
 };

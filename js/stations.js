@@ -210,6 +210,7 @@ const stations = {
   },
   kfjc: {
     stationName: "KFJC",
+    cors: true,
     filters: [""],
   },  
   kosu: {
@@ -286,7 +287,6 @@ const stations = {
   },
   newsounds: {
     stationName: "New Sounds",
-    cors: true,
     filters: [""],
   },
   novaphonicfm: {

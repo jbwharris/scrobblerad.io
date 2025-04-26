@@ -8,5 +8,7 @@ const stationData = {
     timezone: "America/Winnipeg",
     spinPath: true,
     filter: ["CKUW"],
+    quietStream: true,
+    gainBoost: 3
   }
 };

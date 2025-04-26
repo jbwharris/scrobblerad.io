@@ -10,5 +10,7 @@ const stationData = {
     apiUrl: "https://ckut.ca/currentliveshows.php?c=1&json=1",
     timestamp: false,
     filter: ["CKUT"],
+    quietStream: true,
+    gainBoost: 5
   }
 };

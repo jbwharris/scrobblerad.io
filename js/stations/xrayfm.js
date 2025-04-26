@@ -10,5 +10,7 @@ const stationData = {
     apiUrl: "https://xray.fm/api/tracks/current",
     timestamp: "played",
     timezone: "America/Los_Angeles",
+    quietStream: true,
+    gainBoost: 5
   }
 };

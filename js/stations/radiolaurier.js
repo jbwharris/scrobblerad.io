@@ -11,5 +11,7 @@ const stationData = {
     timestamp: "current.starts",
     timezone: "UTC",
     filter: ["Radio Laurier"],
+    quietStream: true,
+    gainBoost: 3
   }
 };

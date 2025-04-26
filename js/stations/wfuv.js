@@ -8,7 +8,7 @@ const stationData = {
     webUrl: "https://wfuv.org",
     streamUrl: "https://music.wfuv.org/music-hi",
     apiUrl: "https://ca.api.iheart.com/api/v3/live-meta/stream/6430/currentTrackMeta",
-    timestamp: "endTime",
+    timestamp: "startTime",
     timezone: "America/New_York",
   }
 };

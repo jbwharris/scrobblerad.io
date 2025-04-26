@@ -11,5 +11,7 @@ const stationData = {
     timestamp: "results.0.ts",
     timezone: "America/Los_Angeles",
     filter: ["Indie X FM", "Kenny Arena", "Richard Latto", "The FTP New Music Show", "Tim Pyles"],
+    duration: "results.0.length",
+    offset: 13
   }
 };

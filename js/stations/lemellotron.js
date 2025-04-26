@@ -1,16 +1,11 @@
 const stationData = {
   lemellotron: {
-    artist: "artist",
-    song: "title",
-    album: "album",
-    albumArt: "cover",
     stationName: "Le Mellotron",
     location: "Paris, France 🇫🇷",
     webUrl: "https://www.lemellotron.com/",
-    streamUrl: "https://www.radioking.com/play/lemellotron-stream",
-    apiUrl:
-      "https://api.radioking.io/widget/radio/lemellotron-stream/track/current",
-    timestamp: "end_at",
+    streamUrl: "https://listen.radioking.com/radio/477719/stream/534044",
+    apiUrl: "https://scraper2.onlineradiobox.com/fr.lemellotron?l=0",
+    orbPath: true,
     timezone: "Europe/Paris",
   }
 };
