@@ -121,6 +121,7 @@ class Page {
         this.stationName = stationName;
         this.radioPlayer = radioPlayer;
         this.displayStationName = this.radioPlayer.currentStationData[this.stationName].stationName;
+        this.scrobbleTimeout = null;
 
         this.cacheDOMElements();
 
@@ -216,13 +217,10 @@ class Page {
 
                 updateNowPlaying(currentTrack);
 
-                setTimeout(() => {
-                  scrobbleIt(currentTrack);
+                this.scrobbleTimeout = setTimeout(() => {
+                    scrobbleIt(currentTrack);
                 }, 60000);
-
             }
-
-
 
             const img = new Image();
             img.onload = updateMetadata;
@@ -294,6 +292,7 @@ class RadioPlayer {
         this.isPlaying = null;
         this.shouldReloadStream = false;
         this.pauseTimeout = null;
+        this.duration = null;
 
         // Station info
         this.stationName = "";
@@ -581,7 +580,6 @@ class RadioPlayer {
 
         return cleanedArtist.trim();
     }
- 
 
     getFilterSet() {
         return {
@@ -666,10 +664,11 @@ class RadioPlayer {
                 return song
                     .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
                     .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
-
+                    .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
                     .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
                     .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
                     .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
+                    .replace(/\s*\(\d{4}\s*-\s*Remaster(ed)?\)/gi, '') // Removes "(1992 - Remaster)" or "(1992 - Remastered)"
                     .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
                     .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
                     .replace(/\s*-\s*Remaster(ed)?/gi, '') // Removes "- Remaster" or "- Remastered" (CASE-INSENSITIVE)
@@ -890,6 +889,7 @@ class RadioPlayer {
                     lfmData.track.listeners || null,
                     lfmData.track.playcount || null,
                     lfmData.track.album?.artist || '',
+                    lfmData.track?.duration || null
                 ];
             } else if (lfmData.error !== 6  && (queryType == 'album')) {
                 lfmResult = [
@@ -945,6 +945,10 @@ class RadioPlayer {
 
             if (lfmData.error !== 6 ) {
                 // return album art, album, song, artist, lfm listeners & playcount
+                if (lfmResult[7] && !this.duration) {
+                    this.duration = Number(lfmResult[7]);
+                    console.log('this.duration', this.duration)
+                } 
                 return [this.upsizeImgUrl(finalAlbumArt), lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null];
             } else {
                 // return album art, album, song, artist, lfm listeners & playcount
@@ -1008,6 +1012,18 @@ class RadioPlayer {
         if (this.isPlaying || this.isPlaying == null) {
             
             if (!this.stationName) return;
+
+            // check if the last time it updated is still in the future
+            if ((this.lastKnownUpdatedTime - Date.now()) > 15000 && !this.shouldReloadStream) {
+                console.log('this.lastKnownUpdatedTime > Date.now', (this.lastKnownUpdatedTime - Date.now()) / 1000);
+                return;
+            }
+
+
+            if ((this.duration + this.lastKnownUpdatedTime) > Date.now()) {
+                this.lastKnownUpdatedTime = this.duration + this.lastKnownUpdatedTime 
+            }
+
 
             if ([this.stationName] == 'cbcmusic') {
                 const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
@@ -1080,16 +1096,6 @@ class RadioPlayer {
                             data = this.extractDataFromHTML(doc);
                         }            
 
-                       // console.log('this.lastKnownUpdatedTime', this.lastKnownUpdatedTime, Date.now());
-
-                        // check if the last time it updated is still in the future
-                        if (this.lastKnownUpdatedTime > Date.now()) {
-                            console.log('this.lastKnownUpdatedTime > Date.now')
-
-                           // console.log('last updated time is still in the future, skipping updating', this.lastKnownUpdatedTime)
-                            return;
-                        }
-
                         // Your existing logic to check if the data is the same
                         if (this.isDataSameAsPrevious(data)) {
                             // Check if it's been more than 900 seconds since the last update
@@ -1100,6 +1106,7 @@ class RadioPlayer {
                                 this.processData(data);
                             }
                             
+                            // console.log("Same data");
                             return; // If data is the same and not stale, exit
                         } 
 
@@ -1111,10 +1118,13 @@ class RadioPlayer {
 
                         // Process the new data response
                         this.previousDataResponse = data; // Update even if we skip processing
+
+
                         this.processData(data);
 
                         // Update the timestamp to reflect the new data was processed
                         this.lastDataUpdateTime = Date.now();
+                        this.duration = null;
 
                     })
                     .catch((error) => {
@@ -1348,7 +1358,7 @@ class RadioPlayer {
             console.log('timezone and no timestamp', timestamp);
             if (song !== this.song) {
                 // Song changed: Set a new fallback timestamp
-                this.fallbackTimestamp = timezoneTime;
+                this.fallbackTimestamp = Date.parse(timezoneTime);
                 apiUpdatedData = this.fallbackTimestamp;
             } else if (this.fallbackTimestamp) {
                 // Same song: Retain the previously assigned timestamp
@@ -1361,16 +1371,17 @@ class RadioPlayer {
 
         // some stations have duration data and tend to switch the track too early. This makes an adjustment so that the station doesn't jump away from the current too quickly if it's still in the window the song should still be playing
         if (duration) {
-            if (duration <= 600) {
+                this.duration = Date.parse(duration);
 
-                apiUpdatedData = apiUpdatedData + (duration * 1000);
-               // console.log('apiUpdatedData', apiUpdatedData)
-            } else {
-                apiUpdatedData = apiUpdatedData + duration; // Get end time of the song
-                console.log('apiUpdatedData else', apiUpdatedData)
-            }
+                if (duration <= 600) {
+                    apiUpdatedData = apiUpdatedData + (duration * 1000);
+                   // console.log('apiUpdatedData', apiUpdatedData)
+                } else {
+                    apiUpdatedData = apiUpdatedData + duration; // Get end time of the song
+                    console.log('apiUpdatedData else', apiUpdatedData)
+                }
 
-            console.log("apiUpdatedData + duration", apiUpdatedData, "+", duration * 1000, "=", apiUpdatedData + (duration * 1000));
+            console.log("apiUpdatedData + duration =", apiUpdatedData);
         }
 
 
@@ -1386,7 +1397,7 @@ class RadioPlayer {
 
           // 1. Reject obviously old data
           if (apiUpdatedData < this.lastKnownUpdatedTime) {
-            console.log("Skipping older song data — already showing newer content.");
+            console.log("Skipping older song data — already showing newer content.", apiUpdatedData,  this.lastKnownUpdatedTime);
             staleData =  "Live365 past";
             return { staleData };
           }
@@ -1416,6 +1427,8 @@ class RadioPlayer {
         }
 
         this.lastKnownUpdatedTime = apiUpdatedData;
+        console.log("this.lastKnownUpdatedTime", this.lastKnownUpdatedTime)
+
 
         // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
         if ((this.currentStationData[this.stationName].offset + apiUpdatedData) < timezoneTime) {
@@ -1425,11 +1438,6 @@ class RadioPlayer {
         // Calculate time difference
         const timeDifference = (timezoneTime - apiUpdatedData) / 1000;
         console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
-
-        if (timeDifference < 0 ) {
-            staleData = "Still future";
-            return { staledata }
-        }
 
 
         // Check if the data is stale (older than 15 minutes)
@@ -1642,7 +1650,6 @@ class RadioPlayer {
         }, 30000);
     }
 
-
     togglePlay() {
         this.isPlaying ? this.pause() : this.play();
     }
@@ -1665,6 +1672,7 @@ class RadioPlayer {
         this.calculateNextAndPreviousIndices();
         const nextStationKey = stationKeys[this.nextIndex];
         this.handleStationSelect(null, nextStationKey, true);
+        this.scrobbleReset; 
     }
 
     reloadStream() {
@@ -1675,6 +1683,11 @@ class RadioPlayer {
         this.calculateNextAndPreviousIndices();
         const currentStationKey = stationKeys[this.currentIndex];
         this.handleStationSelect(true, currentStationKey, true);
+        this.scrobbleReset; 
+    }
+
+    scrobbleReset() {
+        clearTimeout(this.page.scrobbleTimeout);
     }
 
     addCacheBuster(url) {
