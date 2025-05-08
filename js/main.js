@@ -159,72 +159,81 @@ class Page {
       }
     }
 
-     refreshCurrentData(values) {
+    refreshCurrentData(values) {
         const [song, artist, album, artworkUrl, listeners, playcount, errorMessage] = values;
 
-            const station = this.radioPlayer.currentStationData[this.stationName];
-            const isFallbackArt = artworkUrl === urlCoverArt;
-            const finalArtUrl = isFallbackArt ? `img/stations/${this.stationName}.png` : artworkUrl;
+        // Clear any existing scrobble timeout when new data arrives
+        if (this.scrobbleTimeout) {
+            clearTimeout(this.scrobbleTimeout);
+            this.scrobbleTimeout = null;
+        }
 
-            const updateMetadata = () => {
-                if ((!song && !artist) || !finalArtUrl || !station) return;
+        const station = this.radioPlayer.currentStationData[this.stationName];
+        const isFallbackArt = artworkUrl === urlCoverArt;
+        const finalArtUrl = isFallbackArt ? `img/stations/${this.stationName}.png` : artworkUrl;
 
-                const metaElement = document.getElementById("playermeta");
-                metaElement.classList.toggle("errorMessage", Boolean(errorMessage));
+        const updateMetadata = () => {
+            if ((!song && !artist) || !finalArtUrl || !station) return;
 
-                const playerMetaElement = document.querySelector('div.playermeta');
-                playerMetaElement.textContent = '';
+            const metaElement = document.getElementById("playermeta");
+            metaElement.classList.toggle("errorMessage", Boolean(errorMessage));
 
-                const template = document.querySelector('#meta');
-                const clone = document.importNode(template.content, true);
+            const playerMetaElement = document.querySelector('div.playermeta');
+            playerMetaElement.textContent = '';
 
-                clone.querySelector('#title').innerHTML = song;
-                clone.querySelector('#artist').textContent = artist;
-                clone.querySelector('#album').textContent = album;
+            const template = document.querySelector('#meta');
+            const clone = document.importNode(template.content, true);
 
-                const listenerText = (listeners !== null && playcount !== null)
-                    ? `Listeners: ${this.formatCompactNumber(listeners)} | Plays: ${this.formatCompactNumber(playcount)}`
-                    : '';
-                clone.querySelector('#listeners').textContent = listenerText;
+            clone.querySelector('#title').innerHTML = song;
+            clone.querySelector('#artist').textContent = artist;
+            clone.querySelector('#album').textContent = album;
 
-                const albumArtEl = clone.querySelector('#albumArt');
-                albumArtEl.src = finalArtUrl;
-                albumArtEl.alt = `${song} by ${artist}`;
+            const listenerText = (listeners !== null && playcount !== null)
+                ? `Listeners: ${this.formatCompactNumber(listeners)} | Plays: ${this.formatCompactNumber(playcount)}`
+                : '';
+            clone.querySelector('#listeners').textContent = listenerText;
 
-                clone.querySelector('#radioNameLink').href = station.webUrl;
-                clone.querySelector('#radioName').textContent = station.stationName;
-                clone.querySelector('#stationLocation').textContent = station.location;
+            const albumArtEl = clone.querySelector('#albumArt');
+            albumArtEl.src = finalArtUrl;
+            albumArtEl.alt = `${song} by ${artist}`;
 
-                playerMetaElement.appendChild(clone);
-                document.getElementById("playermeta").classList.remove("opacity-50");
+            clone.querySelector('#radioNameLink').href = station.webUrl;
+            clone.querySelector('#radioName').textContent = station.stationName;
+            clone.querySelector('#stationLocation').textContent = station.location;
 
-                const backgroundUrl = `url("${isFallbackArt ? `../${finalArtUrl}` : finalArtUrl}")`;
-                document.documentElement.style.setProperty("--albumArt", backgroundUrl);
+            playerMetaElement.appendChild(clone);
+            document.getElementById("playermeta").classList.remove("opacity-50");
 
-                animateElement(playerMetaElement);
-                document.querySelector('#panel2').click();
+            const backgroundUrl = `url("${isFallbackArt ? `../${finalArtUrl}` : finalArtUrl}")`;
+            document.documentElement.style.setProperty("--albumArt", backgroundUrl);
 
-                this.setupMediaSession(song, artist, artworkUrl, errorMessage);
+            animateElement(playerMetaElement);
+            document.querySelector('#panel2').click();
+
+            this.setupMediaSession(song, artist, artworkUrl, errorMessage);
+        };
+
+        if (song && artist) {
+            const currentTrack = {
+              trackTitle: song,
+              trackArtist: artist,
+              trackAlbum: album,
+              trackTimestamp: Math.floor(Date.now() / 1000) // ✅ timestamp in seconds
             };
 
-            if (song && artist) {
-                const currentTrack = {
-                  trackTitle: song,
-                  trackArtist: artist,
-                  trackAlbum: album,
-                  trackTimestamp: Math.floor(Date.now() / 1000) // ✅ timestamp in seconds
-                };
+            updateNowPlaying(currentTrack);
 
-                updateNowPlaying(currentTrack);
-
+            // Set scrobble timeout only if playback is active
+            if (this.radioPlayer.isPlaying) {
                 this.scrobbleTimeout = setTimeout(() => {
                     scrobbleIt(currentTrack);
                 }, 60000);
             }
+        }
 
-            const img = new Image();
-            img.onload = updateMetadata;
-            img.src = finalArtUrl;
+        const img = new Image();
+        img.onload = updateMetadata;
+        img.src = finalArtUrl;
     }
 
 
@@ -317,7 +326,6 @@ class RadioPlayer {
         this.debounceTimeout = null;
         this.streamingInterval = null;
 
-
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
           if (this.audio) {
@@ -337,6 +345,11 @@ class RadioPlayer {
 
         this.init();
     }
+
+    setPage(page) {
+        this.page = page;
+    }
+
 
     bindMethods() {
         this.handleStationSelect = this.handleStationSelect.bind(this);
@@ -453,6 +466,13 @@ class RadioPlayer {
 
     async handleStationSelect(direction, stationName, firstRun) {
         if (!stationName || direction === false) return;
+
+        // Clear existing scrobble timeout
+        if (this.page && this.page.scrobbleTimeout) {
+            clearTimeout(this.page.scrobbleTimeout);
+            console.log("Scrobble timeout cleared due to station switch.");
+            this.page.scrobbleTimeout = null;
+        }
 
         if (this.shouldReloadStream) {
             console.log('getting here on reload?');
@@ -1019,12 +1039,6 @@ class RadioPlayer {
                 return;
             }
 
-
-            if ((this.duration + this.lastKnownUpdatedTime) > Date.now()) {
-                this.lastKnownUpdatedTime = this.duration + this.lastKnownUpdatedTime 
-            }
-
-
             if ([this.stationName] == 'cbcmusic') {
                 const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
 
@@ -1171,7 +1185,7 @@ class RadioPlayer {
         return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
     }                             
 
-     processData(data) {
+    processData(data) {
         // Check if data and stationName are available
         if (data && this.stationName) {
             const extractedData = this.extractSongAndArtist(data, this.stationName);
@@ -1203,14 +1217,6 @@ class RadioPlayer {
                     timestamp = undefined;
                 }
             }
-
-           // console.log("timestamp and this.lastKnownUpdatedTime", timestamp, this.lastKnownUpdatedTime);
-
-
-            // if (timestamp < this.lastKnownUpdatedTime) {
-            //     console.log('song is still in the future')
-            //     return
-            // }
 
             if (this.currentStationData[this.stationName].altPath && (!song || !timestamp)) {
                 if ([this.stationName] == 'indie1023') {
@@ -1293,6 +1299,11 @@ class RadioPlayer {
                 });
             }
 
+            if ((this.duration + this.lastKnownUpdatedTime) > Date.now()) {
+                this.lastKnownUpdatedTime = this.duration + this.lastKnownUpdatedTime 
+            }
+
+
         }
     }
 
@@ -1371,7 +1382,7 @@ class RadioPlayer {
 
         // some stations have duration data and tend to switch the track too early. This makes an adjustment so that the station doesn't jump away from the current too quickly if it's still in the window the song should still be playing
         if (duration) {
-                this.duration = Date.parse(duration);
+                this.duration = duration;
 
                 if (duration <= 600) {
                     apiUpdatedData = apiUpdatedData + (duration * 1000);
@@ -1606,8 +1617,7 @@ class RadioPlayer {
         // Check if the stream should be reloaded based on page visibility
         if (this.shouldReloadStream) {
             console.log("the stream is reloading");
-            this.handleStationSelect(null, this.stationName, false); // Reload the stream
-            this.shouldReloadStream = false; // Reset the flag
+            this.reloadStream;
         } else {
             // Attempt to play audio
             this.audio.play().then(() => {
@@ -1645,12 +1655,21 @@ class RadioPlayer {
         // Set a timeout to mark stream reload after 30 seconds
         this.pauseTimeout = setTimeout(() => {
             console.log("the stream should be reloaded");
+            const page = new Page(this.stationName, this);
+            page.refreshCurrentData([`Press play or reload to refresh feed`, '', '', urlCoverArt, null, null, true]);
             document.getElementById("playermeta").classList.add("opacity-50");
             this.shouldReloadStream = true;
         }, 30000);
     }
 
     togglePlay() {
+        // Clear scrobble timeout when playback stops
+        if (this.page && this.page.scrobbleTimeout) {
+            clearTimeout(this.page.scrobbleTimeout);
+            console.log("Scrobble timeout cleared due to playback stop.");
+            this.page.scrobbleTimeout = null;
+        }
+
         this.isPlaying ? this.pause() : this.play();
     }
 
@@ -1692,7 +1711,7 @@ class RadioPlayer {
 
     addCacheBuster(url) {
         const timestamp = Date.now();
-        const skipCacheBuster = ['radiowestern', 'kexp'];
+        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb'];
         if (skipCacheBuster.includes(this.stationName)) {
             return url;
         }
