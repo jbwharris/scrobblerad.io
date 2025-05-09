@@ -3,7 +3,7 @@ const stationData = {
     stationName: "WNRN",
     location: "Charlottesville, VA 🇺🇸",
     webUrl: "https://wnrn.org",
-    streamUrl: "https://26223.live.streamtheworld.com/WNRNFM_128.mp3",
+    streamUrl: "https://22213.live.streamtheworld.com/WNRNFM_128.mp3",
     apiUrl: "https://scraper2.onlineradiobox.com/us.w276bz?l=0",
     timestamp: "updated",
     timezone: "America/New_York",
