@@ -829,7 +829,7 @@ class RadioPlayer {
         // Check the song and artist values for invalid content
         if (checkInvalidContent(song) || checkInvalidContent(artist)) {
             // Returning the message indicating the station may be taking a break
-            return ['Station data contains filtered terms', null, null, urlCoverArt, '', '', true];
+            return;
         } else if ((!song && !artist) || (song && !artist)) {
             // Returning the message indicating missing data
             return ['Station data is currently missing', null, null, urlCoverArt, '', '', true];
@@ -1617,7 +1617,8 @@ class RadioPlayer {
         // Check if the stream should be reloaded based on page visibility
         if (this.shouldReloadStream) {
             console.log("the stream is reloading");
-            this.reloadStream;
+            this.handleStationSelect(null, this.stationName, false); // Reload the stream
+            this.shouldReloadStream = false; // Reset the flag
         } else {
             // Attempt to play audio
             this.audio.play().then(() => {
