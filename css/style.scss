@@ -682,7 +682,7 @@ input[type="checkbox"]:checked~.menuIconToggle {
       padding: 0 !important;
       position: relative;
       margin-bottom: 1rem;
-      align-self: end;
+      align-self: safe;
       width: 100vw;
 
       p {
@@ -716,6 +716,7 @@ input[type="checkbox"]:checked~.menuIconToggle {
       }
 
    }
+
 
 }
 
