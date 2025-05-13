@@ -1748,6 +1748,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Element with ID "stationSelect" not found.');
     }
 
+    // Detect fullscreen mode (PWA standalone) and apply CSS class
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        document.body.classList.add('fullscreen-mode');
+    }
+
     // Scroll to Panel 2
     const container = document.querySelector('.mobile-swipe');
     const panel2 = document.getElementById('panel2');

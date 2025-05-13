@@ -725,3 +725,8 @@ input[type="checkbox"]:checked~.menuIconToggle {
    }
 }
 
+
+.fullscreen-mode {
+    padding-bottom: env(safe-area-inset-bottom, 1rem); /* Adds space at the bottom for home indicator */
+}
+
