@@ -1,4 +1,14 @@
 const stations = {
+  abcdoublej: {
+    stationName: "ABC - Double J",
+    cors: true,
+    filters: [""],
+  },
+  abctriplejunearthed: {
+    stationName: "ABC - Triple J Unearthed",
+    cors: true,
+    filters: [""],
+  },
   altradio: {
     stationName: "AltRadio",
     filters: [""],
@@ -124,7 +134,6 @@ const stations = {
   },
   eastvillageradio: {
     stationName: "East Village Radio",
-    cors: true,
     filters: [""],
   },
   eightradio: {
@@ -311,7 +320,6 @@ const stations = {
   },
   radiofrancefip: {
     stationName: "Radio France",
-    cors: true,
     filters: [""],
   },
   radiolaurier: {
@@ -377,10 +385,6 @@ const stations = {
   },
   trendradio: {
     stationName: "Trend Radio",
-    filters: [""],
-  },
-  triplejunearthed: {
-    stationName: "Triple J Unearthed",
     filters: [""],
   },
   uncertainfm: {
