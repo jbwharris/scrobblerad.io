@@ -959,7 +959,10 @@ class RadioPlayer {
                 }
             }
 
-            let finalAlbumArt = currentArt && !currentArt.includes('mzstatic.com') && !currentArt.includes('blankart.jpg') && currentArt !== urlCoverArt
+
+
+
+            let finalAlbumArt = currentArt && !currentArt.includes('mzstatic.com') && !currentArt.includes('blankart.jpg') && !currentArt.includes('623304f1-e04a-40d0-b84d-8ee44b0f10e5') && currentArt !== urlCoverArt
                   ? currentArt
                   : (lfmResult?.[0] || mbResult?.[0] || urlCoverArt);
 
@@ -1657,7 +1660,7 @@ class RadioPlayer {
         this.pauseTimeout = setTimeout(() => {
             console.log("the stream should be reloaded");
             const page = new Page(this.stationName, this);
-            page.refreshCurrentData([`Press play or reload to refresh feed`, '', '', urlCoverArt, null, null, true]);
+            page.refreshCurrentData([`Press reload to refresh feed`, '', '', urlCoverArt, null, null, true]);
             document.getElementById("playermeta").classList.add("opacity-50");
             this.shouldReloadStream = true;
         }, 30000);
