@@ -403,6 +403,10 @@ const stations = {
     stationName: "WBRU",
     filters: [""],
   },
+  wcsb: {
+    stationName: "WCSB",
+    filters: [""],
+  },
   wers: {
     stationName: "WERS",
     filters: [""],
