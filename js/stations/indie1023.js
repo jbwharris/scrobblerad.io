@@ -13,5 +13,5 @@ const stationData = {
     altPath: true,
     timezone: "America/Denver",
     timestamp: ["0.date", "0.time", "1.date", "1.time"],
-  }
-};
+  },
+}

@@ -38,7 +38,8 @@ const stationData = {
       ".com",
       "Nils The Music Director",
       "Josh Tillman",
-      "New Music Showcase"
+      "New Music Showcase",
+      "Toyota Artist Of The Month"
     ],
   },
 }

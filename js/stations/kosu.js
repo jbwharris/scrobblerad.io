@@ -6,6 +6,6 @@ const stationData = {
     streamUrl: "https://22063.live.streamtheworld.com/KOSUHD2.mp3?dist=scrobbleradio",
     apiUrl: "https://scraper2.onlineradiobox.com/us.kosu3?l=0",
     orbPath: true,
-    filter: ["KOSU", "The Spy", "Ryan Lacroix", "Legal Id"],
+    filter: ["KOSU", "The Spy", "Ryan Lacroix", "Legal Id", "New Music Weekly", "Promo", "Yr Welcome"],
   }
 };
