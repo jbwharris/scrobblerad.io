@@ -959,12 +959,15 @@ class RadioPlayer {
                 }
             }
 
-
-
-
-            let finalAlbumArt = currentArt && !currentArt.includes('mzstatic.com') && !currentArt.includes('blankart.jpg') && !currentArt.includes('623304f1-e04a-40d0-b84d-8ee44b0f10e5') && currentArt !== urlCoverArt
+            let finalAlbumArt = currentArt && !currentArt.includes('mzstatic.com') && !currentArt.includes('blankart.jpg') && currentArt !== urlCoverArt
                   ? currentArt
                   : (lfmResult?.[0] || mbResult?.[0] || urlCoverArt);
+
+            //filter the random default MB has started providing
+            if (finalAlbumArt.includes('623304f1')) {
+                finalAlbumArt = urlCoverArt;
+            }
+
 
             if (lfmData.error !== 6 ) {
                 // return album art, album, song, artist, lfm listeners & playcount
