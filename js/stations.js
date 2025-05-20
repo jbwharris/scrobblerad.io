@@ -509,7 +509,11 @@ const stations = {
   wzbc: {
     stationName: "WZBC",
     filters: [""],
-  },  
+  }, 
+  x929: {
+    stationName: "X92.9",
+    filters: [""],
+  }, 
   xpn: {
     stationName: "XPN",
     filters: [""],
