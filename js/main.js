@@ -226,7 +226,7 @@ class Page {
             // Set scrobble timeout only if playback is active
             if (this.radioPlayer.isPlaying) {
                 this.scrobbleTimeout = setTimeout(() => {
-                    scrobbleIt(currentTrack);
+                        scrobbleIt(currentTrack);
                 }, 60000);
             }
         }
@@ -686,14 +686,15 @@ class RadioPlayer {
                     .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
                     .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
                     .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                    .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
                     .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
                     .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
                     .replace(/\s*\(\d{4}\s*-\s*Remaster(ed)?\)/gi, '') // Removes "(1992 - Remaster)" or "(1992 - Remastered)"
                     .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
                     .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
                     .replace(/\s*-\s*Remaster(ed)?/gi, '') // Removes "- Remaster" or "- Remastered" (CASE-INSENSITIVE)
-                    .replace(/([\)\]])\s*\d{4}.*/, '$1') // Removes anything after a closing bracket if followed by a year (e.g., "1972")
-                    .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '$1') // Removes a year within a brackets (6 Music Session, March 31 2025)
+                    .replace(/([\)\]])\s*\d{4}.*/, '') // Removes anything after a closing bracket if followed by a year (e.g., "1972")
+                    .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '') // Removes a year within a brackets (6 Music Session, March 31 2025)
                     .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
                     .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
                     .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
