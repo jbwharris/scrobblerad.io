@@ -39,7 +39,13 @@ const stationData = {
       "Nils The Music Director",
       "Josh Tillman",
       "New Music Showcase",
-      "Toyota Artist Of The Month"
+      "Toyota Artist Of The Month",
+      "at Woodward",
+      "Indie 500",
+      "At The Columbia",
+      "Work Release Program",
+      "at Madison Rooftop",
+      "97x"
     ],
   },
 }
