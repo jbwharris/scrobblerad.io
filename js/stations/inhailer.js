@@ -45,7 +45,11 @@ const stationData = {
       "At The Columbia",
       "Work Release Program",
       "at Madison Rooftop",
-      "97x"
+      "97x",
+      "DJ Andy Eckerle",
+      "James Burke",
+      "Lauren Fitzpatrick",
+      "Ethan Bloomfield"
     ],
   },
 }
