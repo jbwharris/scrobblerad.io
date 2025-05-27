@@ -1,4 +1,4 @@
-const SCROBBLERADIO_CACHE = "app-v3.511";  // Updated cache version
+const SCROBBLERADIO_CACHE = "app-v3.515";  // Updated cache version
 const staticPlayer = SCROBBLERADIO_CACHE;
 const assets = [
   "/",
