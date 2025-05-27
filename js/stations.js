@@ -160,10 +160,6 @@ const stations = {
     stationName: "Gorilla FM",
     filters: [""],
   },
-  theindependent: {
-    stationName: "The Independent",
-    filters: [""],
-  },
   indie1023: {
     stationName: "Indie 102.3",
     filters: [""],
