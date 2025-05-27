@@ -7,7 +7,7 @@ const stationData = {
     apiUrl: "https://scraper2.onlineradiobox.com/us.ktbg?l=0",
     timestamp: "updated",
     timezone: "America/Chicago",
-    filter: ["The Bridge", "Sonic Spectrum"],
+    filter: ["The Bridge", "Sonic Spectrum", "Michael Atchison"],
     orbPath: true
   }
 };
