@@ -122,6 +122,7 @@ class Page {
         this.radioPlayer = radioPlayer;
         this.displayStationName = this.radioPlayer.currentStationData[this.stationName].stationName;
         this.scrobbleTimeout = null;
+        this.currentTrack = null;
 
         this.cacheDOMElements();
 
@@ -212,24 +213,6 @@ class Page {
 
             this.setupMediaSession(song, artist, artworkUrl, errorMessage);
         };
-
-        if (song && artist) {
-            const currentTrack = {
-              trackTitle: song,
-              trackArtist: artist,
-              trackAlbum: album,
-              trackTimestamp: Math.floor(Date.now() / 1000) // ✅ timestamp in seconds
-            };
-
-            updateNowPlaying(currentTrack);
-
-            // Set scrobble timeout only if playback is active
-            if (this.radioPlayer.isPlaying) {
-                this.scrobbleTimeout = setTimeout(() => {
-                        scrobbleIt(currentTrack);
-                }, 60000);
-            }
-        }
 
         const img = new Image();
         img.onload = updateMetadata;
@@ -325,6 +308,11 @@ class RadioPlayer {
         this.firstRun = true;
         this.debounceTimeout = null;
         this.streamingInterval = null;
+
+        this.currentSong = null; // Current song title
+        this.previousSong = null; // Previous song title
+        this.songStartTime = null; // Timestamp when the current song started
+        this.scrobbleTimeout = null; // Timeout ID for the 60-second timer       
 
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
@@ -677,29 +665,52 @@ class RadioPlayer {
             .replace(/[*/|\\]/g, '')                 // Asterisks, pipes, and slashes
             .replace(/--/g, '-')                     // Double hyphens
             .replace(/\s*\(Current Track\)\s*/gi, '') // Removes "(Current Track) " from full string
+            .replace(/^\d{2} /, '') // remove album track numbers "03 Wonderwall" 
+            .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs') // the band tUnE-yArDs often gets messed up 
+            .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, (match) => { // common contractions that can sometimes be input incorrectly
+                    const replacements = {
+                        Lets: "Let's",
+                        Its: "It's",
+                        Ive: "I've",
+                        Dont: "Don't",
+                        Cant: "Can't",
+                        Wont: "Won't",
+                        Aint: "Ain't",
+                        Youve: "You've"
+                    };
+                    return replacements[match] || match;
+                })
+                .replace(/\b(Somethin|Nothin)\b/gi, (match) => {
+                    const replacements = {
+                        Somethin: "Somethin'",
+                        Nothin: "Nothin'"
+                    };
+                    return replacements[match] || match;
+                })
             .trim() || '';                           // Fallback if string is empty
 
-            const filterSongDetails = song => {
-                if (!song) return ''; // Return an empty string if song is undefined
-                return song
-                    .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
-                    .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
-                    .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
-                    .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
-                    .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
-                    .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
-                    .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
-                    .replace(/\s*\(\d{4}\s*-\s*Remaster(ed)?\)/gi, '') // Removes "(1992 - Remaster)" or "(1992 - Remastered)"
-                    .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
-                    .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
-                    .replace(/\s*-\s*Remaster(ed)?/gi, '') // Removes "- Remaster" or "- Remastered" (CASE-INSENSITIVE)
-                    .replace(/([\)\]])\s*\d{4}.*/, '') // Removes anything after a closing bracket if followed by a year (e.g., "1972")
-                    .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '') // Removes a year within a brackets (6 Music Session, March 31 2025)
-                    .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
-                    .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
-                    .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
-                    .trim();
-            };
+        const filterSongDetails = song => {
+            if (!song) return ''; // Return an empty string if song is undefined
+            return song
+                .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
+                .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
+                .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
+                .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
+                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
+                .replace(/\s*\(\d{4}\s*-\s*Remaster(ed)?\)/gi, '') // Removes "(1992 - Remaster)" or "(1992 - Remastered)"
+                .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
+                .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
+                .replace(/\s*-\s*Remaster(ed)?/gi, '') // Removes "- Remaster" or "- Remastered" (CASE-INSENSITIVE)
+                .replace(/([\)\]])\s*\d{4}.*/, '') // Removes anything after a closing bracket if followed by a year (e.g., "1972")
+                .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '') // Removes a year within a brackets (6 Music Session, March 31 2025)
+                .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
+                .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
+                .replace(/\s*\(.*?\bsession\b.*?\)/gi, '') // Removes "(909 Session)"
+                .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
+                .trim();
+        };
 
         const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
         const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
@@ -1190,7 +1201,49 @@ class RadioPlayer {
     isDataSameAsPrevious(data) {
         // Compare data with previousDataResponse and return true if they are the same, false otherwise
         return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
-    }                             
+    }      
+
+    updateScrobbleData(song, artist, album) {
+        if (song && artist && album) {
+            const currentTrack = {
+              trackTitle: song,
+              trackArtist: artist,
+              trackAlbum: album,
+              trackTimestamp: Math.floor(Date.now() / 1000) // ✅ timestamp in seconds
+            };
+
+            updateNowPlaying(currentTrack);
+
+            if (this.currentTrack !== currentTrack || !this.currentTrack) {
+                if (this.currentTrack && this.currentTrack !== currentTrack) { // Song has changed
+                    if (this.scrobbleTimeout) {
+                        clearTimeout(this.scrobbleTimeout); // Clear existing timeout
+                        this.scrobbleTimeout = null;
+                    }
+
+                    if (this.songStartTime && (Date.now() - this.songStartTime >= 60000)) {
+                        scrobbleIt(this.currentTrack); // Scrobble the previous song
+                    }
+
+                    this.songStartTime = null; // Reset song start time
+                }
+
+                this.currentTrack = currentTrack;
+
+                // Set a new 60-second timer for the current song
+                if (this.currentTrack && !this.songStartTime) {
+                    this.songStartTime = Date.now();
+                    this.scrobbleTimeout = setTimeout(() => {
+                        if (this.currentTrack) {
+                            scrobbleIt(this.currentTrack);
+                        }
+                    }, 60000);
+                } 
+
+                console.log('this.currentTrack', this.currentTrack, 'currentTrack', currentTrack);  
+            }
+        }    
+    }                          
 
     processData(data) {
         // Check if data and stationName are available
@@ -1205,7 +1258,7 @@ class RadioPlayer {
             }
 
             this.hasLoadedData = true;
-            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;
+            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;                
 
             // Predefined values
             const timezone = this.currentStationData[this.stationName].timezone;
@@ -1246,19 +1299,21 @@ class RadioPlayer {
                 return;
             }
 
-            // Compare the extractedData response with the previous one
-            if (JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) {
-                return;
-            } else {
-                this.prevExtractedData = extractedData;
-            }
-
             // Handle stale data or invalid song
             if ((staleData) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationName, this);
                 page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true]);
                 return;
             }
+
+             // Compare the extractedData response with the previous one
+            if (JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) {
+                console.log('extracted data the same, returning')
+                return;
+            } else {
+                this.prevExtractedData = extractedData;
+            }
+
 
             // Ensure this code doesn't run unless there's new data to process
             if (!this.lfmMetaChanged || (song.toLowerCase() !== this.song.toLowerCase())) {
@@ -1270,6 +1325,9 @@ class RadioPlayer {
                     this.song = lfmSong;
                     this.artist = lfmArtist;
                     this.album = lfmAlbum || lfmSong;
+
+                    this.updateScrobbleData(this.song, this.artist, this.album);
+
 
                     // Validate the album art only after getting lfmArt
                     const artworkToValidate = lfmArt === urlCoverArt ? albumArt : lfmArt;
@@ -1309,8 +1367,6 @@ class RadioPlayer {
             if ((this.duration + this.lastKnownUpdatedTime) > Date.now()) {
                 this.lastKnownUpdatedTime = this.duration + this.lastKnownUpdatedTime 
             }
-
-
         }
     }
 
