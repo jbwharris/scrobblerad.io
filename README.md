@@ -26,6 +26,7 @@ There are a zillion radio streaming apps out there, but there really aren’t an
 
 ### How does the scrobbling work?
 There are a couple ways to scrobble using the app. There is the Login to last.fm button on the left that allows you to enable scrobbling in the app. This is currently just last.fm and not other platforms. 
+![image](https://github.com/user-attachments/assets/778d0021-6ba1-47b3-a283-38b2ded1e759)
 
 The other alternative is [Web Scrobbler](https://web-scrobbler.com) to handle sending to LastFM, MusicBrainz and LibreFM. You just need to login to each platform. This works on desktop with all major browsers (Chrome, Firefox, Safari etc.) on macOS, Windows and Linus, as well as iOS and iPadOS in Safari and Orion browsers.
 
