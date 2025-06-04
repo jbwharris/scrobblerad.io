@@ -25,7 +25,8 @@ A PWA and website to listen to cool radio stations and easily scrobble to [LastF
 There are a zillion radio streaming apps out there, but there really aren’t any that did so with a scrobbling first focus. That was my primary goal, to gather a bunch of great radio stations that have publicly accessible API metadata and make an app that could scrobble the songs to LastFM, Listenbrainz and LibreFM. For years I had struggled with the idea of finding a reliable way to scrobble radio on the go. There had been an early iOS app that did it pretty well, but as LastFM had faded in popularity there just never seemed to be any apps that focused on being able to accurately scrobble online radio. If you'd like to use this with Android and [Pano Scrobbler](https://github.com/kawaiiDango/pano-scrobbler), it should work without much issue. 
 
 ### How does the scrobbling work?
-There are a couple ways to scrobble using the app. There is the Login to last.fm button on the left that allows you to enable scrobbling in the app. This is currently just last.fm and not other platforms. 
+There are a couple ways to scrobble using the app. There is the Login to last.fm button on the left that allows you to enable scrobbling in the app. This is currently just last.fm and not other scrobbling platforms. 
+
 ![image](https://github.com/user-attachments/assets/778d0021-6ba1-47b3-a283-38b2ded1e759)
 
 The other alternative is [Web Scrobbler](https://web-scrobbler.com) to handle sending to LastFM, MusicBrainz and LibreFM. You just need to login to each platform. This works on desktop with all major browsers (Chrome, Firefox, Safari etc.) on macOS, Windows and Linus, as well as iOS and iPadOS in Safari and Orion browsers.
@@ -35,10 +36,10 @@ The other alternative is [Web Scrobbler](https://web-scrobbler.com) to handle se
 For Android, scrobbling works using [Pano Scrobbler](https://github.com/kawaiiDango/pano-scrobbler), I've tested this a bit and it seems to work well.  
 
 ### Is this a progressive web app (PWA)?
-Yes. It can be installed on your device as a standalone app on your homescreen. 
+Yes. It can be installed on your device as a standalone app on your homescreen. It's no longer a requirement to just use the browser, it can work standalone. 
 
 ### How did you choose the stations?
-Part of my motivation was to add Canadian and local stations to my rotation. So there are some pretty niche and deep cut stations in there. Most are Indie and Alternative stations, and some stations that will play a bit of everything. I’ve tried to steer clear of corporate radio stations with lots of commercials, but that doesn’t mean there aren’t some stations with them. My criteria was typically whether they played a decent variety of music. And they needed to have a public API that I could pull the data from.
+Part of my motivation was to add Canadian and local stations to my rotation. So there are some pretty niche and deep cut stations in there. Most are Indie and Alternative stations, and some stations that will play a bit of everything. I’ve tried to steer clear of corporate radio stations with lots of commercials, but that doesn’t mean there aren’t some stations with them. My criteria was typically whether they played a decent variety of music. And they needed to have a public API that I could pull the data from. I have added quite a few user requested stations as well. If you have a suggestion, message me on [Bluesky](https://bsky.app/profile/scrobblerad.io) or submit a GitHub issue. 
 
 ### Why isn’t the station showing any data?
 There are a few different factors that can cause a site to not have streaming data.
