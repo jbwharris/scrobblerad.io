@@ -665,7 +665,6 @@ class RadioPlayer {
             .replace(/[*/|\\]/g, '')                 // Asterisks, pipes, and slashes
             .replace(/--/g, '-')                     // Double hyphens
             .replace(/\s*\(Current Track\)\s*/gi, '') // Removes "(Current Track) " from full string
-            .replace(/^\d{2} /, '') // remove album track numbers "03 Wonderwall" 
             .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs') // the band tUnE-yArDs often gets messed up 
             .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, (match) => { // common contractions that can sometimes be input incorrectly
                     const replacements = {
@@ -708,6 +707,7 @@ class RadioPlayer {
                 .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
                 .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
                 .replace(/\s*\(.*?\bsession\b.*?\)/gi, '') // Removes "(909 Session)"
+                .replace(/\s*\(.*?\bcover\b.*?\)/gi, '') // Removes "(_____ cover)"
                 .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
                 .trim();
         };
@@ -758,7 +758,7 @@ class RadioPlayer {
             spinUpdated = data.spinUpdated || '';
         }
 
-        if (this.currentStationData[this.stationName].orbPath) {
+        if (this.currentStationData[this.stationName].orbPath || this.currentStationData[this.stationName].dataPath) {
             //radio.co apis that have a string "song - artist" piggybacking on the orbPath function
             if (this.currentStationData[this.stationName].dataPath == true) {
                 dataPath = data.data.title;
@@ -784,23 +784,6 @@ class RadioPlayer {
         }
 
         if (this.currentStationData[this.stationName].stringPath) {
-
-            if (match) {
-                song = filterSongDetails(match[1]?.trim()) || '';
-                artist = this.applyFilters('artist', match[2]?.trim()) || '';
-                album = this.applyFilters('album', match[3]?.trim()) || '';
-                albumArt = match[4]?.trim() || urlCoverArt;
-                spinUpdated = match[5]?.trim() || '';
-
-                if (this.currentStationData[this.stationName].flipMeta) {
-                    [song, artist] = [artist, song];
-                }
-            } else {
-                console.log('No match found');
-            }
-        }
-
-        if (this.currentStationData[this.stationName].htmlPath) {
 
             if (match) {
                 song = filterSongDetails(match[1]?.trim()) || '';
@@ -1075,7 +1058,17 @@ class RadioPlayer {
 
             if (this.isPlaying && !this.shouldReloadStream) {
 
-                let stationUrl = this.addCacheBuster(this.currentStationData[this.stationName].apiUrl);
+                let stationUrl;
+
+                if (this.currentStationData[this.stationName].spinPath) {
+                    stationUrl = `https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron206170750999458&station=${this.currentStationData[this.stationName].spinPath}&num=0&sharing=0&player=0&cover=0&merch=0&meta=0`;
+                } else if (this.currentStationData[this.stationName].orbPath && !this.currentStationData[this.stationName].dataPath) {
+                    stationUrl = `https://scraper2.onlineradiobox.com/${this.currentStationData[this.stationName].orbPath}?l=0`;
+                } else {
+                    stationUrl = this.currentStationData[this.stationName].apiUrl;
+                }
+
+                stationUrl = this.addCacheBuster(stationUrl);
 
                 const fetchOptions = {
                     method: this.currentStationData[this.stationName].method || 'GET',
@@ -1150,7 +1143,6 @@ class RadioPlayer {
 
                         // Process the new data response
                         this.previousDataResponse = data; // Update even if we skip processing
-
 
                         this.processData(data);
 
@@ -1239,8 +1231,6 @@ class RadioPlayer {
                         }
                     }, 60000);
                 } 
-
-                console.log('this.currentTrack', this.currentTrack, 'currentTrack', currentTrack);  
             }
         }    
     }                          
@@ -1249,6 +1239,14 @@ class RadioPlayer {
         // Check if data and stationName are available
         if (data && this.stationName) {
             const extractedData = this.extractSongAndArtist(data, this.stationName);
+
+             // Compare the extractedData response with the previous one
+            if (JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) {
+                console.log('extracted data the same, returning')
+                return;
+            } else {
+                this.prevExtractedData = extractedData;
+            }
 
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
@@ -1284,6 +1282,7 @@ class RadioPlayer {
                     console.log('102.3 timestamp', timestamp);
                 } else {
                     timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
+                    this.duration = this.getPath(data, this.currentStationData[this.stationName].duration2);
                     console.log('altpath timestamp', timestamp);
                 }
             }
@@ -1292,10 +1291,11 @@ class RadioPlayer {
             const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated, this.getPath(data, this.currentStationData[this.stationName].duration), song);
 
             if ((staleData === "Live365 past" || staleData === "Still future") && (this.song)) {
-                if (song.toLowerCase() !== this.song.toLowerCase()) {
                     return;   
-                }
+
             } else if (this.song == "Station data is currently missing" && !staleData ) {
+                const page = new Page(this.stationName, this);
+                page.refreshCurrentData([this.song, '', '', urlCoverArt, null, null, true]);
                 return;
             }
 
@@ -1305,15 +1305,6 @@ class RadioPlayer {
                 page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true]);
                 return;
             }
-
-             // Compare the extractedData response with the previous one
-            if (JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) {
-                console.log('extracted data the same, returning')
-                return;
-            } else {
-                this.prevExtractedData = extractedData;
-            }
-
 
             // Ensure this code doesn't run unless there's new data to process
             if (!this.lfmMetaChanged || (song.toLowerCase() !== this.song.toLowerCase())) {
@@ -1775,7 +1766,7 @@ class RadioPlayer {
 
     addCacheBuster(url) {
         const timestamp = Date.now();
-        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb'];
+        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl'];
         if (skipCacheBuster.includes(this.stationName)) {
             return url;
         }
