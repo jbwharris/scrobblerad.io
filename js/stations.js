@@ -16,10 +16,12 @@ const stations = {
   amazingradiouk: {
     stationName: "Amazing Radio UK",
     filters: [""],
+    cors: true,
   },  
   amazingradious: {
     stationName: "Amazing Radio US",
     filters: [""],
+    cors: true,
   }, 
   bagelradio: {
     stationName: "BagelRadio",
@@ -200,6 +202,10 @@ const stations = {
     stationName: "KALX",
     filters: [""],
   },
+  kboo: {
+    stationName: "KBOO",
+    filters: [""],
+  },
   kcrw: {
     stationName: "KCRW Eclectic 24",
     filters: [""],
@@ -233,6 +239,11 @@ const stations = {
   kqua: {
     stationName: "KQUA - The River",
     filters: [""],
+  },
+  krcl: {
+    stationName: "KRCL",
+    filters: [""],
+    cors: true,
   },
   krsh: {
     stationName: "The Krush",
@@ -306,6 +317,10 @@ const stations = {
     stationName: "The Point",
     filters: [""],
   },
+  prpfm: {
+    stationName: "Portland Radio Project",
+    filters: [""],
+  },
   qcindie: {
     stationName: "QCIndie",
     filters: [""],
@@ -349,6 +364,10 @@ const stations = {
   },
   sabotage: {
     stationName: "Sabotage Radio",
+    filters: [""],
+  },
+  skylab: {
+    stationName: "Skylab Radio",
     filters: [""],
   },
   socalsound: {
