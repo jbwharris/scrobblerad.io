@@ -12,5 +12,6 @@ const stationData = {
     duration: "current-track.duration",
     timezone: "America/Los_Angeles",
     isFuture: true,
+    filter: ["Community Calendar"],
   },
 }

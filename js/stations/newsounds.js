@@ -5,10 +5,9 @@ const stationData = {
     location: "New York, NY ",
     webUrl: "https://newsounds.org",
     streamUrl: "https://q2stream.wqxr.org/q2-web",
-    apiUrl: "https://scraper2.onlineradiobox.com/us.wqxrnewsoundsradio?l=0",
+    orbPath: "us.wqxrnewsoundsradio",
     timestamp: "updated",
     pathRegex: /^(.*)-(.*)$/,
-    orbPath: true,
     flipMeta: true,
     timezone: "America/New_York",
   }

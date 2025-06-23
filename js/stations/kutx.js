@@ -13,6 +13,7 @@ const stationData = {
     apiUrl:
       "https://api.composer.nprstations.org/v1/widget/50ef24ebe1c8a1369593d032/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
     duration: "onNow.song._duration",
+    duration2: "tracklist.results.0.song._duration",
     timestamp: "onNow.song._start_time",
     timestamp2: "tracklist.results.0.song._start_time",
     timezone: "America/Chicago",

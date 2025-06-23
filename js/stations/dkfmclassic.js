@@ -4,8 +4,7 @@ const stationData = {
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://www.decayfm.com",
     streamUrl: "https://radio.streemlion.com:4245/stream",
-    apiUrl: "https://scraper2.onlineradiobox.com/ca.dkfmclassic",
-    orbPath: true,
+    orbPath: "ca.dkfmclassic",
     timestamp: "updated",
     timezone: "America/Toronto",
   }

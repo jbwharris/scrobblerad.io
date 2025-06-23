@@ -4,10 +4,9 @@ const stationData = {
     location: "Powell River, BC 🇨🇦",
     webUrl: "https://www.cjmp.ca",
     streamUrl: "https://usa2.fastcast4u.com/proxy/terjoyce?mp=/1&1641764578515&1717635950075",
-    apiUrl: "https://scraper2.onlineradiobox.com/ca.cjmp",
+    orbPath: "ca.cjmp",
     timestamp: "updated",
     timezone: "America/Vancouver",
-    orbPath: true,
     filter: ["CJMP"],
     quietStream: true,
     gainBoost: 2

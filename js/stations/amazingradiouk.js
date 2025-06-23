@@ -7,7 +7,7 @@ const stationData = {
     stationName: "Amazing Radio UK",
     location: "Newcastle, UK 🇬🇧",
     webUrl: "https://amazingradio.com",
-    streamUrl: "https://stream.amazingradio.com:8443/stream.mp3?ngsw-bypass",
+    streamUrl: "https://stream6.amazingradio.com:8443/stream.mp3?redirected=1",
     apiUrl: "https://api.amazingtunes.com/radio/uk/airplays?page[size]=1&include[]=tune&include[]=tune.artist",
     needPath: true,
     timestamp: "data.0.attributes.aired_at",

@@ -4,9 +4,8 @@ const stationData = {
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://indie88.com",
     streamUrl: "https://localradio.streamb.live/SB00348",
-    apiUrl: "https://scraper2.onlineradiobox.com/ca.cind?l=0",
+    orbPath: "ca.cind",
     timestamp: "updated",
     timezone: "America/Toronto",
-    orbPath: true,
   }
 };

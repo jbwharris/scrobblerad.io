@@ -4,7 +4,7 @@ const stationData = {
     location: "Kansas City, MO 🇺🇸",
     webUrl: "https://bridge909.org/",
     streamUrl: "https://live.amperwave.net/direct/publictv19-ktbgfmaac-imc1",
-    apiUrl: "https://scraper2.onlineradiobox.com/us.ktbg?l=0",
+    orbPath: "us.ktbg",
     timestamp: "updated",
     timezone: "America/Chicago",
     filter: ["The Bridge", "Sonic Spectrum", "Michael Atchison"],

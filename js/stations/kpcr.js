@@ -4,10 +4,9 @@ const stationData = {
     location: "Santa Cruz, CA 🇺🇸",
     webUrl: "https://www.kpcr.org/",
     streamUrl: "https://kpcrfm.radioca.st/stream.mp3",
-    apiUrl: "https://scraper2.onlineradiobox.com/us.piratecat?l=0",
+    orbPath: "us.piratecat",
     timestamp: "updated",
     timezone: "America/Los_Angeles",
-    orbPath: true,
     filter: [
       "Pirate Cat",
       "KPCR",
