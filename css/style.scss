@@ -26,6 +26,7 @@ body {
    body {
       backdrop-filter: blur(2em) contrast(50%) brightness(80%);
       --sr-lightness: 35%;
+      --sr-saturation: 0;
       --sidebar-bg: hsla(0deg,0%,0%,.35);
       --sidebar-headers: hsla(0deg,0%,0%,.85);
       --sidebar-gradient: linear-gradient(90deg,hsla(243.2deg, 75.8%, var(--sr-lightness), 1) 39%, hsla(287.6deg, 88.5%, var(--sr-lightness), 1) 90%);
@@ -34,6 +35,7 @@ body {
       --play-button-border: hsla(287.6deg, 88.5%, calc(var(--sr-lightness) - 10%), .85);
       --spinner-bg: hsla(243.2deg, 75.8%, var(--sr-lightness), .85);
       --spinner-border: hsla(243.2deg, 75.8%, calc(var(--sr-lightness) - 10%), .85);
+      --sr-metadata: 0, var(--sr-saturation), 0;
    }
 
 }
@@ -42,6 +44,8 @@ body {
    body {
       backdrop-filter: blur(2rem) contrast(25%) brightness(140%);
       --sr-lightness: 75%;
+      --sr-opacity: 75%;
+      --sr-saturation: 100%;
       --sidebar-bg: rgba(255,255,255,.35);
       --bs-body-color: hsla(50deg,15%,15%,1) !important;
       --bs-heading-color: hsla(50deg,15%,15%,1) !important;
@@ -52,6 +56,7 @@ body {
       --play-button-border: hsla(189, 69%, calc(var(--sr-lightness) - 10%), .85);
       --spinner-bg: hsla(303.4, 79.5%, var(--sr-lightness), .85);
       --spinner-border: hsla(303.4, 79.5%, calc(var(--sr-lightness) - 10%), .85);
+      --sr-metadata: 0, var(--sr-saturation), 100%;
    }
 }
 
@@ -434,6 +439,7 @@ body {
       left:0;
       left:0;
       background: var(--sidebar-headers);
+      padding-bottom: env(safe-area-inset-bottom, 0);
 
       .media-controls {
          display: flex;
@@ -722,7 +728,25 @@ input[type="checkbox"]:checked~.menuIconToggle {
 
 @media screen and (max-width:375px) and (max-height:675px) {
    #webamp #albumArt {
-      max-width: 75vw;
+      position:absolute;
+      top: -2rem;
+   }
+
+   .metainfo {
+      position: absolute;
+      bottom: 0;
+      margin-bottom: 0;
+      padding: .5rem !important;
+      background: hsla(var(--sr-metadata), var(--sr-lightness));
+
+      &:before {
+         content: "";
+         width: 100%;
+         height: 2rem;
+         background-image: linear-gradient(hsla(var(--sr-metadata), 0), hsla(var(--sr-metadata), var(--sr-lightness)));
+         position: absolute;
+         top: -2rem;
+      }
    }
 }
 
@@ -730,4 +754,15 @@ input[type="checkbox"]:checked~.menuIconToggle {
 .fullscreen-mode {
     padding-bottom: env(safe-area-inset-bottom, 1rem); /* Adds space at the bottom for home indicator */
 }
+
+
+@media (display-mode: standalone) {
+    /* Styles for PWA in fullscreen mode on iOS */
+    body {
+        border: 5px solid green;
+    }
+}
+
+
+
 
