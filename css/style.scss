@@ -472,8 +472,14 @@ body {
    position: relative;
    top: -2rem;
    transition: all .3s ease-in;
-   max-height: 500px;
-   overflow-y: hidden;
+   max-height: 600px;
+   overflow: hidden;
+
+   #albumArt {
+      max-width: 580px;
+      max-height:580px;
+      border: .5rem solid #111;
+   }
 }
 
 #metadata {
