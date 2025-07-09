@@ -693,6 +693,7 @@ class RadioPlayer {
             return song
                 .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
                 .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
+                .replace(/\s-\s.*mix.*$/i, '')    // Removes " - Something Mix" or similar
                 .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
                 .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
                 .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
@@ -1031,30 +1032,30 @@ class RadioPlayer {
 
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
-            
+
             if (!this.stationName) return;
 
             // check if the last time it updated is still in the future
-            if ((this.lastKnownUpdatedTime - Date.now()) > 15000 && !this.shouldReloadStream) {
+            if ((this.lastKnownUpdatedTime - Date.now()) > 10000 && !this.shouldReloadStream) {
                 console.log('this.lastKnownUpdatedTime > Date.now', (this.lastKnownUpdatedTime - Date.now()) / 1000);
                 return;
             }
 
-            if ([this.stationName] == 'cbcmusic') {
-                const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
+            // if ([this.stationName] == 'cbcmusic') {
+            //     const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
 
-                console.log("cbcData", cbcData);
+            //     console.log("cbcData", cbcData);
 
-                // Compare the current data response with the previous one
-                if (this.isDataSameAsPrevious(cbcData)) {
-                    return;
-                }
+            //     // Compare the current data response with the previous one
+            //     if (this.isDataSameAsPrevious(cbcData)) {
+            //         return;
+            //     }
 
-                // Store the current data response for future comparison
-                this.previousDataResponse = cbcData;
-                // Process the new data response
-                this.processData(cbcData);
-            }
+            //     // Store the current data response for future comparison
+            //     this.previousDataResponse = cbcData;
+            //     // Process the new data response
+            //     this.processData(cbcData);
+            // }
 
             if (this.isPlaying && !this.shouldReloadStream) {
 
@@ -1184,6 +1185,8 @@ class RadioPlayer {
         const album = replaceEnDashWithEmDash(doc.querySelector('span.release')?.textContent.trim() || '');
         const albumArt = doc.querySelector('img')?.src || '';
         const spinUpdated = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
+
+
 
         // Return the extracted data in the format expected by processData
         return {song, artist, album, albumArt, spinUpdated};
@@ -1396,9 +1399,13 @@ class RadioPlayer {
             const isDecimalEpoch = /^\d{10}(\.\d+)?$/.test(timestamp); // 10-digit epoch with optional decimal
             const isEpoch = /^\d{10,13}$/.test(timestamp); // integer epoch
 
+
+
             if (isDecimalEpoch || isEpoch) {
                 const numericTs = parseFloat(timestamp); // works for both int & float
                 apiUpdatedData = numericTs < 1e12 ? Math.floor(numericTs * 1000) : Math.floor(numericTs); // Ensure ms, strip decimals
+
+                console.log('apiUpdatedData from isEpoch', apiUpdatedData);
             } else {
                 apiUpdatedData = this.convertTimestamp(timestamp, timezone);
             }
@@ -1434,21 +1441,33 @@ class RadioPlayer {
         // Convert formatted times to epoch
         timezoneTime = Date.parse(timezoneTime);
 
+
         // some stations have duration data and tend to switch the track too early. This makes an adjustment so that the station doesn't jump away from the current too quickly if it's still in the window the song should still be playing
         if (duration) {
-                this.duration = duration;
+            this.duration = duration;
+
+            if (this.duration > 0) {
+                apiUpdatedData = apiUpdatedData + duration;
+            } else {
+                // Check if duration is already in epoch format (milliseconds)
+                const isEpoch = (value) => typeof value === 'number' && value >= 1000 && value < 1e13;
+
+                // Convert duration to epoch if necessary
+                const epochDuration = isEpoch(this.duration) ? this.duration : this.convertDurationToMilliseconds(this.duration);
 
                 if (duration <= 600) {
                     apiUpdatedData = apiUpdatedData + (duration * 1000);
                    // console.log('apiUpdatedData', apiUpdatedData)
+                } else if (epochDuration > 0) {
+                    apiUpdatedData = apiUpdatedData + epochDuration;
                 } else {
                     apiUpdatedData = apiUpdatedData + duration; // Get end time of the song
                     console.log('apiUpdatedData else', apiUpdatedData)
                 }
 
-            console.log("apiUpdatedData + duration =", apiUpdatedData);
+                console.log("apiUpdatedData + duration =", apiUpdatedData);
+            }
         }
-
 
         // For Live365 apis that skip back and forth with the data (for whatever reason). This checks if the end of the song is still in the future to ensure it doesn't change the song data back to an old song only to jump back again next api check
         if (this.currentStationData[this.stationName].isFuture) {
@@ -1504,7 +1523,6 @@ class RadioPlayer {
         const timeDifference = (timezoneTime - apiUpdatedData) / 1000;
         console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
 
-
         // Check if the data is stale (older than 15 minutes)
         if (timeDifference > 900 && apiUpdatedData !== "") {
             staleData = 'Streaming data is stale';
@@ -1513,17 +1531,43 @@ class RadioPlayer {
         return { staleData };
     }
 
-    convertTimestamp(timestamp, timezone, spinUpdated) {
+    convertDurationToMilliseconds(durationStr) {
+        const parts = durationStr.split(':');
+        const hours = parseInt(parts[0], 10) || 0;
+        const minutes = parseInt(parts[1], 10) || 0;
+        const seconds = parts[2].split('.');
+        const wholeSeconds = parseInt(seconds[0], 10) || 0;
+        const milliseconds = seconds[1] ? parseInt(seconds[1], 10) / Math.pow(10, seconds[1].length) * 1000 : 0;
+
+        return Math.round((hours * 3600 + minutes * 60 + wholeSeconds) * 1000 + milliseconds);
+    }
+
+    convertTimestamp(timestamp, timezone, spinUpdated, duration) {
+
+        console.log('timestamp before conversion', timestamp);
+
         const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
         const isEpoch = /^\d{10,13}$/.test(timestamp); // Check for 10 or 13 digits
         const isUTC = typeof timestamp === 'string' && timestamp.trim().endsWith('Z');
         const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
         const mmddyyyyRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/; // MM-DD-YYYY HH:mm:ss
         const yyyymmddhhmmRegex = /^20\d{10}$/; // YYYYMMDDHHMM starting with 20
-
+        const yyyymmddhhmmssRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?$/;
 
        if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
             return new Date(timestamp).getTime(); // ⬅️ Epoch
+        }
+
+        if (yyyymmddhhmmssRegex.test(timestamp)) {
+            const [datePart, timePart] = timestamp.split(' ');
+            const [year, month, day] = datePart.split('-'); // Correct order: YYYY-MM-DD
+
+            // Convert to desired format (MM/DD/YYYY, HH:mm:ss GMT)
+            const formattedDate = `${month}/${day}/${year}`;
+            const formattedTime = timePart; // Time remains the same
+            const formattedTimestamp = `${formattedDate}, ${formattedTime} GMT`;
+
+            return new Date(formattedTimestamp).getTime(); // ⬅️ Epoch
         }
 
         if (yyyymmddhhmmRegex.test(timestamp)) {
@@ -1556,7 +1600,7 @@ class RadioPlayer {
             return new Date(timestamp).getTime(); // ⬅️ Epoch
         }
 
-        if (mmddyyyyRegex.test(timestamp)) {
+        if (mmddyyyyRegex.test(timestamp) || mmddyyyyRegex.test(formattedTimestamp)) {
             const [datePart, timePart] = timestamp.split(' ');
             const [month, day, year] = datePart.split('-');
             const formattedTimestamp = `${year}-${month}-${day}T${timePart}`;
