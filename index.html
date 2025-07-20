@@ -15,7 +15,7 @@
   <!-- End Matomo Tag Manager -->
   <!-- Required meta tags -->
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
   <link rel="icon" href="img/icons/icon.svg" />
 
@@ -152,14 +152,15 @@
                   <a href="https://music.apple.com/ca/playlist/jaybeedub-mixtape/pl.u-dkelCypyBM" class="iconLink"><i class="icon-apple" aria-hidden="true"></i><span class="visually-hidden">opens Apple Music JayBeeDub Mixtape in a new tab</span></a>
                   <a href="https://open.spotify.com/playlist/2MJuX8Lx1IyvEzSXTcUw42?go=1&sp_cid=1b8011ab28a385db6cd8f67005590e9d" class="iconLink"><i class="icon-spotify" aria-hidden="true" target="_blank"></i><span class="visually-hidden">opens Spotify Music JayBeeDub Mixtape in a new tab</span></a>
                 </p>
+
+                <div id="mt-box"></div>
               </footer>
             </div>
 
             <div class="col col-xxl-8 col-md-6 panels" id="panel2">
-
               <div class="playermeta px-0 row album-controls" id="playermeta">
                 <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
-                  <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="ScrobbleRadio - scrobble awesome radio">
+                  <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="600" height="600" alt="ScrobbleRadio - scrobble awesome radio">
                 </div>
                 <div class="col col-xxl-5 col-md-10 p-2 metainfo">
                   <p class="fs-3 d-sm-none">Swipe left to pick a station to get started</p>
@@ -206,7 +207,7 @@
 
   <template id="meta">
     <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
-      <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="500" height="500" alt="">
+      <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="600" height="600" alt="">
     </div>
     <div class="col col-xxl-5 col-md-10 p-2 metainfo">
       <p id="title" class="text-capitalize h3"></p>
@@ -225,6 +226,7 @@
   <script src="js/external/filter.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/hls.js/latest/hls.js"></script>
 
   <script src="js/stations-dist.js"></script>
   <script src="js/scrobbler.js"></script>

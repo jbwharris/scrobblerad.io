@@ -3,7 +3,7 @@ const stationData = {
     stationName: "ABC - Triple J Unearthed",
     location: "Sydney, Australia 🇦🇺",
     webUrl: "https://www.abc.net.au/triplejunearthed/",
-    streamUrl: "https://live-radio01.mediahubaustralia.com/UNEW/aac/",
+    streamUrl: "https://mediaserviceslive.akamaized.net/hls/live/2038305/triplejunearthed/masterhq.m3u8",
     timestamp: "updated",
     timezone: "Australia/Sydney",
     orbPath: "au.abctriplejunearthed",

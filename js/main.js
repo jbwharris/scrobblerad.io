@@ -281,6 +281,7 @@ class RadioPlayer {
     constructor(buttonElement, skipForwardButton, skipBackButton, reloadStreamButton) {
         // Audio setup
         this.audio = new Audio();
+        this.hls = null; // Store HLS instance
         this.isPlaying = null;
         this.shouldReloadStream = false;
         this.pauseTimeout = null;
@@ -498,6 +499,14 @@ class RadioPlayer {
             firstRun = false;
         }
 
+        // Destroy HLS instance if switching to a non-HLS station
+        if (this.hls) {
+            this.hls.destroy();
+            this.hls = null;
+            this.audio.removeAttribute('src'); // Reset audio element
+            this.audio.load(); // Reset audio state
+        }
+
         const debouncedSetupAudio = this.debounce(() => {
             if (!this.isPlaying) return;
 
@@ -506,9 +515,18 @@ class RadioPlayer {
                 return;
             }
 
-            const audioSrc = this.addCacheBuster(this.currentStationData[this.stationName].streamUrl);
-            const newAudio = new Audio(audioSrc);
-            newAudio.crossOrigin = 'anonymous'; // Required for Web Audio API
+            const newAudio = new Audio(); // Create new Audio element
+            newAudio.crossOrigin = 'anonymous';
+
+            const streamUrl = this.currentStationData[this.stationName].streamUrl;
+            const isHlsStream = streamUrl.endsWith('.m3u8');
+
+            if (isHlsStream) {
+                this.hlsStreamLoad(streamUrl, newAudio);
+            } else {
+                newAudio.src = this.addCacheBuster(streamUrl);
+                newAudio.load();
+            }
 
             // If the stream is marked as quiet, boost it
             if (this.currentStationData[this.stationName].quietStream) {
@@ -565,6 +583,39 @@ class RadioPlayer {
 
         debouncedSetupAudio();
     }
+
+    hlsStreamLoad(streamUrl, audioElement) {
+        if (Hls.isSupported()) {
+            this.hls = new Hls(); // Store HLS instance
+            this.hls.loadSource(streamUrl);
+            this.hls.attachMedia(audioElement);
+            this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                audioElement.play();
+            });
+            this.hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            console.error('Fatal network error encountered, try to recover');
+                            this.hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            console.error('Fatal media error encountered, try to recover');
+                            this.hls.recoverMediaError();
+                            break;
+                        default:
+                            this.hls.destroy();
+                            this.hls = null;
+                            console.error('Unrecoverable error, destroy HLS instance');
+                            break;
+                    }
+                }
+            });
+        } else {
+            console.error('HLS is not supported in this browser and cannot be played.');
+        }
+    }
+
 
     cleanupArtist(artist) {
         // Define patterns to find additional artists or features.
@@ -1041,21 +1092,30 @@ class RadioPlayer {
                 return;
             }
 
-            // if ([this.stationName] == 'cbcmusic') {
-            //     const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
+            if ([this.stationName] == 'cbcmusic') {
 
-            //     console.log("cbcData", cbcData);
 
-            //     // Compare the current data response with the previous one
-            //     if (this.isDataSameAsPrevious(cbcData)) {
-            //         return;
-            //     }
 
-            //     // Store the current data response for future comparison
-            //     this.previousDataResponse = cbcData;
-            //     // Process the new data response
-            //     this.processData(cbcData);
-            // }
+                this.loadHTMLContent(true, 'mytuner.html', 'mt-box');
+
+
+
+
+
+                const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
+
+                console.log("cbcData", cbcData);
+
+                // Compare the current data response with the previous one
+                if (this.isDataSameAsPrevious(cbcData)) {
+                    return;
+                }
+
+                // Store the current data response for future comparison
+                this.previousDataResponse = cbcData;
+                // Process the new data response
+                this.processData(cbcData);
+            }
 
             if (this.isPlaying && !this.shouldReloadStream) {
 
@@ -1683,6 +1743,37 @@ class RadioPlayer {
         return apiUpdatedTime;
     }
 
+
+    loadHTMLContent(condition, url, targetElementId) {
+    const targetElement = document.getElementById(targetElementId);
+
+    // Check if the target element exists
+    if (!targetElement) {
+        console.error(`Element with ID "${targetElementId}" not found in the DOM.`);
+        return; // Exit the function early
+    }
+
+    if (condition) {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(html => {
+                targetElement.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    } else {
+        // Optionally clear the content if the condition is false
+        targetElement.innerHTML = '';
+    }
+}
+
+
     upsizeImgUrl(url) {
         if (url) {
             return url.replace(/\d{3}x\d{3}/g, '500x500');
@@ -1810,7 +1901,7 @@ class RadioPlayer {
 
     addCacheBuster(url) {
         const timestamp = Date.now();
-        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl'];
+        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl', 'cbcmusic'];
         if (skipCacheBuster.includes(this.stationName)) {
             return url;
         }

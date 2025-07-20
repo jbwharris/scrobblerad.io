@@ -1,12 +1,14 @@
 const stations = {
   abcdoublej: {
     stationName: "ABC - Double J",
-    cors: true,
+    filters: [""],
+  },
+  abctriplej: {
+    stationName: "ABC - Triple J",
     filters: [""],
   },
   abctriplejunearthed: {
     stationName: "ABC - Triple J Unearthed",
-    cors: true,
     filters: [""],
   },
   altradio: {
@@ -58,6 +60,15 @@ const stations = {
   cavernfm: {
     stationName: "Cavern.FM",
     cors: true,
+    filters: [""],
+  },
+  cbcmusic: {
+    stationName: "CBC Music Eastern",
+    cors: true,
+    filters: [""],
+  },
+  cfrc: {
+    stationName: "CFRC",
     filters: [""],
   },
   chillfiltr: {
@@ -221,7 +232,6 @@ const stations = {
   },
   kfjc: {
     stationName: "KFJC",
-    cors: true,
     filters: [""],
   },  
   kosu: {
