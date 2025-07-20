@@ -585,27 +585,30 @@ class RadioPlayer {
     }
 
     hlsStreamLoad(streamUrl, audioElement) {
-        if (Hls.isSupported()) {
-            this.hls = new Hls(); // Store HLS instance
-            this.hls.loadSource(streamUrl);
-            this.hls.attachMedia(audioElement);
-            this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        // Check for native HLS support (Safari)
+        if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
+            audioElement.src = streamUrl;
+            audioElement.play();
+        } else if (Hls.isSupported()) { // Fallback to HLS.js for other browsers
+            const hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(audioElement);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 audioElement.play();
             });
-            this.hls.on(Hls.Events.ERROR, (event, data) => {
+            hls.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
                             console.error('Fatal network error encountered, try to recover');
-                            this.hls.startLoad();
+                            hls.startLoad();
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
                             console.error('Fatal media error encountered, try to recover');
-                            this.hls.recoverMediaError();
+                            hls.recoverMediaError();
                             break;
                         default:
-                            this.hls.destroy();
-                            this.hls = null;
+                            hls.destroy();
                             console.error('Unrecoverable error, destroy HLS instance');
                             break;
                     }
@@ -615,6 +618,7 @@ class RadioPlayer {
             console.error('HLS is not supported in this browser and cannot be played.');
         }
     }
+
 
 
     cleanupArtist(artist) {
