@@ -49,7 +49,11 @@ const stationData = {
       "James Burke",
       "Lauren Fitzpatrick",
       "Ethan Bloomfield",
-      "Ethan in the Evening"
+      "Ethan in the Evening",
+      "http",
+      "www",
+      " PM",
+      " AM"
     ],
   },
 }

@@ -11,5 +11,7 @@ const stationData = {
     duration: "current-track.duration",
     timezone: "America/New_York",
     isFuture: true,
+    quietStream: true,
+    gainBoost: 3,
   },
 }
