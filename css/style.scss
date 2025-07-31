@@ -762,15 +762,14 @@ input[type="checkbox"]:checked~.menuIconToggle {
 
 .fullscreen-mode {
     padding-bottom: env(safe-area-inset-bottom, 1rem); /* Adds space at the bottom for home indicator */
-}
+
+  .nav.stationNav #stationSelect {
+   padding-bottom: 2.5rem;
+  }
 
 
-@media (display-mode: standalone) {
-    /* Styles for PWA in fullscreen mode on iOS */
-    body {
-        border: 5px solid green;
-    }
 }
+
 
 
 
