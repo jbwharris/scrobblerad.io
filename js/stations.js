@@ -15,16 +15,6 @@ const stations = {
     stationName: "AltRadio",
     tags: ["us"],
   },
-  amazingradiouk: {
-    stationName: "Amazing Radio UK",
-    tags: ["uk"],
-    cors: true,
-  },  
-  amazingradious: {
-    stationName: "Amazing Radio US",
-    tags: ["us"],
-    cors: true,
-  }, 
   bagelradio: {
     stationName: "BagelRadio",
     tags: ["us"],
@@ -56,11 +46,6 @@ const stations = {
   btpm: {
     stationName: "BTPM - The Bridge",
     tags: ["us", "ca"],
-  },
-  cavernfm: {
-    stationName: "Cavern.FM",
-    cors: true,
-    tags: ["us"],
   },
   cbcmusic: {
     stationName: "CBC Music Eastern",
@@ -102,11 +87,6 @@ const stations = {
     stationName: "CKUA",
     tags: ["ca"],
   },
-  ckut: {
-    stationName: "CKUT",
-    cors: true,
-    tags: ["ca"],
-  },
   ckuw: {
     stationName: "CKUW",
     tags: ["ca"],
@@ -126,11 +106,6 @@ const stations = {
   d2relax: {
     stationName: "D2 Relax",
     tags: ["ca"],
-  },
-  demostation: {
-    stationName: "Demo Station 2",
-    cors: true,
-    tags: [""],
   },
   dkfm: {
     stationName: "DKFM",
@@ -170,7 +145,7 @@ const stations = {
   },
   gorillafm: {
     stationName: "Gorilla FM",
-    tags: ["fr"],
+    tags: ["ch"],
   },
   indie1023: {
     stationName: "Indie 102.3",
@@ -216,11 +191,6 @@ const stations = {
     stationName: "KCRW Eclectic 24",
     tags: ["us"],
   },
-  kdhx: {
-    stationName: "KDHX",
-    cors: true,
-    tags: ["us"],
-  },
   kexp: {
     stationName: "KEXP",
     tags: ["us"],
@@ -245,10 +215,9 @@ const stations = {
     stationName: "KQUA - The River",
     tags: ["us"],
   },
-  krcl: {
-    stationName: "KRCL",
+  kroq: {
+    stationName: "KROQ",
     tags: ["us"],
-    cors: true,
   },
   krsh: {
     stationName: "The Krush",
@@ -357,11 +326,6 @@ const stations = {
   radiosydney: {
     stationName: "Radio Sydney",
     tags: ["au"],
-  },
-  radiowestern: {
-    stationName: "Radio Western",
-    cors: true,
-    tags: ["ca"],
   },  
   radiox: {
     stationName: "Radio X",
@@ -539,11 +503,6 @@ const stations = {
   },
   xpn2: {
     stationName: "XPoNential Radio",
-    tags: ["us"],
-  },
-  xrayfm: {
-    stationName: "XRAY.FM",
-    cors: true,
     tags: ["us"],
   },
   ynotradio: {
