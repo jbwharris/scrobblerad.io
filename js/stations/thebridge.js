@@ -8,6 +8,5 @@ const stationData = {
     timestamp: "updated",
     timezone: "America/Chicago",
     filter: ["The Bridge", "Sonic Spectrum", "Michael Atchison"],
-    orbPath: true
   }
 };
