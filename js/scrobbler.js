@@ -3,12 +3,28 @@ let lastFmBaseScrobbleUrl = "https://ws.audioscrobbler.com/2.0/";
 const APIKEY = "1eda135bc7d7e3ef4815d11f9990d60c";
 const SECRET = "d006f6c9ede4f8d566110fdd5369dbe6";
 
-function authenticateFM(callback) {
+function removeTokenFromUrl() {
+    const { history, location } = window;
+    const { search } = location;
 
+    if (search && search.includes('token') && history && history.replaceState) {
+        // Remove token from URL
+        const cleanSearch = search.replace(/(\&|\?)token([_A-Za-z0-9=\.%]+)/g, '').replace(/^&/, '?');
+        
+        // Replace search params with clean params
+        const cleanURL = location.origin + location.pathname + (cleanSearch || '');
+        
+        // Use browser history API to clean the params
+        history.replaceState({}, document.title, cleanURL);
+    }
+}
+
+function authenticateFM(callback) {
     // Check if already authenticated
     const existingKey = Cookies.get("scrobbleradio-lastfm-key");
 
     if (existingKey) {
+        console.log("Already authenticated. Updating UI...");
         updateAuthButton();
         if (callback) callback();
         return;
@@ -20,10 +36,13 @@ function authenticateFM(callback) {
 
     // If no token, redirect to Last.fm for authentication
     if (!token) {
-        const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent('https://scrobblerad.io')}`;
+        console.log("No token found. Redirecting to Last.fm...");
+        const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
         window.location.href = authUrl;
         return;
     }
+
+    removeTokenFromUrl();
 
     // Prepare request to exchange token for session key
     const sig = md5(`api_key${APIKEY}methodauth.getSessiontoken${token}${SECRET}`);
@@ -43,7 +62,7 @@ function authenticateFM(callback) {
     })
     .then(res => res.json())
     .then(data => {
-        console.log("Step 8: Session Data:", data);
+        console.log("Session Data:", data);
         if (data?.session?.key) {
             const userKey = data.session.key;
 
@@ -63,8 +82,6 @@ function authenticateFM(callback) {
     })
     .catch(err => console.error("Auth error:", err));
 }
-
-
 
 
 function updateNowPlaying(track) {
@@ -128,7 +145,7 @@ function scrobbleIt(track) {
 
 
   if (isDuplicate) {
-    console.log("🚫 Skipping duplicate scrobble: ", track);
+    console.log("🚫 Skipping duplicate scrobble:", track);
     return;
   }
 
@@ -250,7 +267,7 @@ function updateAuthButton() {
         if (!userKey) {
             button.innerHTML = '<i class="icon-lastfm"></i> Login with Last.fm';
             button.onclick = () => {
-                const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.href)}`;
+                const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
                 window.location.href = authUrl;
             };
         } else {
@@ -263,3 +280,21 @@ function updateAuthButton() {
         }
     }
 }
+
+
+
+// Ensure the token is removed when the page loads if present
+document.addEventListener("DOMContentLoaded", () => {
+    removeTokenFromUrl();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (token) {
+        authenticateFM(() => {
+            updateAuthButton();
+        });
+    } else {
+        updateAuthButton();
+    }
+});
