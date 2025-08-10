@@ -172,6 +172,31 @@
 
               <nav class="stationNav">
                 <h3 class="sidebar-text fw-bold h5">Choose A Station</h3>
+
+                <div class="accordion" id="accordionFilters">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header mr-2">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
+                        Filter stations
+                      </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse" data-bs-parent="#accordionFilters">
+                      <div class="accordion-body">
+                        <select id="tagFilter" onchange="generateRadioButtons(this.value)">
+                          <option value="all">All Countries</option>
+                          <option value="au">Australia 🇦🇺</option>
+                          <option value="ca">Canada 🇨🇦</option>
+                          <option value="us">United States 🇺🇸</option>
+                          <option value="uk">United Kingdom 🇬🇧</option>
+                          <option value="fr">France 🇫🇷</option>
+                          <option value="ie">Ireland 🇮🇪</option>
+                          <option value="ch">Switzerland 🇨🇭</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="d-flex flex-column position-relative" id="stationSelect">
                   <div class="loader">
                     <div class="spinner-grow text-light">
