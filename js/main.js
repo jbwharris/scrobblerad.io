@@ -1,90 +1,73 @@
 const urlCoverArt = "img/defaultArt.png";
 let stationKeys = Object.keys(stations); // Change to let to allow modification
-let skipCORS = ''; // This will store the result of CORS check
+let currentTag = 'all'; // Global variable to track the currently selected tag
 
-async function generateRadioButtons(tag = null) {
-    if (skipCORS === '') {
-        skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/'); // Use the outer variable
+function generateRadioButtons(tag = "all") {
+    currentTag = tag; // Update the global currentTag
+
+    const stationSelectDiv = document.getElementById('stationSelect');
+    stationSelectDiv.innerHTML = '';
+
+    const fragment = document.createDocumentFragment();
+
+    let filteredStationKeys;
+
+    if (tag === "all") {
+        filteredStationKeys = stationKeys.filter(stationKey => {
+            const station = stations[stationKey];
+            return !!station; // Include all valid stations
+        });
+    } else {
+        filteredStationKeys = stationKeys.filter(stationKey => {
+            const station = stations[stationKey];
+            return !!station && station.tags && station.tags.includes(tag);
+        });
+
+        // Fallback to all stations if no stations match the tag
+        if (filteredStationKeys.length === 0) {
+            filteredStationKeys = stationKeys.filter(stationKey => !!stations[stationKey]);
+        }
     }
 
-  const stationSelectDiv = document.getElementById('stationSelect');
+    filteredStationKeys.forEach(stationKey => {
+        const station = stations[stationKey];
+        if (!station) return;
 
-  // Clear the container to prevent duplicates
-  stationSelectDiv.innerHTML = '';
+        const button = document.createElement('button');
+        button.name = stationKey;
+        button.textContent = station.stationName;
 
-  const fragment = document.createDocumentFragment();
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'station';
+        input.value = stationKey;
+        input.checked = stationKey === radioPlayer.stationName;
 
-  // Filter station keys based on the CORS condition and the provided tag
-  let filteredStationKeys = stationKeys.filter((stationKey) => {
-    const station = stations[stationKey];
+        const img = document.createElement('img');
+        img.src = `img/stations/${stationKey}.png`;
+        img.width = '45';
+        img.height = '45';
+        img.loading = 'lazy';
 
-    // If station is undefined, exclude it and log an error
-    if (!station) {
-      // console.error(`Station with key "${stationKey}" not found in stations object.`);
-      return false;
-    }
+        button.appendChild(input);
+        button.prepend(img);
+        fragment.appendChild(button);
+    });
 
-    // Skip stations that require CORS if CORS is not enabled
-    if (skipCORS === false && station.cors) {
-      delete stations[stationKey]; // Remove from stations object
-      return false;
-    }
+    stationSelectDiv.appendChild(fragment);
 
-    // If a tag is provided, only include stations with that tag
-    if (tag !== null && (!station.tags || !station.tags.includes(tag))) {
-      return false;
-    }
-
-    return true; // Keep the station
-  });
-
-  // Now generate buttons for the remaining stations
-  filteredStationKeys.forEach((stationKey) => {
-    const station = stations[stationKey];
-
-    // If station is undefined, skip this iteration and log an error
-    if (!station) {
-      console.error(`Station with key "${stationKey}" not found in stations object.`);
-      return;
-    }
-
-    const button = document.createElement('button');
-    button.name = stationKey; // Set the button's name to the stationKey
-    button.textContent = station.stationName;
-
-    const input = document.createElement('input');
-    input.type = 'radio';
-    input.name = 'station';
-    input.value = stationKey;
-    input.checked = stationKey === radioPlayer.stationName;
-
-    const img = document.createElement('img');
-    img.src = `img/stations/${stationKey}.png`;
-    img.width = '45';
-    img.height = '45';
-    img.loading = 'lazy';
-
-    // Attach the input to the button
-    button.appendChild(input);
-    button.prepend(img);
-    fragment.appendChild(button);
-  });
-
-  stationSelectDiv.appendChild(fragment);
-
-  // Event delegation: Add a single event listener to the parent container
-  stationSelectDiv.addEventListener('click', (event) => {
-    const clickedButton = event.target.closest('button');
-    if (clickedButton) {
-      event.preventDefault(); // Prevent the default button behavior
-      const stationKey = clickedButton.name;
-      window.location.hash = `#${stationKey}`;
-      radioPlayer.handleStationSelect(null, stationKey, true);
-    }
-  });
-
-  // Offcanvas Panels Toggle
-  document.getElementById("togglePanels").addEventListener("click", function () {
+    // Event delegation for station selection
+    stationSelectDiv.addEventListener('click', (event) => {
+        const clickedButton = event.target.closest('button');
+        if (clickedButton) {
+            const stationKey = clickedButton.name;
+            window.location.hash = `#${stationKey}`;
+            radioPlayer.handleStationSelect(null, stationKey, true);
+        }
+    });
+    
+    // Offcanvas Panels Toggle
+    document.getElementById("togglePanels").addEventListener("click", function () {
     const leftPanel = document.getElementById("panel1");
     const centrePanel = document.getElementById("panel2");
     const rightPanel = document.getElementById("panel3");
@@ -106,32 +89,6 @@ async function generateRadioButtons(tag = null) {
       }
     }
   });
-}
-
-
-
-async function isCORSEnabled(url) {
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      mode: 'cors', // CORS mode
-    });
-
-    // If the response is ok, CORS is allowed
-    if (response.ok) {
-      return true;
-    } else {
-      // CORS is enforced but not allowed by the server
-      return false;
-    }
-  } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-      // CORS is likely active and blocking the request
-      return false;
-    } else {
-      return false;
-    }
-  }
 }
 
 function animateElement(element, duration = 2000) {
@@ -435,45 +392,37 @@ class RadioPlayer {
         }
     }
 
-    calculateNextAndPreviousIndices(direction) {
-        const currentStation = stations[this.stationName];
+     calculateNextAndPreviousIndices(direction) {
+        let filteredStationKeys;
 
-        // If currentStation is undefined, log an error and return early
-        if (!currentStation) {
-            console.error(`Station with key "${this.stationName}" not found in stations object.`);
+        if (currentTag === "all") {
+            filteredStationKeys = stationKeys.filter(stationKey => !!stations[stationKey]);
+        } else {
+            filteredStationKeys = stationKeys.filter(stationKey => {
+                const station = stations[stationKey];
+                return !!station && station.tags && station.tags.includes(currentTag);
+            });
+
+            // Fallback to all stations if no stations match the tag
+            if (filteredStationKeys.length === 0) {
+                filteredStationKeys = stationKeys.filter(stationKey => !!stations[stationKey]);
+            }
+        }
+
+        const currentIndex = filteredStationKeys.indexOf(this.stationName);
+        if (currentIndex === -1) {
+            console.error(`Current station "${this.stationName}" not found in filtered list.`);
             return;
         }
 
-        const currentTags = currentStation.tags || [];
-
-        const taggedStationKeys = stationKeys.filter(stationKey => {
-            const station = stations[stationKey];
-
-            // If station is undefined, exclude it and log an error
-            if (!station) {
-                return false;
-            }
-
-            // Check if the station has tags and matches the current tags
-            return station.tags && currentTags.every(tag => station.tags.includes(tag));
-        });
-
-        // If no stations match the tags, fallback to all stations
-        if (taggedStationKeys.length === 0) {
-            taggedStationKeys.push(...stationKeys.filter(stationKey => stations[stationKey])); // Ensure all stations exist
-        }
-
-        const currentIndex = taggedStationKeys.indexOf(this.stationName);
-
         if (direction === 'next') {
-            this.nextIndex = (currentIndex + 1) % taggedStationKeys.length;
-            this.nextStationName = taggedStationKeys[this.nextIndex];
+            this.nextIndex = (currentIndex + 1) % filteredStationKeys.length;
+            this.nextStationName = filteredStationKeys[this.nextIndex];
         } else if (direction === 'previous') {
-            this.previousIndex = (currentIndex - 1 + taggedStationKeys.length) % taggedStationKeys.length;
-            this.previousStationName = taggedStationKeys[this.previousIndex];
+            this.previousIndex = (currentIndex - 1 + filteredStationKeys.length) % filteredStationKeys.length;
+            this.previousStationName = filteredStationKeys[this.previousIndex];
         }
     }
-
 
 
     // Debounce function
@@ -1414,7 +1363,7 @@ class RadioPlayer {
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData(['No streaming data to show', '', '', urlCoverArt, null, null, true]);
+                page.refreshCurrentData(['[ Air break ]', '', '', urlCoverArt, null, null, true]);
                 return;
             }
 
@@ -1967,24 +1916,33 @@ class RadioPlayer {
     }
 
     skipToNextStation() {
-        this.calculateNextAndPreviousIndices('next'); // Explicitly specify 'next' direction
-        const nextStationKey = this.nextStationName; // Use the filtered next station
+        this.calculateNextAndPreviousIndices('next');
+        const nextStationKey = this.nextStationName;
         this.handleStationSelect(null, nextStationKey, true);
     }
 
     skipBackward() {
-        this.playButton.lastElementChild.className = "spinner-grow text-light";
-        this.calculateNextAndPreviousIndices('previous'); // Explicitly specify 'previous' direction
-        const prevStationKey = this.previousStationName; // Use the filtered previous station
+        this.calculateNextAndPreviousIndices('previous');
+        const prevStationKey = this.previousStationName;
         this.handleStationSelect(true, prevStationKey, true);
     }
 
     skipForward() {
-        this.playButton.lastElementChild.className = "spinner-grow text-light";
-        this.calculateNextAndPreviousIndices('next'); // Explicitly specify 'next' direction
-        const nextStationKey = this.nextStationName; // Use the filtered next station
+        this.calculateNextAndPreviousIndices('next');
+        const nextStationKey = this.nextStationName;
         this.handleStationSelect(null, nextStationKey, true);
-        this.scrobbleReset; 
+    }
+
+
+    onTagSelected(tag) {
+        currentTag = tag;
+        generateRadioButtons(tag);
+    }
+
+
+    onAllTagsSelected() {
+        currentTag = "all";
+        generateRadioButtons("all");
     }
 
 
