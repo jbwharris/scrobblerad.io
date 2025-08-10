@@ -7,6 +7,6 @@ const stationData = {
     orbPath: "ca.alternativerockvariety",
     timestamp: "updated",
     timezone: "America/Toronto",
-    filter: ["MegaShuffle"],
+    filter: ["MegaShuffle", "Live365", "Advertisement"],
   }
 };

@@ -3,7 +3,7 @@ const stationData = {
     stationName: "Radio Sydney",
     location: "Sydney, Australia 🇦🇺",
     webUrl: "https://radio.sydney/",
-    streamUrl: "https://cast3.asurahosting.com/proxy/radiosyd/stream",
+    streamUrl: "https://mediaserviceslive.akamaized.net/hls/live/2109422/localsydney/v0-221.m3u8",
     orbPath: "au.sydney128",
     timestamp: "updated",
     timezone: "Australia/Sydney",
