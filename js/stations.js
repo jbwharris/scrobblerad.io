@@ -1,559 +1,553 @@
 const stations = {
   abcdoublej: {
     stationName: "ABC - Double J",
-    filters: [""],
+    tags: ["au"],
   },
   abctriplej: {
     stationName: "ABC - Triple J",
-    filters: [""],
+    tags: ["au"],
   },
   abctriplejunearthed: {
     stationName: "ABC - Triple J Unearthed",
-    filters: [""],
+    tags: ["au"],
   },
   altradio: {
     stationName: "AltRadio",
-    filters: [""],
+    tags: ["us"],
   },
   amazingradiouk: {
     stationName: "Amazing Radio UK",
-    filters: [""],
+    tags: ["uk"],
     cors: true,
   },  
   amazingradious: {
     stationName: "Amazing Radio US",
-    filters: [""],
+    tags: ["us"],
     cors: true,
   }, 
   bagelradio: {
     stationName: "BagelRadio",
-    filters: [""],
+    tags: ["us"],
   },
   bbcradio6: {
     stationName: "BBC6 Music",
-    filters: [""],
+    tags: ["uk"],
   },
   bfffm: {
     stationName: "BFF.fm",
-    filters: [""],
+    tags: ["us"],
   },   
   birchstreet: {
     stationName: "Birch Street Radio",
-    filters: [""],
+    tags: ["ca"],
   },
   blacklightradio: {
     stationName: "Blacklight Radio",
-    filters: [""],
+    tags: ["us"],
   },
   blowupradio: {
     stationName: "BlowupRadio",
-    filters: [""],
+    tags: ["us"],
   },
   thebridge: {
     stationName: "The Bridge 90.9",
-    filters: [""],
+    tags: ["us"],
   },
   btpm: {
     stationName: "BTPM - The Bridge",
-    filters: [""],
+    tags: ["us", "ca"],
   },
   cavernfm: {
     stationName: "Cavern.FM",
     cors: true,
-    filters: [""],
+    tags: ["us"],
   },
   cbcmusic: {
     stationName: "CBC Music Eastern",
-    cors: true,
-    filters: [""],
+    tags: ["ca"],
   },
   cfrc: {
     stationName: "CFRC",
-    filters: [""],
+    tags: ["ca"],
   },
   chillfiltr: {
     stationName: "CHILLFILTR",
-    filters: [""],
+    tags: ["ca"],
   },
   chirpradio: {
     stationName: "CHIRP Radio",
-    filters: ["us"],
+    tags: ["us"],
   },
   chly: {
     stationName: "CHLY",
-    filters: ["ca"],
+    tags: ["ca"],
   },
   chma: {
     stationName: "CHMA",
-    filters: ["ca"],
+    tags: ["ca"],
   },
   civl: {
     stationName: "CIVL",
-    filters: [""],
+    tags: ["ca"],
   },
   cjiq: {
     stationName: "CJIQ",
-    filters: [""],
+    tags: ["ca"],
   },
   cjmp: {
     stationName: "CJMP",
-    filters: [""],
+    tags: ["ca"],
   },
   ckua: {
     stationName: "CKUA",
-    filters: [""],
+    tags: ["ca"],
   },
   ckut: {
     stationName: "CKUT",
     cors: true,
-    filters: [""],
+    tags: ["ca"],
   },
   ckuw: {
     stationName: "CKUW",
-    filters: [""],
+    tags: ["ca"],
   },
   coloradosound: {
     stationName: "The Colorado Sound",
-    filters: [""],
+    tags: ["us"],
   },
   thecurrent: {
     stationName: "The Current",
-    filters: [""],
+    tags: ["us"],
   },
   d1alt: {
     stationName: "D1 Alternative",
-    filters: [""],
+    tags: ["ca"],
   },
   d2relax: {
     stationName: "D2 Relax",
-    filters: [""],
+    tags: ["ca"],
   },
   demostation: {
     stationName: "Demo Station 2",
     cors: true,
-    filters: [""],
+    tags: [""],
   },
   dkfm: {
     stationName: "DKFM",
-    filters: [""],
+    tags: ["us"],
   },
   dkfmclassic: {
     stationName: "DKFM Classic",
-    filters: [""],
+    tags: ["ca"],
   },
   easternalt: {
     stationName: "Eastern Alternative Radio",
-    filters: [""],
+    tags: ["uk"],
   },
   eastvillageradio: {
     stationName: "East Village Radio",
-    filters: [""],
+    tags: ["us"],
   },
   eightradio: {
     stationName: "8Radio",
-    filters: [""],
+    tags: ["ie"],
   }, 
   wyms: {
     stationName: "88Nine - Radio Milwaukee",
-    filters: [""],
+    tags: ["us"],
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
-    filters: [""],
+    tags: ["ca"],
   },
   kffp: {
     stationName: "Freeform Portland",
-    filters: [""],
+    tags: ["us"],
   },
   funkymoose: {
     stationName: "Funky Moose Radio",
-    filters: [""],
+    tags: ["ca"],
   },
   gorillafm: {
     stationName: "Gorilla FM",
-    filters: [""],
+    tags: ["fr"],
   },
   indie1023: {
     stationName: "Indie 102.3",
-    filters: [""],
+    tags: ["us"],
   },
   indie617: {
     stationName: "indie617",
-    filters: [""],
+    tags: ["us"],
   },
   indie88: {
     stationName: "Indie88",
-    filters: [""],
+    tags: ["ca"],
   },
   indieblend: {
     stationName: "The Indie Blend",
-    filters: [""],
+    tags: ["us"],
   },
   indiediscotheque: {
     stationName: "Indie Discotheque",
-    filters: [""],
-  },
-  indiegoogleplus: {
-    stationName: "Indie Google+",
-    filters: [""],
+    tags: ["us"],
   },
   indiexfm: {
     stationName: "Indie X FM",
-    filters: [""],
+    tags: ["us"],
   },
   idobianthm: {
     stationName: "idobi anthm",
-    filters: [""],
+    tags: ["us"],
   },
   inhailer: {
     stationName: "Inhailer Radio",
-    filters: [""],
+    tags: ["us"],
   },
   kalx: {
     stationName: "KALX",
-    filters: [""],
+    tags: ["us"],
   },
   kboo: {
     stationName: "KBOO",
-    filters: [""],
+    tags: ["us"],
   },
   kcrw: {
     stationName: "KCRW Eclectic 24",
-    filters: [""],
+    tags: ["us"],
   },
   kdhx: {
     stationName: "KDHX",
     cors: true,
-    filters: [""],
+    tags: ["us"],
   },
   kexp: {
     stationName: "KEXP",
-    filters: [""],
+    tags: ["us"],
   },
   kfjc: {
     stationName: "KFJC",
-    filters: [""],
+    tags: ["us"],
   },  
   kosu: {
     stationName: "KOSU - The Spy",
-    filters: [""],
+    tags: ["us"],
   },
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
-    filters: [""],
+    tags: ["us"],
   },
   kpiss: {
     stationName: "KPISS",
-    filters: [""],
+    tags: ["us"],
   },
   kqua: {
     stationName: "KQUA - The River",
-    filters: [""],
+    tags: ["us"],
   },
   krcl: {
     stationName: "KRCL",
-    filters: [""],
+    tags: ["us"],
     cors: true,
   },
   krsh: {
     stationName: "The Krush",
-    filters: [""],
+    tags: ["us"],
   },
   krsm: {
     stationName: "KRSM",
-    filters: [""],
+    tags: ["us"],
   },
   kuom: {
     stationName: "KUOM - Radio K",
-    filters: [""],
+    tags: ["us"],
   },  
   kutx: {
     stationName: "KUTX",
-    filters: [""],
+    tags: ["us"],
   },
   kxlu: {
     stationName: "KXLU",
-    filters: [""],
+    tags: ["us"],
   },
   kxll: {
     stationName: "KXLL",
-    filters: [""],
+    tags: ["us"],
   },
   kxt: {
     stationName: "KXT",
-    filters: [""],
+    tags: ["us"],
   },
   lemellotron: {
     stationName: "Le Mellotron",
-    filters: [""],
+    tags: ["fr"],
   },
   lightning100: {
     stationName: "Lightning 100",
-    filters: [""],
+    tags: ["us"],
   },
   megashuffle: {
     stationName: "MegaShuffle",
-    filters: [""],
+    tags: ["ca"],
   },
   metradio: {
     stationName: "Met Radio",
-    filters: [""],
+    tags: ["ca"],
   },
   midtownradio: {
     stationName: "Midtown Radio",
-    filters: [""],
+    tags: ["ca"],
   },
   tmm1: {
     stationName: "The Music Machine 1",
-    filters: [""],
+    tags: ["uk"],
   },
   tmm2: {
     stationName: "The Music Machine 2",
-    filters: [""],
+    tags: ["uk"],
   },
   newsounds: {
     stationName: "New Sounds",
-    filters: [""],
+    tags: ["us"],
   },
   novaphonicfm: {
     stationName: "Novaphonic.FM",
-    filters: [""],
+    tags: ["us"],
   },
   plazaone: {
     stationName: "Nightwave Plaza",
-    filters: [""],
+    tags: ["us"],
   },
   thepoint: {
     stationName: "The Point",
-    filters: [""],
+    tags: ["us"],
   },
   prpfm: {
     stationName: "Portland Radio Project",
-    filters: [""],
+    tags: ["us"],
   },
   qcindie: {
     stationName: "QCIndie",
-    filters: [""],
+    tags: ["ca"],
   },
   racketeer: {
     stationName: "Racketeer Radio",
-    filters: [""],
+    tags: ["us"],
   },
   radiofrancefip: {
     stationName: "Radio France",
-    filters: [""],
+    tags: ["fr"],
   },
   radiolaurier: {
     stationName: "Radio Laurier",
-    filters: [""],
+    tags: ["ca"],
   },
   radionovanuit: {
     stationName: "Radio Nova - La Nuit",
-    filters: [""],
+    tags: ["fr"],
   },
   radioparadiseglobal: {
     stationName: "Radio Paradise Global Mix",
-    filters: [""],
+    tags: ["us"],
   },
   radioparadisemain: {
     stationName: "Radio Paradise Main Mix",
-    filters: [""],
+    tags: ["us"],
   },
   radiosydney: {
     stationName: "Radio Sydney",
-    filters: [""],
+    tags: ["au"],
   },
   radiowestern: {
     stationName: "Radio Western",
     cors: true,
-    filters: [""],
+    tags: ["ca"],
   },  
   radiox: {
     stationName: "Radio X",
-    filters: [""],
+    tags: ["uk"],
   },
   sabotage: {
     stationName: "Sabotage Radio",
-    filters: [""],
+    tags: ["fr"],
   },
   skylab: {
     stationName: "Skylab Radio",
-    filters: [""],
+    tags: ["uk"],
   },
   socalsound: {
     stationName: "The SoCal Sound",
-    filters: [""],
+    tags: ["us"],
   },
   soma80sunderground: {
     stationName: "SomaFM 80s Underground",
-    filters: [""],
+    tags: ["us"],
   },
   somafolkfwd: {
     stationName: "SomaFM Folk Forward",
-    filters: [""],
+    tags: ["us"],
   },
   somaindiepop: {
     stationName: "SomaFM Indie Pop Rocks!",
-    filters: [""],
+    tags: ["us"],
   },
   soniccoast: {
     stationName: "The Sonic Coast",
-    filters: [""],
+    tags: ["us"],
   },
   spacefm: {
     stationName: "Space 101.1FM",
-    filters: [""],
+    tags: ["us"],
   },
   thesummit: {
     stationName: "The Summit",
-    filters: [""],
+    tags: ["us"],
   },
   trendradio: {
     stationName: "Trend Radio",
-    filters: [""],
+    tags: ["uk"],
   },
   uncertainfm: {
     stationName: "UncertainFM",
-    filters: [""],
+    tags: ["us"],
   },
   wber: {
     stationName: "WBER",
-    filters: [""],
+    tags: ["us"],
   },
   wbor: {
     stationName: "WBOR",
-    filters: [""],
+    tags: ["us"],
   },
   wbru: {
     stationName: "WBRU",
-    filters: [""],
+    tags: ["us"],
   },
   wcsb: {
     stationName: "WCSB",
-    filters: [""],
+    tags: ["us"],
   },
   wers: {
     stationName: "WERS",
-    filters: [""],
+    tags: ["us"],
   },
   wext: {
     stationName: "WEXT",
     tags: [
-      "AAA", "NPR", "United States", "New York"
+      "us", "AAA", "NPR", "United States", "New York"
     ],
-    filters: [""],
   },
   wfmu: {
     stationName: "WFMU",
-    filters: [""],
+    tags: ["us"],
   },
   wfpk: {
     stationName: "WFPK",
-    filters: [""],
+    tags: ["us"],
   },
   wfuv: {
     stationName: "WFUV",
-    filters: [""],
+    tags: ["us"],
   },
   wicb: {
     stationName: "WICB",
-    filters: [""],
+    tags: ["us"],
   },
   witt: {
     stationName: "WITT",
-    filters: [""],
+    tags: ["us"],
   },
   wluw: {
     stationName: "WLUW",
-    filters: [""],
+    tags: ["us"],
   },
   wmfo: {
     stationName: "WMFO",
-    filters: [""],
+    tags: ["us"],
   },
   wmse: {
     stationName: "WMSE Radio",
-    filters: [""],
+    tags: ["us"],
   },
   wnmc: {
     stationName: "WNMC",
-    filters: [""],
+    tags: ["us"],
   },
   wnrn: {
     stationName: "WNRN",
-    filters: [""],
+    tags: ["us"],
   },
   wnxp: {
     stationName: "WNXP",
-    filters: [""],
+    tags: ["us"],
   },
   worldwidefm: {
     stationName: "Worldwide FM",
-    filters: [""],
+    tags: ["uk"],
   },
   wpkn: {
     stationName: "WPKN",
-    filters: [""],
+    tags: ["us"],
   },
   wprb: {
     stationName: "WPRB",
-    filters: [""],
+    tags: ["us"],
   },
   wrir: {
     stationName: "WRIR",
-    filters: [""],
+    tags: ["us"],
   },
   wrur: {
     stationName: "WRUR - The Route",
-    filters: [""],
+    tags: ["us"],
   },
   wtmd: {
     stationName: "WTMD",
-    filters: [""],
+    tags: ["us"],
   },
   wudr: {
     stationName: "WUDR - Flyer Radio",
-    filters: [""],
+    tags: ["us"],
   },
   wuky: {
     stationName: "WUKY",
-    filters: [""],
+    tags: ["us"],
   },
   wusc: {
     stationName: "WUSC",
-    filters: [""],
+    tags: ["us"],
   },
   wyep: {
     stationName: "WYEP",
-    filters: [""],
+    tags: ["us"],
   },
   wyomingsounds: {
     stationName: "Wyoming Sounds",
-    filters: [""],
+    tags: ["us"],
   },
   wzbc: {
     stationName: "WZBC",
-    filters: [""],
+    tags: ["us"],
   }, 
   x929: {
     stationName: "X92.9",
-    filters: [""],
+    tags: ["ca"],
   }, 
   xpn: {
     stationName: "XPN",
-    filters: [""],
+    tags: ["us"],
   },
   xpn2: {
     stationName: "XPoNential Radio",
-    filters: [""],
+    tags: ["us"],
   },
   xrayfm: {
     stationName: "XRAY.FM",
     cors: true,
-    filters: [""],
+    tags: ["us"],
   },
   ynotradio: {
     stationName: "Y-Not Radio",
-    filters: [""],
+    tags: ["us"],
   },
 };
