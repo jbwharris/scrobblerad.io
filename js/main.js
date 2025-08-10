@@ -2,8 +2,10 @@ const urlCoverArt = "img/defaultArt.png";
 let stationKeys = Object.keys(stations); // Change to let to allow modification
 let skipCORS = ''; // This will store the result of CORS check
 
-async function generateRadioButtons() {
-  skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/'); // Use the outer variable
+async function generateRadioButtons(tag = null) {
+    if (skipCORS === '') {
+        skipCORS = await isCORSEnabled('https://api.wnyc.org/api/v1/whats_on/'); // Use the outer variable
+    }
 
   const stationSelectDiv = document.getElementById('stationSelect');
 
@@ -12,19 +14,40 @@ async function generateRadioButtons() {
 
   const fragment = document.createDocumentFragment();
 
-  // Filter station keys based on the CORS condition
-  stationKeys = stationKeys.filter((stationKey) => {
+  // Filter station keys based on the CORS condition and the provided tag
+  let filteredStationKeys = stationKeys.filter((stationKey) => {
     const station = stations[stationKey];
+
+    // If station is undefined, exclude it and log an error
+    if (!station) {
+      // console.error(`Station with key "${stationKey}" not found in stations object.`);
+      return false;
+    }
+
+    // Skip stations that require CORS if CORS is not enabled
     if (skipCORS === false && station.cors) {
       delete stations[stationKey]; // Remove from stations object
-      return false; // Filter out this station key
+      return false;
     }
+
+    // If a tag is provided, only include stations with that tag
+    if (tag !== null && (!station.tags || !station.tags.includes(tag))) {
+      return false;
+    }
+
     return true; // Keep the station
   });
 
   // Now generate buttons for the remaining stations
-  stationKeys.forEach((stationKey) => {
+  filteredStationKeys.forEach((stationKey) => {
     const station = stations[stationKey];
+
+    // If station is undefined, skip this iteration and log an error
+    if (!station) {
+      console.error(`Station with key "${stationKey}" not found in stations object.`);
+      return;
+    }
+
     const button = document.createElement('button');
     button.name = stationKey; // Set the button's name to the stationKey
     button.textContent = station.stationName;
@@ -84,6 +107,8 @@ async function generateRadioButtons() {
     }
   });
 }
+
+
 
 async function isCORSEnabled(url) {
   try {
@@ -411,10 +436,45 @@ class RadioPlayer {
     }
 
     calculateNextAndPreviousIndices(direction) {
-        this.currentIndex = stationKeys.indexOf(this.stationName);
-        this.nextIndex = (this.currentIndex + 1) % stationKeys.length;
-        this.previousIndex = (this.currentIndex - 1 + stationKeys.length) % stationKeys.length;
+        const currentStation = stations[this.stationName];
+
+        // If currentStation is undefined, log an error and return early
+        if (!currentStation) {
+            console.error(`Station with key "${this.stationName}" not found in stations object.`);
+            return;
+        }
+
+        const currentTags = currentStation.tags || [];
+
+        const taggedStationKeys = stationKeys.filter(stationKey => {
+            const station = stations[stationKey];
+
+            // If station is undefined, exclude it and log an error
+            if (!station) {
+                return false;
+            }
+
+            // Check if the station has tags and matches the current tags
+            return station.tags && currentTags.every(tag => station.tags.includes(tag));
+        });
+
+        // If no stations match the tags, fallback to all stations
+        if (taggedStationKeys.length === 0) {
+            taggedStationKeys.push(...stationKeys.filter(stationKey => stations[stationKey])); // Ensure all stations exist
+        }
+
+        const currentIndex = taggedStationKeys.indexOf(this.stationName);
+
+        if (direction === 'next') {
+            this.nextIndex = (currentIndex + 1) % taggedStationKeys.length;
+            this.nextStationName = taggedStationKeys[this.nextIndex];
+        } else if (direction === 'previous') {
+            this.previousIndex = (currentIndex - 1 + taggedStationKeys.length) % taggedStationKeys.length;
+            this.previousStationName = taggedStationKeys[this.previousIndex];
+        }
     }
+
+
 
     // Debounce function
     debounce(func, wait) {
@@ -453,6 +513,18 @@ class RadioPlayer {
         }
     }
 
+    // Method to destroy HLS instance and reset audio
+    destroyHLSAndResetAudio() {
+        if (this.hls) {
+            this.hls.destroy();
+            this.hls = null;
+        }
+        if (this.audio) {
+            this.audio.removeAttribute('src');
+            this.audio.load();
+        }
+    }
+
     async handleStationSelect(direction, stationName, firstRun) {
         if (!stationName || direction === false) return;
 
@@ -467,9 +539,14 @@ class RadioPlayer {
             console.log('getting here on reload?');
             document.getElementById("playermeta").classList.remove("opacity-50");
             this.audio.load();
+            if (this.hls) {
+                this.destroyHLSAndResetAudio();
+            }
             this.shouldReloadStream = false;
             return;
         }
+
+
 
         document.getElementById("playermeta").classList.add("opacity-50");
 
@@ -499,20 +576,16 @@ class RadioPlayer {
             firstRun = false;
         }
 
-        // Destroy HLS instance if switching to a non-HLS station
-        if (this.hls) {
-            this.hls.destroy();
-            this.hls = null;
-            this.audio.removeAttribute('src'); // Reset audio element
-            this.audio.load(); // Reset audio state
-        }
-
         const debouncedSetupAudio = this.debounce(() => {
             if (!this.isPlaying) return;
 
             if (!this.currentStationData[this.stationName]) {
                 console.error("currentStationData is undefined or null");
                 return;
+            }
+
+            if (this.hls) {
+                this.destroyHLSAndResetAudio();
             }
 
             const newAudio = new Audio(); // Create new Audio element
@@ -522,7 +595,7 @@ class RadioPlayer {
             const isHlsStream = streamUrl.endsWith('.m3u8');
 
             if (isHlsStream) {
-                this.hlsStreamLoad(streamUrl, newAudio);
+                this.hlsStreamLoad(streamUrl, newAudio); // No need to assign return value
             } else {
                 newAudio.src = this.addCacheBuster(streamUrl);
                 newAudio.load();
@@ -584,17 +657,21 @@ class RadioPlayer {
         debouncedSetupAudio();
     }
 
-    hlsStreamLoad(streamUrl, audioElement) {
+     hlsStreamLoad(streamUrl, audioElement) {
         // Check for native HLS support (Safari)
         if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
             audioElement.src = streamUrl;
-            audioElement.play();
+            audioElement.play().catch(error => {
+                console.error('Failed to play HLS natively:', error);
+            });
         } else if (Hls.isSupported()) { // Fallback to HLS.js for other browsers
             const hls = new Hls();
             hls.loadSource(streamUrl);
             hls.attachMedia(audioElement);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                audioElement.play();
+                audioElement.play().catch(error => {
+                    console.error('Failed to play HLS via HLS.js:', error);
+                });
             });
             hls.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
@@ -614,12 +691,11 @@ class RadioPlayer {
                     }
                 }
             });
+            this.hls = hls; // Store HLS instance in the class
         } else {
             console.error('HLS is not supported in this browser and cannot be played.');
         }
     }
-
-
 
     cleanupArtist(artist) {
         // Define patterns to find additional artists or features.
@@ -751,6 +827,7 @@ class RadioPlayer {
                 .replace(/\s-\s.*mix.*$/i, '')    // Removes " - Something Mix" or similar
                 .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
                 .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                .replace(/\s*\(.*?Feat\..*?\)/gi, '')   // Removes text in brackets containing "Feat."
                 .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
                 .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
                 .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
@@ -1015,10 +1092,9 @@ class RadioPlayer {
                   : (lfmResult?.[0] || mbResult?.[0] || urlCoverArt);
 
             //filter the random default MB has started providing
-            if (finalAlbumArt.includes('623304f1')) {
+            if (finalAlbumArt.includes('623304f1') || finalAlbumArt.includes('b4df49b51c57')) {
                 finalAlbumArt = urlCoverArt;
             }
-
 
             if (lfmData.error !== 6 ) {
                 // return album art, album, song, artist, lfm listeners & playcount
@@ -1152,6 +1228,7 @@ class RadioPlayer {
                             return response.json().then((data) => ({ data, contentType }));
                             
                         } else if (contentType && (contentType.includes('text/html') || 
+                            (this.currentStationData[this.stationName].jsonString) && contentType.includes('text/plain') ||  
                             contentType.includes('application/javascript'))) {
                             return response.text().then((data) => ({ data, contentType }));
                         } else {
@@ -1173,6 +1250,8 @@ class RadioPlayer {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
+                        } else if (contentType && contentType.includes('text/plain')) {
+                            data = this.extractJsonFromJS(data);
                         } else if (contentType && contentType.includes('text/html') && 
                                     (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString)) {
                             data = data;
@@ -1233,6 +1312,23 @@ class RadioPlayer {
             throw new Error('Unable to extract HTML content from JavaScript response');
         }
     }
+
+    extractJsonFromJS(js) {
+        // Match the JSON payload inside the jsonpcallback function
+        const match = js.match(/jsonpcallback\((.*)\);/);
+        if (match && match[1]) {
+            try {
+                // Parse the matched JSON string
+                const jsonData = JSON.parse(match[1]);
+                return jsonData;
+            } catch (error) {
+                throw new Error('Failed to parse JSON from the response: ' + error.message);
+            }
+        } else {
+            throw new Error('Unable to extract JSON content from the response');
+        }
+    }
+
 
     // Helper function to extract necessary data from HTML response
     extractDataFromHTML(doc) {
@@ -1506,6 +1602,12 @@ class RadioPlayer {
         timezoneTime = Date.parse(timezoneTime);
 
 
+        // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
+        if ((this.currentStationData[this.stationName].offset + apiUpdatedData) < timezoneTime) {
+            apiUpdatedData = (this.currentStationData[this.stationName].offset + apiUpdatedData);
+            timezoneTime = (this.currentStationData[this.stationName].offset + timezoneTime);
+        }
+
         // some stations have duration data and tend to switch the track too early. This makes an adjustment so that the station doesn't jump away from the current too quickly if it's still in the window the song should still be playing
         if (duration) {
             this.duration = duration;
@@ -1576,12 +1678,6 @@ class RadioPlayer {
 
         this.lastKnownUpdatedTime = apiUpdatedData;
         console.log("this.lastKnownUpdatedTime", this.lastKnownUpdatedTime)
-
-
-        // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
-        if ((this.currentStationData[this.stationName].offset + apiUpdatedData) < timezoneTime) {
-            apiUpdatedData = (this.currentStationData[this.stationName].offset + apiUpdatedData);
-        }
 
         // Calculate time difference
         const timeDifference = (timezoneTime - apiUpdatedData) / 1000;
@@ -1664,7 +1760,7 @@ class RadioPlayer {
             return new Date(timestamp).getTime(); // ⬅️ Epoch
         }
 
-        if (mmddyyyyRegex.test(timestamp) || mmddyyyyRegex.test(formattedTimestamp)) {
+        if (mmddyyyyRegex.test(timestamp) || mmddyyyyRegex.test(this.formattedTimestamp)) {
             const [datePart, timePart] = timestamp.split(' ');
             const [month, day, year] = datePart.split('-');
             const formattedTimestamp = `${year}-${month}-${day}T${timePart}`;
@@ -1852,6 +1948,9 @@ class RadioPlayer {
             const page = new Page(this.stationName, this);
             page.refreshCurrentData([`Press reload to refresh feed`, '', '', urlCoverArt, null, null, true]);
             document.getElementById("playermeta").classList.add("opacity-50");
+            if (this.hls) {
+                this.destroyHLSAndResetAudio();
+            }
             this.shouldReloadStream = true;
         }, 30000);
     }
@@ -1868,25 +1967,26 @@ class RadioPlayer {
     }
 
     skipToNextStation() {
-        this.calculateNextAndPreviousIndices();
-        const nextStationKey = stationKeys[this.nextIndex];
+        this.calculateNextAndPreviousIndices('next'); // Explicitly specify 'next' direction
+        const nextStationKey = this.nextStationName; // Use the filtered next station
         this.handleStationSelect(null, nextStationKey, true);
     }
 
     skipBackward() {
         this.playButton.lastElementChild.className = "spinner-grow text-light";
-        this.calculateNextAndPreviousIndices();
-        const prevStationKey = stationKeys[this.previousIndex];
+        this.calculateNextAndPreviousIndices('previous'); // Explicitly specify 'previous' direction
+        const prevStationKey = this.previousStationName; // Use the filtered previous station
         this.handleStationSelect(true, prevStationKey, true);
     }
 
     skipForward() {
         this.playButton.lastElementChild.className = "spinner-grow text-light";
-        this.calculateNextAndPreviousIndices();
-        const nextStationKey = stationKeys[this.nextIndex];
+        this.calculateNextAndPreviousIndices('next'); // Explicitly specify 'next' direction
+        const nextStationKey = this.nextStationName; // Use the filtered next station
         this.handleStationSelect(null, nextStationKey, true);
         this.scrobbleReset; 
     }
+
 
     reloadStream() {
         this.shouldReloadStream = true;
