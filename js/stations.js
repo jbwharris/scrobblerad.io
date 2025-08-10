@@ -47,10 +47,6 @@ const stations = {
     stationName: "BTPM - The Bridge",
     tags: ["us", "ca"],
   },
-  cbcmusic: {
-    stationName: "CBC Music Eastern",
-    tags: ["ca"],
-  },
   cfrc: {
     stationName: "CFRC",
     tags: ["ca"],
