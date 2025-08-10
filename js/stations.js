@@ -231,6 +231,10 @@ const stations = {
     stationName: "KUTX",
     tags: ["us"],
   },
+  kwva: {
+    stationName: "KWVA",
+    tags: ["us"],
+  },
   kxlu: {
     stationName: "KXLU",
     tags: ["us"],
