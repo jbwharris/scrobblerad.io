@@ -227,7 +227,13 @@ body {
       }
    }
 
-  .accordion {
+  #lastfm-auth {background:hsl(0 93.4% 52.4%); border:0; padding: .75rem; margin-bottom: 1rem; color:#fff;
+      &:hover {background: hsl(0 93.4% 40%);
+      }
+   }
+}
+
+.accordion {
    .accordion-item {
       background: transparent;
       margin-top: .5rem;
@@ -263,11 +269,8 @@ body {
    }
   }
 
-  #lastfm-auth {background:hsl(0 93.4% 52.4%); border:0; padding: .75rem; margin-bottom: 1rem; color:#fff;
-      &:hover {background: hsl(0 93.4% 40%);
-      }
-   }
-}
+
+
 
 #player {
    position: relative;
@@ -531,10 +534,26 @@ h3.sidebar-text {
    z-index: 100;
    margin-bottom:0;
    color: var(--bs-body-color);
+
+
+   & + #accordionFilters {
+      position: absolute; 
+      width: 100%;
+      top: 2rem;
+
+      .accordion-collapse {
+         position: absolute;
+         width: 100%;
+         z-index: 10;
+         top: 3.65rem;
+         background: rgba(0,0,0,.9)
+
+      }
+   }
 }
 
 nav.stationNav {
-   height: calc(100dvh - 4rem);
+   height: calc(100dvh - 7rem);
    position: relative;
    left: 0;
    padding: 0;
@@ -552,19 +571,19 @@ nav.stationNav {
       }
    }
 
-   #stationSelect {
-      overflow-y: scroll;
-      height: calc(100dvh - 6.5rem); 
-      padding-bottom: .5rem;
-      scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
-      scrollbar-width: thin;
-   }
-
-
    a {
       text-decoration: none;
    }
 
+   .sidebar-text {margin-bottom: 3.2rem;}
+
+   #stationSelect {
+      overflow-y: scroll;
+      height: calc(100dvh - 9.75rem); 
+      padding-bottom: .5rem;
+      scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
+      scrollbar-width: thin;
+   
    button {
       padding: 0 .5rem 0 0;
       font-size: clamp(0.9rem, 0.796rem + 0.522vw, 1.2rem);
@@ -599,7 +618,7 @@ nav.stationNav {
 
       img {border-radius: .5rem 0 0 .5rem; margin-right: 1rem; transition: all 250ms ease-in-out;}
    }
-
+}
 }
 
 input[type="checkbox"]:checked~nav.stationNav {
