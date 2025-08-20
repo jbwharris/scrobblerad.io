@@ -2,6 +2,8 @@ const urlCoverArt = "img/defaultArt.png";
 let stationKeys = Object.keys(stations); // Change to let to allow modification
 let currentTag = 'all'; // Global variable to track the currently selected tag
 
+
+
 function generateRadioButtons(tag = "all") {
     currentTag = tag; // Update the global currentTag
 
@@ -65,7 +67,7 @@ function generateRadioButtons(tag = "all") {
             radioPlayer.handleStationSelect(null, stationKey, true);
         }
     });
-    
+
     // Offcanvas Panels Toggle
     document.getElementById("togglePanels").addEventListener("click", function () {
     const leftPanel = document.getElementById("panel1");
@@ -150,57 +152,65 @@ class Page {
             clearTimeout(this.scrobbleTimeout);
             this.scrobbleTimeout = null;
         }
-
         const station = this.radioPlayer.currentStationData[this.stationName];
-        const isFallbackArt = artworkUrl === urlCoverArt;
-        const finalArtUrl = isFallbackArt ? `img/stations/${this.stationName}.png` : artworkUrl;
 
-        const updateMetadata = () => {
-            if ((!song && !artist) || !finalArtUrl || !station) return;
-
-            const metaElement = document.getElementById("playermeta");
-            metaElement.classList.toggle("errorMessage", Boolean(errorMessage));
-
-            const playerMetaElement = document.querySelector('div.playermeta');
-            playerMetaElement.textContent = '';
-
-            const template = document.querySelector('#meta');
-            const clone = document.importNode(template.content, true);
-
-            clone.querySelector('#title').innerHTML = song;
-            clone.querySelector('#artist').textContent = artist;
-            clone.querySelector('#album').textContent = album;
-
-            const listenerText = (listeners !== null && playcount !== null)
-                ? `Listeners: ${this.formatCompactNumber(listeners)} | Plays: ${this.formatCompactNumber(playcount)}`
-                : '';
-            clone.querySelector('#listeners').textContent = listenerText;
-
-            const albumArtEl = clone.querySelector('#albumArt');
-            albumArtEl.src = finalArtUrl;
-            albumArtEl.alt = `${song} by ${artist}`;
-
-            clone.querySelector('#radioNameLink').href = station.webUrl;
-            clone.querySelector('#radioName').textContent = station.stationName;
-            clone.querySelector('#stationLocation').textContent = station.location;
-
-            playerMetaElement.appendChild(clone);
-            document.getElementById("playermeta").classList.remove("opacity-50");
-
-            const backgroundUrl = `url("${isFallbackArt ? `../${finalArtUrl}` : finalArtUrl}")`;
-            document.documentElement.style.setProperty("--albumArt", backgroundUrl);
-
-            animateElement(playerMetaElement);
-            document.querySelector('#panel2').click();
-
-            this.setupMediaSession(song, artist, artworkUrl, errorMessage);
-        };
-
-        const img = new Image();
-        img.onload = updateMetadata;
-        img.src = finalArtUrl;
+        // Bind updateMetadata to the correct context (this) and call it
+        this.updateMetadata(song, artist, album, listeners, playcount, errorMessage, station, artworkUrl);
     }
 
+    updateMetadata(song, artist, album, listeners, playcount, errorMessage, station, artworkUrl) {
+        if ((!song && !artist) || !station) return;
+
+        const metaElement = document.getElementById("playermeta");
+        metaElement.classList.toggle("errorMessage", Boolean(errorMessage));
+
+        const playerMetaElement = document.querySelector('div.playermeta');
+        playerMetaElement.textContent = '';
+
+        const template = document.querySelector('#meta');
+        const clone = document.importNode(template.content, true);
+
+        clone.querySelector('#title').innerHTML = song;
+        clone.querySelector('#artist').textContent = artist;
+        clone.querySelector('#album').textContent = album;
+
+        const listenerText = (listeners !== null && playcount !== null)
+            ? `Listeners: ${this.formatCompactNumber(listeners)} | Plays: ${this.formatCompactNumber(playcount)}`
+            : '';
+        clone.querySelector('#listeners').textContent = listenerText;
+
+        const albumArtEl = clone.querySelector('#albumArt');
+
+        // Validate and update artwork, then set this.artworkUrl
+        this.radioPlayer.validateArtworkUrl(artworkUrl).then(isValid => {
+            if (isValid) {
+                const effectiveUrl = /^https?:\/\//i.test(artworkUrl) ? artworkUrl : `../${artworkUrl}`;
+                this.artworkUrl = artworkUrl;
+                albumArtEl.src = artworkUrl;
+                albumArtEl.alt = `${song} by ${artist}`;
+                document.documentElement.style.setProperty("--albumArt", `url("${effectiveUrl}")`);
+            } else if (!this.artworkUrl) {
+                this.artworkUrl = this.stationArt;
+                albumArtEl.src = "";
+                albumArtEl.alt = "";
+                document.documentElement.style.setProperty("--albumArt", `url("${this.stationArt}")`);
+            }
+        });
+
+        clone.querySelector('#radioNameLink').href = station.webUrl;
+        clone.querySelector('#radioName').textContent = station.stationName;
+        clone.querySelector('#stationLocation').textContent = station.location;
+
+        playerMetaElement.appendChild(clone);
+        document.getElementById("playermeta").classList.remove("opacity-50");
+
+        animateElement(playerMetaElement);
+        document.querySelector('#panel2').click();
+
+        this.setupMediaSession(song, artist, artworkUrl, errorMessage);
+
+
+    }
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
         if (song.includes("<br/>")) {
@@ -210,17 +220,15 @@ class Page {
         let albumDisplay = '';
         if (errorMessage) {
             albumDisplay = '';
-        } else if (artist == 'currently loading') {
-            albumDisplay = ''
-        } else if ((song && artist) && artist !== 'currently loading' ) {
+        } else if (artist === 'currently loading') {
+            albumDisplay = '';
+        } else if ((song && artist) && artist !== 'currently loading') {
             albumDisplay = `Now playing on ${this.displayStationName}`;
         }
 
-        let stationArt;
-
-        if (artworkUrl == urlCoverArt) {
-            stationArt = `img/stations/${this.stationName}.png`;
-        } else {
+        // Ensure stationArt always has a valid value
+        let stationArt = `../img/stations/${this.stationName}.png`; // Default to stationArt
+        if (artworkUrl && artworkUrl !== urlCoverArt) {
             stationArt = artworkUrl;
         }
 
@@ -231,19 +239,16 @@ class Page {
                 album: albumDisplay || '',
                 duration: Infinity,
                 startTime: 0,
-                artwork: [{ src: stationArt }],
+                artwork: [{ src: stationArt }], // Ensure src is always valid
             });
 
-
             // Update document title
-            if (!song && !artist || artist == 'currently loading') {
+            if (!song && !artist || artist === 'currently loading') {
                 document.title = '';
                 return;
             } else if (song && artist || !errorMessage) {
                 document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
             }
-
-
 
             const actionHandlers = {
                 nexttrack: () => this.radioPlayer.skipForward(),
@@ -257,6 +262,7 @@ class Page {
             }
         }
     }
+
 }
 
 class RadioPlayer {
@@ -274,12 +280,14 @@ class RadioPlayer {
         this.currentStationData = null;
         this.previousDataResponse = null;
         this.prevExtractedData = null;
+        this.stationArt = '';
 
         // Metadata handling
         this.songMetadataChanged = false;
         this.lastDataUpdateTime = null;
         this.lastKnownUpdatedTime = null;
         this.errorMessage = false;
+        this.mytunerWidgetRemoved = false;
 
         // UI & Event Handling
         this.playButton = buttonElement;
@@ -512,12 +520,15 @@ class RadioPlayer {
         }
 
         if (firstRun && !this.shouldReloadStream) {
-            page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', urlCoverArt, false);
-            page.refreshCurrentData([`Station data loading`, '', '', urlCoverArt, null, null, true]);
+            this.stationName = stationName;
+            this.stationArt = `../img/stations/${this.stationName}.png`;
+            document.documentElement.style.setProperty("--albumArt", `url("../${this.stationArt}")`);
+            document.documentElement.style.setProperty("--stationArt", `url("../${this.stationArt}")`);
+            page.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', this.stationArt, false);
+            page.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, true]);
             this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false;
             console.log(stationName);
-            this.stationName = stationName;
             this.updateArt = true;
             this.isPlaying = true;
             this.songMetadataChanged = false;
@@ -776,7 +787,7 @@ class RadioPlayer {
                 .replace(/\s-\s.*mix.*$/i, '')    // Removes " - Something Mix" or similar
                 .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
                 .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
-                .replace(/\s*\(.*?Feat\..*?\)/gi, '')   // Removes text in brackets containing "Feat."
+                .replace(/\s*\(.*?Feat\..*?\)|\s+Feat\..*?/gi, '')   // Removes text in brackets containing "Feat." or "Song Feat. Other Artist"
                 .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
                 .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
                 .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
@@ -832,7 +843,7 @@ class RadioPlayer {
            // console.log('albumArt from spinPath', albumArt);
         }
 
-        if (this.currentStationData[this.stationName].htmlPath) {
+        if (this.currentStationData[this.stationName].htmlString) {
             song = filterSongDetails(data.song) || '';
             artist = this.applyFilters('artist', data.artist) || '';
             album = this.applyFilters('album', data.album) || '';
@@ -870,9 +881,14 @@ class RadioPlayer {
             if (match) {
                 song = filterSongDetails(match[1]?.trim()) || '';
                 artist = this.applyFilters('artist', match[2]?.trim()) || '';
-                album = this.applyFilters('album', match[3]?.trim()) || '';
-                albumArt = match[4]?.trim() || urlCoverArt;
-                spinUpdated = match[5]?.trim() || '';
+
+                if (this.stationName !== 'cbcmusic') {
+                    album = this.applyFilters('album', match[3]?.trim()) || '';
+                    albumArt = match[4]?.trim() || urlCoverArt;
+                    spinUpdated = match[5]?.trim() || '';
+                } else {
+                    spinUpdated = match[3]?.trim() || '';
+                }
 
                 if (this.currentStationData[this.stationName].flipMeta) {
                     [song, artist] = [artist, song];
@@ -1101,14 +1117,160 @@ class RadioPlayer {
         return intersection.size / union.size;
     }
 
+    validateArtworkUrl(artworkUrl) {
+        const isAbsoluteUrl = (url) => {
+            return /^https?:\/\//i.test(url); // Checks if the URL starts with http:// or https://
+        };
+
+        const effectiveUrl = isAbsoluteUrl(artworkUrl) ? artworkUrl : `../${artworkUrl}`;
+
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = effectiveUrl;
+
+            img.onload = () => {
+                resolve(effectiveUrl); // Resolve with the effective URL
+            };
+
+            img.onerror = () => {
+                resolve(null); // Resolve with null if the image fails to load
+            };
+        });
+    }
+
     checkUrlValidity(url) {
         return fetch(url, { method: 'HEAD' })
             .then(response => response.ok)
-            .catch(error => {
-                console.error('Error fetching URL:', url, error);
-                return false;
-            });
+            .catch(() => false);
     }
+
+async appendMytunerWidget() {
+    try {
+        const response = await fetch('mytuner.html');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const htmlContent = await response.text();
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = htmlContent;
+
+        const widgetDiv = tempContainer.querySelector('.mytuner-widget');
+        if (!widgetDiv) {
+            throw new Error('Widget div not found in mytuner.html');
+        }
+
+        const targetElement = document.getElementById('mytuner-container');
+        if (targetElement) {
+            targetElement.appendChild(widgetDiv);
+        } else {
+            console.error('Target element not found!');
+        }
+
+        // Execute scripts in the widget
+        this.executeScriptsInElement(widgetDiv);
+
+    } catch (error) {
+        console.error('Error appending mytuner.html:', error);
+    }
+}
+
+removeMytunerWidget() {
+    if (this.mytunerWidgetRemoved) return; // Exit if already removed
+
+    // 1. Remove the widget and its container
+    const widgetContainerSelectors = ['.mytuner-widget'];
+
+    widgetContainerSelectors.forEach(selector => {
+        const container = document.querySelector(selector);
+        if (container) {
+            container.remove();
+        }
+    });
+
+    // 2. Remove MyTuner scripts from the head
+    const scriptUrlsToRemove = [
+        'https://mytuner-radio.com/static/js/widgets/player-v1.js',
+        'https://mytuner-radio.com/static/js/widgets/widget-player-v1.js',
+    ];
+
+    const removeScripts = () => {
+        scriptUrlsToRemove.forEach(url => {
+            const scripts = document.querySelectorAll(`script[src="${url}"]`);
+            scripts.forEach(script => script.remove());
+        });
+    };
+
+    removeScripts();
+
+    // 3. Block MyTuner API requests
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url) {
+        if (url.includes('metadata-api.mytuner.mobi')) {
+            console.log('Blocked MyTuner API request:', url);
+            return;
+        }
+        return originalOpen.apply(this, arguments);
+    };
+
+    const originalFetch = window.fetch;
+    window.fetch = function(resource, options) {
+        const url = typeof resource === 'string' ? resource : resource.url;
+        if (url.includes('metadata-api.mytuner.mobi')) {
+            console.log('Blocked MyTuner API fetch request:', url);
+            return Promise.reject(new Error('Blocked MyTuner API request'));
+        }
+        return originalFetch.apply(this, arguments);
+    };
+
+    // 4. Observe the DOM for new scripts or elements
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length > 0) {
+                removeScripts();
+                mutation.addedNodes.forEach(node => {
+                    if (node.tagName === 'SCRIPT' && node.src.includes('mytuner')) {
+                        node.remove();
+                    }
+                });
+            }
+        });
+    });
+
+    observer.observe(document.head, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // 5. Remove inline scripts
+    const removeInlineScripts = () => {
+        const scripts = document.querySelectorAll('script');
+        scripts.forEach(script => {
+            if (script.textContent.includes('mytuner')) {
+                script.remove();
+            }
+        });
+    };
+
+    removeInlineScripts();
+
+    this.mytunerWidgetRemoved = true; // Mark as removed
+}
+
+
+
+executeScriptsInElement(element) {
+    const scripts = element.querySelectorAll('script');
+    scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        if (oldScript.src) {
+            newScript.src = oldScript.src;
+            newScript.async = false;
+        } else {
+            newScript.textContent = oldScript.textContent;
+        }
+        document.body.appendChild(newScript);
+    });
+}
+
 
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
@@ -1116,34 +1278,18 @@ class RadioPlayer {
             if (!this.stationName) return;
 
             // check if the last time it updated is still in the future
-            if ((this.lastKnownUpdatedTime - Date.now()) > 10000 && !this.shouldReloadStream) {
+            if ((this.lastKnownUpdatedTime - Date.now()) > 20000 && !this.shouldReloadStream) {
                 console.log('this.lastKnownUpdatedTime > Date.now', (this.lastKnownUpdatedTime - Date.now()) / 1000);
                 return;
             }
 
-            if ([this.stationName] == 'cbcmusic') {
-
-
-
-                this.loadHTMLContent(true, 'mytuner.html', 'mt-box');
-
-
-
-
-
-                const cbcData = document.querySelector('span.player-radio-name span:last-child')?.textContent.trim() || '';
-
-                console.log("cbcData", cbcData);
-
-                // Compare the current data response with the previous one
-                if (this.isDataSameAsPrevious(cbcData)) {
-                    return;
-                }
-
-                // Store the current data response for future comparison
-                this.previousDataResponse = cbcData;
-                // Process the new data response
-                this.processData(cbcData);
+            if (this.stationName === 'cbcmusic') {
+                if (!document.querySelector('.mytuner-widget')) {
+                        this.appendMytunerWidget();
+                    }
+            } else {
+                // Remove the widget and scripts for non-cbcmusic stations
+                this.removeMytunerWidget();
             }
 
             if (this.isPlaying && !this.shouldReloadStream) {
@@ -1186,13 +1332,20 @@ class RadioPlayer {
                     })
                     .then(({ data, contentType }) => {
                         if (contentType && contentType.includes('text/html') && 
-                            !this.currentStationData[this.stationName].phpString) {
+                            !this.currentStationData[this.stationName].phpString && this.stationName !== 'cbcmusic') {
                             
                             // Parse the HTML response
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(data, 'text/html');
-                            data = this.extractDataFromHTML(doc);
-                            
+                            data = this.extractDataFromHTML(doc);  
+                        } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic') {
+                            // Extract artist - song
+                            const songInfo = document.querySelector('.song-history li:first-child span:last-child span')?.textContent.trim() || '';
+                            // Extract time played
+                            const timePlayed = document.querySelector('.song-history li:first-child span[style^="display: inline-flex"]')?.textContent.trim() || '';
+
+                            // Combine songInfo and timePlayed into a single string
+                            data = songInfo ? `${songInfo} - ${timePlayed}` : '';
                         } else if (contentType && contentType.includes('application/javascript')) {
                             // Extract the HTML content from the JavaScript response
                             const htmlContent = this.extractHTMLFromJS(data);
@@ -1204,7 +1357,6 @@ class RadioPlayer {
                         } else if (contentType && contentType.includes('text/html') && 
                                     (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString)) {
                             data = data;
-
                         } else if (contentType && contentType.includes('text/html') && 
                                    this.currentStationData[this.stationName].htmlString) {
                             const htmlContent = data;
@@ -1232,6 +1384,10 @@ class RadioPlayer {
                                 console.log("Skipping update: song metadata was altered externally.");
                                 this.songMetadataChanged = false; // Reset flag
                                 return; // Stop further processing
+                        }
+
+                        if (this.cbcData) {
+                            data = this.cbcData;
                         }
 
                         // Process the new data response
@@ -1284,19 +1440,25 @@ class RadioPlayer {
         const replaceEnDashWithEmDash = str => str.replace(/—/g, '—');
         const replaceHyphenWithEmDash = str => str.replace(/—/g, '—');
 
+        let targetSelector; 
+
         if (this.currentStationData[this.stationName].htmlString) {
-            const htmlString = replaceHyphenWithEmDash(doc.querySelector('div.hidden-xs')?.textContent.trim() || 'No streaming data currently available').replace(/\s+/g,' ').trim();
-            return htmlString;
+            targetSelector = ['div.song-details:first-child', '.radio-song-title', ' p:first-child', ' .album-title', ' .album-art', ' p:last-child']
+
+            // const htmlString = replaceHyphenWithEmDash(doc.querySelector('div.hidden-xs')?.textContent.trim() || 'No streaming data currently available').replace(/\s+/g,' ').trim();
+            // return htmlString;
+        } else {
+            targetSelector = ['span', '.song', '.artist', '.release', 'img', '.spin-time a']
         }
 
-        const song = replaceEnDashWithEmDash(doc.querySelector('span.song')?.textContent.trim() || 'No streaming data currently available');
-        const artist = replaceEnDashWithEmDash(doc.querySelector('span.artist')?.textContent.trim() || '');
-        const album = replaceEnDashWithEmDash(doc.querySelector('span.release')?.textContent.trim() || '');
-        const albumArt = doc.querySelector('img')?.src || '';
-        const spinUpdated = doc.querySelector('td.spin-time a')?.textContent.trim() || '';
+        const song = replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[1]}`)?.textContent.trim() || 'No streaming data currently available');
+        const artist = replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[2]}`)?.textContent.trim() || '');
+        const album = replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[3]}`)?.textContent.trim() || '');
+        const albumArt = doc.querySelector(`${targetSelector[4]}`)?.src || '';
+        const spinUpdated = doc.querySelector(`${targetSelector[0]}${targetSelector[5]}`)?.textContent.trim() || '';
 
 
-
+        console.log('extractedfromhtml', song, artist, album, albumArt, spinUpdated)
         // Return the extracted data in the format expected by processData
         return {song, artist, album, albumArt, spinUpdated};
     }
@@ -1375,8 +1537,8 @@ class RadioPlayer {
             let timestamp;
 
             if ([this.stationName] == 'indie1023') {
-                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])}`;
-                console.log('102.3 timestamp', timestamp);
+                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])} GMT-06:00`;
+                    console.log('102.3 timestamp', timestamp);
             } else if (this.currentStationData[this.stationName].reverseArray) {
                 timestamp = this.getPath(data, this.getLastJsonPath(this.currentStationData[this.stationName].timestamp, data)); 
                 console.log('timestamp reverse array', timestamp);
@@ -1402,12 +1564,15 @@ class RadioPlayer {
             // Format and check stale data in a separate function
             const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated, this.getPath(data, this.currentStationData[this.stationName].duration), song);
 
-            if ((staleData === "Live365 past" || staleData === "Still future") && (this.song)) {
+            if ((staleData === "Live365 past" || staleData === "Still future") && (song)) {
                     return;   
-
-            } else if (this.song == "Station data is currently missing" && !staleData ) {
+            } else if ([this.stationName] == 'indie1023' && song == "Station data is currently missing") {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData([this.song, '', '', urlCoverArt, null, null, true]);
+                page.refreshCurrentData(['[ Air Break ]', '', '', urlCoverArt, null, null, true]);
+                return;
+            } else if (song == "Station data is currently missing" && !staleData ) {
+                const page = new Page(this.stationName, this);
+                page.refreshCurrentData([song, '', '', urlCoverArt, null, null, true]);
                 return;
             }
 
@@ -1428,39 +1593,16 @@ class RadioPlayer {
                     this.song = lfmSong;
                     this.artist = lfmArtist;
                     this.album = lfmAlbum || lfmSong;
+                    this.artworkUrl = lfmArt || urlCoverArt;
 
                     this.updateScrobbleData(this.song, this.artist, this.album);
 
+                    this.listeners = lfmListeners || null;
+                    this.playcount = lfmPlaycount || null;
+                    this.lfmMetaChanged = true;
 
-                    // Validate the album art only after getting lfmArt
-                    const artworkToValidate = lfmArt === urlCoverArt ? albumArt : lfmArt;
-
-                    if (!artworkToValidate || artworkToValidate === urlCoverArt) {
-                        // Skip validation
-                        this.artworkUrl = this.upsizeImgUrl(urlCoverArt) || urlCoverArt;
-                        this.listeners = lfmListeners || null;
-                        this.playcount = lfmPlaycount || null;
-                        this.lfmMetaChanged = true;
-
-                        const page = new Page(this.stationName, this);
-                        page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.errorMessage]);
-                    } else {
-                        // Validate the chosen art
-                        this.checkUrlValidity(artworkToValidate).then(isValid => {
-                            const validatedArt = isValid ? artworkToValidate : urlCoverArt;
-
-                            this.artworkUrl = this.upsizeImgUrl(validatedArt) || urlCoverArt;
-                            this.listeners = lfmListeners || null;
-                            this.playcount = lfmPlaycount || null;
-                            this.lfmMetaChanged = true;
-
-                            const page = new Page(this.stationName, this);
-                            page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.errorMessage]);
-                        }).catch(error => {
-                            console.error('Error during album art validation:', error);
-                        });
-                    }
-
+                    const page = new Page(this.stationName, this);
+                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.errorMessage]);
 
                 }).catch(error => {
                     console.error('Error processing data:', error);
@@ -1821,8 +1963,6 @@ class RadioPlayer {
         targetElement.innerHTML = '';
     }
 }
-
-
     upsizeImgUrl(url) {
         if (url) {
             return url.replace(/\d{3}x\d{3}/g, '500x500');
@@ -1963,7 +2103,7 @@ class RadioPlayer {
 
     addCacheBuster(url) {
         const timestamp = Date.now();
-        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl', 'cbcmusic'];
+        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl', 'cbcmusic', 'indie1023'];
         if (skipCacheBuster.includes(this.stationName)) {
             return url;
         }

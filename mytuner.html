@@ -1,0 +1,55 @@
+<div id="UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oi" class="mytuner-widget" data-target="403120" data-requires_initialization="false" data-autoplay="false" data-hidehistory="false" style=""><style type="text/css"> .song-history li:first-child span:last-child span {color:green;} .song-history li:first-child span[style^="display: inline-flex"] {color:blue;} </style>
+  <div id="UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oitop-bar" style="">
+    <div id="UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oiplay-button" class="main-play-button disabled" data-id="UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oi">
+    </div>
+  </div>
+  <ul id="UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oisong-history" class="song-history" style="width: 100%; background-color: rgb(238, 238, 238); max-height: calc(100px); width:300px; padding: 0px; margin: 0px; overflow: hidden;" data-border="1" data-bordercolor="#817f80"></ul>
+  <script>
+  // var widget_id = widget_id || "UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oi";
+  var mytuner_scripts = mytuner_scripts || {};
+  let widget = document.getElementById("UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oi");
+  let addPlayerInstance = false;
+  mytuner_scripts["player-v1.js_queue"] = mytuner_scripts["player-v1.js_queue"] || [];
+  if (mytuner_scripts["player-v1.js-imported"] == undefined) {
+    mytuner_scripts["player-v1.js-imported"] = false;
+    mytuner_scripts["player-v1.js"] = function() {};
+    var s = document.createElement("script");
+    s.type = "text/javascript";
+    s.src = "https://mytuner-radio.com/static/js/widgets/player-v1.js";
+    s.defer = true;
+    if (s.readyState) { //IE
+      s.onreadystatechange = function() {
+        if (s.readyState == "loaded" || s.readyState == "complete") {
+          s.onreadystatechange = null;
+          runQueue();
+        }
+      };
+    } else { //Others
+      s.onload = function() { runQueue(); };
+    }
+    document.getElementsByTagName('head')[0].appendChild(s);
+
+    function runQueue() {
+      mytuner_scripts["player-v1.js_queue"].forEach(function(func) {
+        func();
+      });
+    }
+    mytuner_scripts["player-v1.js_queue"].push(function() {
+      mytuner_scripts["player-v1.js"]("UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oi");
+      widget.dataset.requires_initialization = "false";
+    });
+  } else {
+    if (widget && widget.dataset.requires_initialization === "true") {
+      if (mytuner_scripts["player-v1.js-imported"]) {
+        mytuner_scripts["player-v1.js"]("UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oi");
+        widget.dataset.requires_initialization = "false";
+      } else {
+        mytuner_scripts["player-v1.js_queue"].push(function() {
+          mytuner_scripts["player-v1.js"]("UipGIXfCrjZ0w6TDmMK8NsOJwrTCrsOkPcOHw4bDq8Oi");
+          widget.dataset.requires_initialization = "false";
+        });
+      }
+    }
+  }
+  </script>
+</div>

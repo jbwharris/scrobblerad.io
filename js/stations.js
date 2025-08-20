@@ -17,11 +17,11 @@ const stations = {
   },
   bagelradio: {
     stationName: "BagelRadio",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   bbcradio6: {
     stationName: "BBC6 Music",
-    tags: ["uk"],
+    tags: ["uk", "public", "top"],
   },
   bfffm: {
     stationName: "BFF.fm",
@@ -41,11 +41,15 @@ const stations = {
   },
   thebridge: {
     stationName: "The Bridge 90.9",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   btpm: {
     stationName: "BTPM - The Bridge",
-    tags: ["us", "ca"],
+    tags: ["us", "ca", "npr", "public", "top"],
+  },
+  cbcmusic: {
+    stationName: "CBC Music",
+    tags: ["ca", "top"],
   },
   cfrc: {
     stationName: "CFRC",
@@ -57,7 +61,7 @@ const stations = {
   },
   chirpradio: {
     stationName: "CHIRP Radio",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   chly: {
     stationName: "CHLY",
@@ -93,7 +97,7 @@ const stations = {
   },
   thecurrent: {
     stationName: "The Current",
-    tags: ["us"],
+    tags: ["us", "public", "top"],
   },
   d1alt: {
     stationName: "D1 Alternative",
@@ -125,7 +129,7 @@ const stations = {
   }, 
   wyms: {
     stationName: "88Nine - Radio Milwaukee",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
@@ -153,7 +157,7 @@ const stations = {
   },
   indie88: {
     stationName: "Indie88",
-    tags: ["ca"],
+    tags: ["ca", "corp", "top"],
   },
   indieblend: {
     stationName: "The Indie Blend",
@@ -173,7 +177,7 @@ const stations = {
   },
   inhailer: {
     stationName: "Inhailer Radio",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   kalx: {
     stationName: "KALX",
@@ -189,15 +193,11 @@ const stations = {
   },
   kexp: {
     stationName: "KEXP",
-    tags: ["us"],
-  },
-  kfjc: {
-    stationName: "KFJC",
-    tags: ["us"],
-  },  
+    tags: ["us", "public", "top"],
+  }, 
   kosu: {
     stationName: "KOSU - The Spy",
-    tags: ["us"],
+    tags: ["us", "public", "npr"],
   },
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
@@ -213,7 +213,7 @@ const stations = {
   },
   kroq: {
     stationName: "KROQ",
-    tags: ["us"],
+    tags: ["us", "corp"],
   },
   krsh: {
     stationName: "The Krush",
@@ -225,27 +225,23 @@ const stations = {
   },
   kuom: {
     stationName: "KUOM - Radio K",
-    tags: ["us"],
+    tags: ["us", "college"],
   },  
   kutx: {
     stationName: "KUTX",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
-  kwva: {
-    stationName: "KWVA",
+  kxll: {
+    stationName: "KXLL",
     tags: ["us"],
   },
   kxlu: {
     stationName: "KXLU",
     tags: ["us"],
   },
-  kxll: {
-    stationName: "KXLL",
-    tags: ["us"],
-  },
   kxt: {
     stationName: "KXT",
-    tags: ["us"],
+    tags: ["us", "public", "npr", "top"],
   },
   lemellotron: {
     stationName: "Le Mellotron",
@@ -277,11 +273,11 @@ const stations = {
   },
   newsounds: {
     stationName: "New Sounds",
-    tags: ["us"],
+    tags: ["us", "public"],
   },
   novaphonicfm: {
     stationName: "Novaphonic.FM",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   plazaone: {
     stationName: "Nightwave Plaza",
@@ -289,19 +285,19 @@ const stations = {
   },
   thepoint: {
     stationName: "The Point",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   prpfm: {
     stationName: "Portland Radio Project",
-    tags: ["us"],
+    tags: ["us", "community"],
   },
   qcindie: {
     stationName: "QCIndie",
-    tags: ["ca"],
+    tags: ["ca", "online", "top"],
   },
   racketeer: {
     stationName: "Racketeer Radio",
-    tags: ["us"],
+    tags: ["us", "online"],
   },
   radiofrancefip: {
     stationName: "Radio France",
@@ -309,7 +305,7 @@ const stations = {
   },
   radiolaurier: {
     stationName: "Radio Laurier",
-    tags: ["ca"],
+    tags: ["ca", "college"],
   },
   radionovanuit: {
     stationName: "Radio Nova - La Nuit",
@@ -317,19 +313,19 @@ const stations = {
   },
   radioparadiseglobal: {
     stationName: "Radio Paradise Global Mix",
-    tags: ["us"],
+    tags: ["us", "online"],
   },
   radioparadisemain: {
     stationName: "Radio Paradise Main Mix",
-    tags: ["us"],
+    tags: ["us", "online", "top"],
   },
   radiosydney: {
     stationName: "Radio Sydney",
-    tags: ["au"],
+    tags: ["au", "public"],
   },  
   radiox: {
     stationName: "Radio X",
-    tags: ["uk"],
+    tags: ["uk", "corp"],
   },
   sabotage: {
     stationName: "Sabotage Radio",
@@ -341,19 +337,19 @@ const stations = {
   },
   socalsound: {
     stationName: "The SoCal Sound",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   soma80sunderground: {
     stationName: "SomaFM 80s Underground",
-    tags: ["us"],
+    tags: ["us", "soma"],
   },
   somafolkfwd: {
     stationName: "SomaFM Folk Forward",
-    tags: ["us"],
+    tags: ["us", "soma"],
   },
   somaindiepop: {
     stationName: "SomaFM Indie Pop Rocks!",
-    tags: ["us"],
+    tags: ["us", "soma"],
   },
   soniccoast: {
     stationName: "The Sonic Coast",
@@ -398,12 +394,12 @@ const stations = {
   wext: {
     stationName: "WEXT",
     tags: [
-      "us", "AAA", "NPR", "United States", "New York"
+      "us", "aaa", "npr", "United States", "New York"
     ],
   },
   wfmu: {
     stationName: "WFMU",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   wfpk: {
     stationName: "WFPK",
@@ -443,7 +439,7 @@ const stations = {
   },
   wnxp: {
     stationName: "WNXP",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   worldwidefm: {
     stationName: "Worldwide FM",
@@ -471,7 +467,7 @@ const stations = {
   },
   wudr: {
     stationName: "WUDR - Flyer Radio",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
   wuky: {
     stationName: "WUKY",
@@ -495,11 +491,11 @@ const stations = {
   }, 
   x929: {
     stationName: "X92.9",
-    tags: ["ca"],
+    tags: ["ca", "corp"],
   }, 
   xpn: {
     stationName: "XPN",
-    tags: ["us"],
+    tags: ["us", "npr", "top"],
   },
   xpn2: {
     stationName: "XPoNential Radio",
@@ -507,6 +503,6 @@ const stations = {
   },
   ynotradio: {
     stationName: "Y-Not Radio",
-    tags: ["us"],
+    tags: ["us", "top"],
   },
 };

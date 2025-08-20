@@ -182,7 +182,7 @@
                     </h2>
                     <div id="collapseFilters" class="accordion-collapse collapse" data-bs-parent="#accordionFilters">
                       <div class="accordion-body">
-                        <select id="tagFilter" onchange="generateRadioButtons(this.value)">
+                        <select id="tagCountry" onchange="generateRadioButtons(this.value)">
                           <option value="all">All Countries</option>
                           <option value="au">Australia 🇦🇺</option>
                           <option value="ca">Canada 🇨🇦</option>
@@ -191,6 +191,17 @@
                           <option value="fr">France 🇫🇷</option>
                           <option value="ie">Ireland 🇮🇪</option>
                           <option value="ch">Switzerland 🇨🇭</option>
+                        </select>
+
+                        <select id="tagFormat" onchange="generateRadioButtons(this.value)">
+                          <option value="all">All Formats</option>
+                          <option value="top">Top Picks</option>
+                          <option value="npr">NPR</option>
+                          <option value="aaa">AAA</option>
+                          <option value="college">College</option>
+                          <option value="public">Public</option>
+                          <option value="corp">Corporate</option>
+                          <option value="online">Online only</option>
                         </select>
                       </div>
                     </div>
@@ -230,6 +241,8 @@
     </div>
   </div>
 
+  <div id="mytuner-container"></div>
+
   <template id="meta">
     <div class="col col-xxl-6 col-md-7 player px-0 mt-md-2" id="webamp">
       <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="600" height="600" alt="">
@@ -255,7 +268,7 @@
 
   <script src="js/stations-dist.js"></script>
   <script src="js/scrobbler.js"></script>
-  <script src="js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 
   <!-- Matomo -->
   <script>

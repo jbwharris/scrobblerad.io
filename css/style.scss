@@ -19,12 +19,16 @@ body {
    min-height: -webkit-fill-available;
    font-size: clamp(16px, 15.296px + 0.188vw, 18px);
    overflow:hidden;
+
+   &:has(#albumArt[src=""]), &:has(#albumArt[src="undefined"]) {
+      background-image: var(--stationArt);
+   }
 }
 
 /* Theme sombre ou clair */
 @media (prefers-color-scheme:dark) {
    body {
-      backdrop-filter: blur(2em) contrast(50%) brightness(80%);
+      backdrop-filter: blur(1.5em) contrast(50%) brightness(80%);
       --sr-lightness: 35%;
       --sr-saturation: 0;
       --sidebar-bg: hsla(0deg,0%,0%,.35);
@@ -476,13 +480,32 @@ body {
    top: -2rem;
    transition: all .3s ease-in;
    max-height: 600px;
+   max-width: 600px;
    overflow: hidden;
+   background: var(--albumArt) no-repeat 0 0;
+   background-size: cover;
+   border: .5rem solid #111;
+   height:100%;
+   width:100%;
+   aspect-ratio: 1 / 1;
+
+   &:has(#albumArt[src=""]), &:has(#albumArt[src="undefined"]) {
+      background: var(--stationArt) no-repeat 0 0;
+      background-size: cover;
+   }
 
    #albumArt {
-      max-width: 580px;
-      max-height:580px;
-      border: .5rem solid #111;
+      transition: all 250ms ease-in-out;
+      max-width: 600px;
+      max-height:600px;
       width: 100%;
+      height:100%;
+      opacity: 1;
+      aspect-ratio: 1 / 1;
+
+      &[src=""] {
+         opacity:0;
+      }
    }
 }
 
