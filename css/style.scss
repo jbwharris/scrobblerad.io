@@ -793,7 +793,7 @@ input[type="checkbox"]:checked~.menuIconToggle {
    .metainfo {
       position: absolute;
       bottom: 0;
-      margin-bottom: 0;
+      margin-bottom: 1rem;
       padding: .5rem !important;
       background: hsla(var(--sr-metadata), var(--sr-lightness));
 
