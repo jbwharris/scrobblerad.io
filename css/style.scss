@@ -743,7 +743,7 @@ input[type="checkbox"]:checked~.menuIconToggle {
       justify-content: stretch;
       padding: 0 !important;
       position: absolute;
-      bottom:0;
+      bottom:3rem;
       margin-bottom: 1rem;
       align-self: safe;
       width: 100vw;
@@ -792,7 +792,7 @@ input[type="checkbox"]:checked~.menuIconToggle {
 
    .metainfo {
       position: absolute;
-      bottom: 0;
+      bottom: 3rem;
       margin-bottom: 1rem;
       padding: .5rem !important;
       background: hsla(var(--sr-metadata), var(--sr-lightness));
