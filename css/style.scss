@@ -792,7 +792,7 @@ input[type="checkbox"]:checked~.menuIconToggle {
 
    .metainfo {
       position: absolute;
-      bottom: 3rem;
+      bottom: 0;
       margin-bottom: 1rem;
       padding: .5rem !important;
       background: hsla(var(--sr-metadata), var(--sr-lightness));
@@ -817,9 +817,8 @@ input[type="checkbox"]:checked~.menuIconToggle {
   }
 
   .metainfo {
-   margin-bottom: 2.5rem;
+   bottom: 3rem;
   }
-
 }
 
 
