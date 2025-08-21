@@ -2,8 +2,6 @@ const urlCoverArt = "img/defaultArt.png";
 let stationKeys = Object.keys(stations); // Change to let to allow modification
 let currentTag = 'all'; // Global variable to track the currently selected tag
 
-
-
 function generateRadioButtons(tag = "all") {
     currentTag = tag; // Update the global currentTag
 
@@ -619,12 +617,7 @@ class RadioPlayer {
 
      hlsStreamLoad(streamUrl, audioElement) {
         // Check for native HLS support (Safari)
-        if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
-            audioElement.src = streamUrl;
-            audioElement.play().catch(error => {
-                console.error('Failed to play HLS natively:', error);
-            });
-        } else if (Hls.isSupported()) { // Fallback to HLS.js for other browsers
+        if (Hls.isSupported()) { // Fallback to HLS.js for other browsers
             const hls = new Hls();
             hls.loadSource(streamUrl);
             hls.attachMedia(audioElement);
