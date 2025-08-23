@@ -6,7 +6,7 @@ const stationData = {
     streamUrl: "https://stream.statsradio.com:8146/stream",
     spinPath: "chly",
     timezone: "America/Vancouver",
-    filter: ["CHLY", "earshot Daily", "Sean Savage"],
+    filter: ["CHLY", "earshot Daily", "Sean Savage", "Democracy Now"],
     quietStream: true,
     gainBoost: 3
   }
