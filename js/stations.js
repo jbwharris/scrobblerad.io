@@ -51,6 +51,10 @@ const stations = {
     stationName: "CBC Music",
     tags: ["ca", "top"],
   },
+  cfny: {
+    stationName: "102.1 The Edge - CFNY",
+    tags: ["ca", "corp", "alt"],
+  },
   cfrc: {
     stationName: "CFRC",
     tags: ["ca"],
@@ -345,6 +349,10 @@ const stations = {
   },
   somafolkfwd: {
     stationName: "SomaFM Folk Forward",
+    tags: ["us", "soma"],
+  },
+  somagroovesalad: {
+    stationName: "SomaFM Groove Salad",
     tags: ["us", "soma"],
   },
   somaindiepop: {

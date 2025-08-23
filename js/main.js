@@ -152,11 +152,6 @@ class Page {
         }
         const station = this.radioPlayer.currentStationData[this.stationName];
 
-        // Bind updateMetadata to the correct context (this) and call it
-        this.updateMetadata(song, artist, album, listeners, playcount, errorMessage, station, artworkUrl);
-    }
-
-    updateMetadata(song, artist, album, listeners, playcount, errorMessage, station, artworkUrl) {
         if ((!song && !artist) || !station) return;
 
         const metaElement = document.getElementById("playermeta");
@@ -617,7 +612,12 @@ class RadioPlayer {
 
      hlsStreamLoad(streamUrl, audioElement) {
         // Check for native HLS support (Safari)
-        if (Hls.isSupported()) { // Fallback to HLS.js for other browsers
+        if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
+            audioElement.src = streamUrl;
+            audioElement.play().catch(error => {
+                console.error('Failed to play HLS natively:', error);
+            });
+        } else if (Hls.isSupported()) { // Fallback to HLS.js for other browsers
             const hls = new Hls();
             hls.loadSource(streamUrl);
             hls.attachMedia(audioElement);
@@ -1137,132 +1137,130 @@ class RadioPlayer {
             .catch(() => false);
     }
 
-async appendMytunerWidget() {
-    try {
-        const response = await fetch('mytuner.html');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+    async appendMytunerWidget() {
+        try {
+            const response = await fetch('mytuner.html');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const htmlContent = await response.text();
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = htmlContent;
+
+            const widgetDiv = tempContainer.querySelector('.mytuner-widget');
+            if (!widgetDiv) {
+                throw new Error('Widget div not found in mytuner.html');
+            }
+
+            const targetElement = document.getElementById('mytuner-container');
+            if (targetElement) {
+                targetElement.appendChild(widgetDiv);
+            } else {
+                console.error('Target element not found!');
+            }
+
+            // Execute scripts in the widget
+            this.executeScriptsInElement(widgetDiv);
+
+        } catch (error) {
+            console.error('Error appending mytuner.html:', error);
         }
-
-        const htmlContent = await response.text();
-        const tempContainer = document.createElement('div');
-        tempContainer.innerHTML = htmlContent;
-
-        const widgetDiv = tempContainer.querySelector('.mytuner-widget');
-        if (!widgetDiv) {
-            throw new Error('Widget div not found in mytuner.html');
-        }
-
-        const targetElement = document.getElementById('mytuner-container');
-        if (targetElement) {
-            targetElement.appendChild(widgetDiv);
-        } else {
-            console.error('Target element not found!');
-        }
-
-        // Execute scripts in the widget
-        this.executeScriptsInElement(widgetDiv);
-
-    } catch (error) {
-        console.error('Error appending mytuner.html:', error);
     }
-}
 
-removeMytunerWidget() {
-    if (this.mytunerWidgetRemoved) return; // Exit if already removed
+    removeMytunerWidget() {
+        if (this.mytunerWidgetRemoved) return; // Exit if already removed
 
-    // 1. Remove the widget and its container
-    const widgetContainerSelectors = ['.mytuner-widget'];
+        // 1. Remove the widget and its container
+        const widgetContainerSelectors = ['.mytuner-widget'];
 
-    widgetContainerSelectors.forEach(selector => {
-        const container = document.querySelector(selector);
-        if (container) {
-            container.remove();
-        }
-    });
-
-    // 2. Remove MyTuner scripts from the head
-    const scriptUrlsToRemove = [
-        'https://mytuner-radio.com/static/js/widgets/player-v1.js',
-        'https://mytuner-radio.com/static/js/widgets/widget-player-v1.js',
-    ];
-
-    const removeScripts = () => {
-        scriptUrlsToRemove.forEach(url => {
-            const scripts = document.querySelectorAll(`script[src="${url}"]`);
-            scripts.forEach(script => script.remove());
-        });
-    };
-
-    removeScripts();
-
-    // 3. Block MyTuner API requests
-    const originalOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function(method, url) {
-        if (url.includes('metadata-api.mytuner.mobi')) {
-            console.log('Blocked MyTuner API request:', url);
-            return;
-        }
-        return originalOpen.apply(this, arguments);
-    };
-
-    const originalFetch = window.fetch;
-    window.fetch = function(resource, options) {
-        const url = typeof resource === 'string' ? resource : resource.url;
-        if (url.includes('metadata-api.mytuner.mobi')) {
-            console.log('Blocked MyTuner API fetch request:', url);
-            return Promise.reject(new Error('Blocked MyTuner API request'));
-        }
-        return originalFetch.apply(this, arguments);
-    };
-
-    // 4. Observe the DOM for new scripts or elements
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length > 0) {
-                removeScripts();
-                mutation.addedNodes.forEach(node => {
-                    if (node.tagName === 'SCRIPT' && node.src.includes('mytuner')) {
-                        node.remove();
-                    }
-                });
+        widgetContainerSelectors.forEach(selector => {
+            const container = document.querySelector(selector);
+            if (container) {
+                container.remove();
             }
         });
-    });
 
-    observer.observe(document.head, { childList: true, subtree: true });
-    observer.observe(document.body, { childList: true, subtree: true });
+        // 2. Remove MyTuner scripts from the head
+        const scriptUrlsToRemove = [
+            'https://mytuner-radio.com/static/js/widgets/player-v1.js',
+            'https://mytuner-radio.com/static/js/widgets/widget-player-v1.js',
+        ];
 
-    // 5. Remove inline scripts
-    const removeInlineScripts = () => {
-        const scripts = document.querySelectorAll('script');
-        scripts.forEach(script => {
-            if (script.textContent.includes('mytuner')) {
-                script.remove();
+        const removeScripts = () => {
+            scriptUrlsToRemove.forEach(url => {
+                const scripts = document.querySelectorAll(`script[src="${url}"]`);
+                scripts.forEach(script => script.remove());
+            });
+        };
+
+        removeScripts();
+
+        // 3. Block MyTuner API requests
+        const originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url) {
+            if (url.includes('metadata-api.mytuner.mobi')) {
+                console.log('Blocked MyTuner API request:', url);
+                return;
             }
+            return originalOpen.apply(this, arguments);
+        };
+
+        const originalFetch = window.fetch;
+        window.fetch = function(resource, options) {
+            const url = typeof resource === 'string' ? resource : resource.url;
+            if (url.includes('metadata-api.mytuner.mobi')) {
+                console.log('Blocked MyTuner API fetch request:', url);
+                return Promise.reject(new Error('Blocked MyTuner API request'));
+            }
+            return originalFetch.apply(this, arguments);
+        };
+
+        // 4. Observe the DOM for new scripts or elements
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length > 0) {
+                    removeScripts();
+                    mutation.addedNodes.forEach(node => {
+                        if (node.tagName === 'SCRIPT' && node.src.includes('mytuner')) {
+                            node.remove();
+                        }
+                    });
+                }
+            });
         });
-    };
 
-    removeInlineScripts();
+        observer.observe(document.head, { childList: true, subtree: true });
+        observer.observe(document.body, { childList: true, subtree: true });
 
-    this.mytunerWidgetRemoved = true; // Mark as removed
-}
+        // 5. Remove inline scripts
+        const removeInlineScripts = () => {
+            const scripts = document.querySelectorAll('script');
+            scripts.forEach(script => {
+                if (script.textContent.includes('mytuner')) {
+                    script.remove();
+                }
+            });
+        };
 
+        removeInlineScripts();
 
+        this.mytunerWidgetRemoved = true; // Mark as removed
+    }
 
-executeScriptsInElement(element) {
-    const scripts = element.querySelectorAll('script');
-    scripts.forEach(oldScript => {
-        const newScript = document.createElement('script');
-        if (oldScript.src) {
-            newScript.src = oldScript.src;
-            newScript.async = false;
-        } else {
-            newScript.textContent = oldScript.textContent;
-        }
-        document.body.appendChild(newScript);
-    });
-}
+    executeScriptsInElement(element) {
+        const scripts = element.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+                newScript.async = false;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            document.body.appendChild(newScript);
+        });
+    }
 
 
     getStreamingData() {
@@ -1320,7 +1318,8 @@ executeScriptsInElement(element) {
                             contentType.includes('application/javascript'))) {
                             return response.text().then((data) => ({ data, contentType }));
                         } else {
-                            throw new Error(`Unsupported content type or missing content-type header: ${contentType}`);
+                            return;
+                            //throw new Error(`Unsupported content type or missing content-type header: ${contentType}`);
                         }
                     })
                     .then(({ data, contentType }) => {
@@ -1964,7 +1963,7 @@ executeScriptsInElement(element) {
 
     getPath(obj, prop) {
         if (!obj || typeof obj !== 'object' || !prop) {
-            return undefined; // Handle invalid arguments
+            return; // Handle invalid arguments
         }
 
         // Split the property path by "." for multi-layer paths
@@ -1974,7 +1973,7 @@ executeScriptsInElement(element) {
         // Traverse the object for each part of the path
         for (let i = 0; i < parts.length; i++) {
             if (current[parts[i]] === undefined) {
-                return undefined; // Return undefined if any part of the path is not found
+                return; // Return undefined if any part of the path is not found
             }
             current = current[parts[i]]; // Drill down into the object
         }
@@ -2096,7 +2095,7 @@ executeScriptsInElement(element) {
 
     addCacheBuster(url) {
         const timestamp = Date.now();
-        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl', 'cbcmusic', 'indie1023'];
+        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl', 'cbcmusic', 'indie1023', 'somagroovesalad'];
         if (skipCacheBuster.includes(this.stationName)) {
             return url;
         }
