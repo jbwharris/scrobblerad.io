@@ -59,6 +59,10 @@ const stations = {
     stationName: "CFRC",
     tags: ["ca"],
   },
+  charlies80sattic: {
+    stationName: "Charlie's 80s Attic",
+    tags: ["us", "80s"],
+  },
   chillfiltr: {
     stationName: "CHILLFILTR",
     tags: ["ca"],
