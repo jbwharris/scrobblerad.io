@@ -79,6 +79,14 @@ const stations = {
     stationName: "CHMA",
     tags: ["ca"],
   },
+  cimx: {
+    stationName: "89X - CIMX",
+    tags: ["ca", "alt"],
+  },
+  ciso: {
+    stationName: "89.1 MAX FM - CISO",
+    tags: ["ca", "alt"],
+  },
   civl: {
     stationName: "CIVL",
     tags: ["ca"],
