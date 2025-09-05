@@ -319,6 +319,10 @@ const stations = {
     stationName: "Radio France",
     tags: ["fr"],
   },
+  radiohumber: {
+    stationName: "Radio Humber",
+    tags: ["ca", "college"],
+  },
   radiolaurier: {
     stationName: "Radio Laurier",
     tags: ["ca", "college"],

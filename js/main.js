@@ -1208,13 +1208,20 @@ class RadioPlayer {
 
         const originalFetch = window.fetch;
         window.fetch = function(resource, options) {
-            const url = typeof resource === 'string' ? resource : resource.url;
-            if (url.includes('metadata-api.mytuner.mobi')) {
+            let url = '';
+            if (typeof resource === 'string') {
+                url = resource;
+            } else if (resource && typeof resource === 'object' && resource.url) {
+                url = resource.url;
+            }
+
+            if (url && url.includes('metadata-api.mytuner.mobi')) {
                 console.log('Blocked MyTuner API fetch request:', url);
                 return Promise.reject(new Error('Blocked MyTuner API request'));
             }
             return originalFetch.apply(this, arguments);
         };
+
 
         // 4. Observe the DOM for new scripts or elements
         const observer = new MutationObserver((mutations) => {
