@@ -1,17 +1,16 @@
 const stationData = {
   noiseboxradio: {
     stationName: "NoiseboxRadio",
-    artist: "current.metadata.artist_name",
-    song: "current.metadata.track_title",
-    album: "current.metadata.album_title",
-    location: "Waterloo, ON 🇨🇦",
+    artist: "artist",
+    song: "title",
+    album: "album",
+    location: "Musselburgh, UK 🇬🇧",
     webUrl: "https://www.radiolaurier.com",
-    streamUrl: "https://radiolaurier.out.airtime.pro/radiolaurier_a",
+    streamUrl: "https://stream.radiojar.com/n1bs4ekbvuhvv",
     apiUrl: "https://proxy.radiojar.com/api/stations/n1bs4ekbvuhvv/now_playing/",
-    timestamp: "current.starts",
+    timestamp: false,
     timezone: "UTC",
-    filter: ["Radio Laurier"],
-    quietStream: true,
-    gainBoost: 3
+    duration: "duration",
+    proxyApi: true
   }
 };

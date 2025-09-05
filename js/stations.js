@@ -103,6 +103,10 @@ const stations = {
     stationName: "CKUA",
     tags: ["ca"],
   },
+  ckut: {
+    stationName: "CKUT",
+    tags: ["ca", "college"],
+  },
   ckuw: {
     stationName: "CKUW",
     tags: ["ca"],
@@ -291,6 +295,10 @@ const stations = {
     stationName: "New Sounds",
     tags: ["us", "public"],
   },
+  noiseboxradio: {
+    stationName: "Noisebox Radio",
+    tags: ["uk", ""],
+  },
   novaphonicfm: {
     stationName: "Novaphonic.FM",
     tags: ["us", "top"],
@@ -342,7 +350,11 @@ const stations = {
   radiosydney: {
     stationName: "Radio Sydney",
     tags: ["au", "public"],
-  },  
+  }, 
+  radiowestern: {
+    stationName: "Radio Western",
+    tags: ["ca", "college"],
+  }, 
   radiox: {
     stationName: "Radio X",
     tags: ["uk", "corp"],
@@ -523,6 +535,10 @@ const stations = {
   },
   xpn2: {
     stationName: "XPoNential Radio",
+    tags: ["us"],
+  },
+  xrayfm: {
+    stationName: "XRAY FM",
     tags: ["us"],
   },
   ynotradio: {

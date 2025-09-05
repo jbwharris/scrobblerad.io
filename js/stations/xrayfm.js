@@ -8,9 +8,10 @@ const stationData = {
     webUrl: "https://xray.fm",
     streamUrl: "https://listen.xray.fm/stream",
     apiUrl: "https://xray.fm/api/tracks/current",
+    proxyApi: true,
     timestamp: "played",
     timezone: "America/Los_Angeles",
     quietStream: true,
-    gainBoost: 5
+    gainBoost: 3
   }
 };

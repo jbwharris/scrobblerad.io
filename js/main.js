@@ -221,7 +221,7 @@ class Page {
 
         // Ensure stationArt always has a valid value
         let stationArt = `../img/stations/${this.stationName}.png`; // Default to stationArt
-        if (artworkUrl && artworkUrl !== urlCoverArt) {
+        if (artworkUrl && (artworkUrl !== urlCoverArt || artworkUrl !== stationArt ) ) {
             stationArt = artworkUrl;
         }
 
@@ -545,6 +545,7 @@ class RadioPlayer {
             newAudio.crossOrigin = 'anonymous';
 
             const streamUrl = this.currentStationData[this.stationName].streamUrl;
+            // const streamUrl = `https://scrobblerad.io/proxy.php?url=${this.currentStationData[this.stationName].streamUrl}`;
             const isHlsStream = streamUrl.endsWith('.m3u8');
 
             if (isHlsStream) {
@@ -1276,7 +1277,10 @@ class RadioPlayer {
             if (!this.stationName) return;
 
             // check if the last time it updated is still in the future
-            if ((this.lastKnownUpdatedTime - Date.now()) > 20000 && !this.shouldReloadStream) {
+            if (((this.lastKnownUpdatedTime - Date.now()) < 35000) && ((this.lastKnownUpdatedTime - Date.now()) > 70000) && !this.shouldReloadStream) {
+                // check again, since that's a long time to go in a song
+                console.log('this.lastKnownUpdatedTime is a bit too far in the future, checking again', (this.lastKnownUpdatedTime - Date.now()) / 1000);
+            } else if (((this.lastKnownUpdatedTime - Date.now()) > 20000) && !this.shouldReloadStream) {
                 console.log('this.lastKnownUpdatedTime > Date.now', (this.lastKnownUpdatedTime - Date.now()) / 1000);
                 return;
             }
@@ -1299,7 +1303,11 @@ class RadioPlayer {
                 } else if (this.currentStationData[this.stationName].orbPath && !this.currentStationData[this.stationName].dataPath) {
                     stationUrl = `https://scraper2.onlineradiobox.com/${this.currentStationData[this.stationName].orbPath}?l=0`;
                 } else {
-                    stationUrl = this.currentStationData[this.stationName].apiUrl;
+                    if (this.currentStationData[this.stationName].proxyApi) {
+                        stationUrl = `https://scrobblerad.io/proxy.php?url=${this.currentStationData[this.stationName].apiUrl}`;
+                    } else {
+                        stationUrl = this.currentStationData[this.stationName].apiUrl;
+                    }
                 }
 
                 stationUrl = this.addCacheBuster(stationUrl);
@@ -1447,7 +1455,7 @@ class RadioPlayer {
             // const htmlString = replaceHyphenWithEmDash(doc.querySelector('div.hidden-xs')?.textContent.trim() || 'No streaming data currently available').replace(/\s+/g,' ').trim();
             // return htmlString;
         } else {
-            targetSelector = ['span', '.song', '.artist', '.release', 'img', '.spin-time a']
+            targetSelector = ['', '.song', '.artist', '.release', 'img', '.spin-time a']
         }
 
         const song = replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[1]}`)?.textContent.trim() || 'No streaming data currently available');
@@ -1766,6 +1774,11 @@ class RadioPlayer {
           // console.log("✅ Accepting new song data");
         }
 
+
+        if (apiUpdatedData.length > 13) {
+            apiUpdatedData = Number.parseInt(apiUpdatedData.slice(0, 13));
+        }
+
         this.lastKnownUpdatedTime = apiUpdatedData;
         console.log("this.lastKnownUpdatedTime", this.lastKnownUpdatedTime)
 
@@ -1804,7 +1817,12 @@ class RadioPlayer {
         const yyyymmddhhmmRegex = /^20\d{10}$/; // YYYYMMDDHHMM starting with 20
         const yyyymmddhhmmssRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?$/;
 
-       if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
+        if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
+            return new Date(timestamp).getTime(); // ⬅️ Epoch
+        }
+
+        if (dateWithoutTimezoneRegex.test(timestamp)) {
+            timestamp = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
             return new Date(timestamp).getTime(); // ⬅️ Epoch
         }
 
@@ -1842,11 +1860,6 @@ class RadioPlayer {
             if (timestamp.endsWith('+0000')) {
                 timestamp = timestamp.replace('+0000', 'Z');
             }
-            return new Date(timestamp).getTime(); // ⬅️ Epoch
-        }
-
-        if (dateWithoutTimezoneRegex.test(timestamp)) {
-            timestamp = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
             return new Date(timestamp).getTime(); // ⬅️ Epoch
         }
 
@@ -2102,8 +2115,8 @@ class RadioPlayer {
 
     addCacheBuster(url) {
         const timestamp = Date.now();
-        const skipCacheBuster = ['radiowestern', 'kexp', 'wprb', 'krcl', 'cbcmusic', 'indie1023', 'somagroovesalad'];
-        if (skipCacheBuster.includes(this.stationName)) {
+        const skipCacheBuster = ['radiowestern', 'kexp', 'wrir', 'wprb', 'krcl', 'cbcmusic', 'indie1023', 'somagroovesalad'];
+        if (skipCacheBuster.includes(this.stationName) ) {
             return url;
         }
         return url.includes('?') ? `${url}&t=${timestamp}` : `${url}?t=${timestamp}`;

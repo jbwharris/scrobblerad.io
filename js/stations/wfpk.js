@@ -7,6 +7,6 @@ const stationData = {
     orbPath: "us.wfpk",
     timestamp: "updated",
     timezone: "America/New_York",
-    filter: ["WFPK"],
+    filter: ["WFPK", "Interview"],
   }
 };
