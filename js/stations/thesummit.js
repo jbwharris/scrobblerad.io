@@ -8,5 +8,6 @@ const stationData = {
     stringPath: true,
     phpString: true,
     filter: ["The Summit", "thesummit"],
+    proxyApi: true
   }
 };
