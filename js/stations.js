@@ -437,6 +437,18 @@ const stations = {
     stationName: "WFMU",
     tags: ["us", "top"],
   },
+  wfmudrummer: {
+    stationName: "WFMU - Give The Drummer Radio",
+    tags: ["us"],
+  },
+  wfmusoul: {
+    stationName: "WFMU - Rock'n'Soul Radio",
+    tags: ["us", "rock", "soul"],
+  },
+  wfmusheena: {
+    stationName: "WFMU - Sheena's Jungle Room",
+    tags: ["us"],
+  },
   wfpk: {
     stationName: "WFPK",
     tags: ["us"],
