@@ -1,16 +1,12 @@
 const stationData = {
   soniccoast: {
     stationName: "The Sonic Coast",
-    artist: "current-track.title",
-    song: "current-track.artist",
     location: "Detroit, MI 🇺🇸",
     webUrl: "https://thesoniccoast.com/",
     streamUrl: "https://das-edge13-live365-dal02.cdnstream.com/a85042_2",
-    apiUrl: "https://api.live365.com/station/a85042",
-    timestamp: "current-track.start",
-    duration: "current-track.duration",
+    orbPath: "us/thesoniccoast",
+    timestamp: "updated",
     timezone: "America/New_York",
     filter: ["The Sonic Coast"],
-    isFuture: true,
   }
 };

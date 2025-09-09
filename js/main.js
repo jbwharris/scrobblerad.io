@@ -2,6 +2,8 @@ const urlCoverArt = "img/defaultArt.png";
 let stationKeys = Object.keys(stations); // Change to let to allow modification
 let currentTag = 'all'; // Global variable to track the currently selected tag
 
+const main_scripts = window.main_scripts || {};
+
 function generateRadioButtons(tag = "all") {
     currentTag = tag; // Update the global currentTag
 
@@ -551,7 +553,12 @@ class RadioPlayer {
             if (isHlsStream) {
                 this.hlsStreamLoad(streamUrl, newAudio); // No need to assign return value
             } else {
-                newAudio.src = this.addCacheBuster(streamUrl);
+                if (this.currentStationData[this.stationName].proxyStream) {
+                        newAudio.src = this.addCacheBuster(`https://scrobblerad.io/proxy.php?url=${this.currentStationData[this.stationName].streamUrl}`);
+                } else {
+                    newAudio.src = this.addCacheBuster(streamUrl);
+                }
+
                 newAudio.load();
             }
 
@@ -880,6 +887,7 @@ class RadioPlayer {
                     album = this.applyFilters('album', match[3]?.trim()) || '';
                     albumArt = match[4]?.trim() || urlCoverArt;
                     spinUpdated = match[5]?.trim() || '';
+                    spinUpdated = Number(spinUpdated);
                 } else {
                     spinUpdated = match[3]?.trim() || '';
                 }
@@ -919,7 +927,7 @@ class RadioPlayer {
             return;
         } else if ((!song && !artist) || (song && !artist)) {
             // Returning the message indicating missing data
-            return ['Station data is currently missing', null, null, urlCoverArt, '', '', true];
+            return ['Station data is currently missing', null, null, this.stationArt, '', '', true];
         }
 
 
@@ -1184,8 +1192,7 @@ class RadioPlayer {
 
         // 2. Remove MyTuner scripts from the head
         const scriptUrlsToRemove = [
-            'https://mytuner-radio.com/static/js/widgets/player-v1.js',
-            'https://mytuner-radio.com/static/js/widgets/widget-player-v1.js',
+            '/js/widgets/player-v1.js'
         ];
 
         const removeScripts = () => {
@@ -1346,13 +1353,11 @@ class RadioPlayer {
                             const doc = parser.parseFromString(data, 'text/html');
                             data = this.extractDataFromHTML(doc);  
                         } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic') {
-                            // Extract artist - song
-                            const songInfo = document.querySelector('.song-history li:first-child span:last-child span')?.textContent.trim() || '';
-                            // Extract time played
-                            const timePlayed = document.querySelector('.song-history li:first-child span[style^="display: inline-flex"]')?.textContent.trim() || '';
 
-                            // Combine songInfo and timePlayed into a single string
-                            data = songInfo ? `${songInfo} - ${timePlayed}` : '';
+                            if (window.mytuner_scripts.mytunerMeta) {
+                                console.log('window.mytuner_scripts.mytunerMeta', window.mytuner_scripts.mytunerMeta)
+                                data = window.mytuner_scripts.mytunerMeta;
+                            }
                         } else if (contentType && contentType.includes('application/javascript')) {
                             // Extract the HTML content from the JavaScript response
                             const htmlContent = this.extractHTMLFromJS(data);
@@ -1532,7 +1537,7 @@ class RadioPlayer {
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData(['[ Air break ]', '', '', urlCoverArt, null, null, true]);
+                page.refreshCurrentData(['[ Air break ]', '', '', this.stationArt, null, null, true]);
                 return;
             }
 
@@ -1575,11 +1580,11 @@ class RadioPlayer {
                     return;   
             } else if ([this.stationName] == 'indie1023' && song == "Station data is currently missing") {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData(['[ Air Break ]', '', '', urlCoverArt, null, null, true]);
+                page.refreshCurrentData(['[ Air Break ]', '', '', this.stationArt, null, null, true]);
                 return;
             } else if (song == "Station data is currently missing" && !staleData ) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData([song, '', '', urlCoverArt, null, null, true]);
+                page.refreshCurrentData([song, '', '', this.stationArt, null, null, true]);
                 return;
             }
 
