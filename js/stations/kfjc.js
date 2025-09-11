@@ -12,5 +12,6 @@ const stationData = {
     timezone: "UTC",
     phpString: true,
     reverseArray: true,
+    proxyStream: true,
   }
 };

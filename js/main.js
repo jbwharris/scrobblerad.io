@@ -2,8 +2,6 @@ const urlCoverArt = "img/defaultArt.png";
 let stationKeys = Object.keys(stations); // Change to let to allow modification
 let currentTag = 'all'; // Global variable to track the currently selected tag
 
-const main_scripts = window.main_scripts || {};
-
 function generateRadioButtons(tag = "all") {
     currentTag = tag; // Update the global currentTag
 
@@ -785,6 +783,7 @@ class RadioPlayer {
             return song
                 .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
                 .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
+                .replace(/\s-\s.*kqua.*$/i, '')    // Removes " - Radio Version" or similar
                 .replace(/\s-\s.*mix.*$/i, '')    // Removes " - Something Mix" or similar
                 .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
                 .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
@@ -1591,7 +1590,7 @@ class RadioPlayer {
             // Handle stale data or invalid song
             if ((staleData) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationName, this);
-                page.refreshCurrentData([(staleData || song), '', '', urlCoverArt, null, null, true]);
+                page.refreshCurrentData([(staleData || song), '', '', this.stationArt, null, null, true]);
                 return;
             }
 
@@ -2052,7 +2051,7 @@ class RadioPlayer {
         this.pauseTimeout = setTimeout(() => {
             console.log("the stream should be reloaded");
             const page = new Page(this.stationName, this);
-            page.refreshCurrentData([`Press reload to refresh feed`, '', '', urlCoverArt, null, null, true]);
+            page.refreshCurrentData([`Press reload to refresh feed`, '', '', this.stationArt, null, null, true]);
             document.getElementById("playermeta").classList.add("opacity-50");
             if (this.hls) {
                 this.destroyHLSAndResetAudio();

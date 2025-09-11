@@ -183,10 +183,6 @@ const stations = {
     stationName: "The Indie Blend",
     tags: ["us"],
   },
-  indiediscotheque: {
-    stationName: "Indie Discotheque",
-    tags: ["us"],
-  },
   indiexfm: {
     stationName: "Indie X FM",
     tags: ["us"],
@@ -215,6 +211,10 @@ const stations = {
     stationName: "KEXP",
     tags: ["us", "public", "top"],
   }, 
+  kfjc: {
+    stationName: "KFJC",
+    tags: ["us", "public", "community"],
+  },
   kosu: {
     stationName: "KOSU - The Spy",
     tags: ["us", "public", "npr"],

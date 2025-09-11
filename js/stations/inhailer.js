@@ -38,7 +38,7 @@ const stationData = {
       "Nils The Music Director",
       "Josh Tillman",
       "New Music Showcase",
-      "Toyota Artist Of The Month",
+      "Toyota",
       "at Woodward",
       "Indie 500",
       "At The Columbia",
@@ -49,11 +49,12 @@ const stationData = {
       "James Burke",
       "Lauren Fitzpatrick",
       "Ethan Bloomfield",
-      "Ethan in the Evening",
+      "Ethan in the",
       "http",
       "www",
       " PM",
-      " AM"
+      " AM",
+      "Clara Stryker"
     ],
   },
 }
