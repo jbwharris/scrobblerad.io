@@ -4,7 +4,7 @@ const stationData = {
     location: "Jersey City, NJ 🇺🇸",
     webUrl: "https://wfmu.org/sheena",
     streamUrl: "https://stream0.wfmu.org/sheena",
-    orbPath: "us.wfmusheenajungleroom",
+    orbPath: "us.wfmusheenasjungleroom",
     timestamp: "updated",
     timezone: "America/New_York",
     pathRegex: /"([^"]+)" by ([^"]+?)(?=\son)/,
