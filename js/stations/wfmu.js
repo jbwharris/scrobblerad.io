@@ -9,6 +9,7 @@ const stationData = {
     timezone: "America/New_York",
     pathRegex: /"([^"]+)" by ([^"]+?)(?=\son)/,
     flipMeta: true,
+    proxyStream: true,
     filter: ["on Wake on WFMU", "Your DJ speaks", "Cat Bomb! Radio", "Six Degrees with Alan"],
   }
 };
