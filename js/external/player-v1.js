@@ -4,8 +4,7 @@ var mytuner_scripts = window.mytuner_scripts || {};
 mytuner_scripts["player-v1.js-imported"] = true;
 mytuner_scripts["player-v1.js"] = initialize;
 
-let mytunerMeta = '';
-let mytunerPlaylist;
+let mytunerMeta = null;
 
 //initialize();
 function initialize(wid) {
@@ -18,7 +17,7 @@ function initialize(wid) {
     let hidehistory = document.getElementById(widget_id).dataset.hidehistory;
     hidehistory = hidehistory === "true" || hidehistory === true;
 
-    let placeholder_image = document.getElementById(widget_id).dataset.placeholder || "https://mytuner-radio.com/static/icons/widgets/Placeholder/Placeholder.png";
+    let placeholder_image = "https://mytuner-radio.com/static/icons/widgets/Placeholder/Placeholder.png";
 
     let volume = localStorage.getItem("myTnr_volume");
     if (volume === null) {
@@ -75,13 +74,21 @@ function initialize(wid) {
                         data: {'access_token': access_token, 'radio_id': radio_id},
                         success: function(data) {
                         if (data.success) {
-                            window.mytuner_scripts.mytunerMeta = `${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`;
+                            if (!data.radio_metadata.metadata ) {
+                                window.mytuner_scripts.mytunerMeta = `${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`;
+                            }
+
+                            console.log(`${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`);
 
                             document.getElementById(widget_id).playlist = data.data;
                             change_dow(new Date().getUTCDay() - 1, widget_id, placeholder_image);  // document.getElementById(widget_id).dataset.fdow);
                             then();
                         } else {
-                            window.mytuner_scripts.mytunerMeta = `${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`;
+                            if (!data.radio_metadata.metadata ) {
+                                window.mytuner_scripts.mytunerMeta = `${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`;
+                            }
+
+                            console.log(`${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`);
 
                             console.log("No playlist for selected radio");
                             no_history();
@@ -106,7 +113,9 @@ function initialize(wid) {
                     function create_song(data) {
                         var md = data.radio_metadata;
                             if (md.metadata !== "") {
-                                window.mytuner_scripts.mytunerMeta = `${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`;
+                                if (data.radio_metadata.start_date !== 0 ) {
+                                    window.mytuner_scripts.mytunerMeta = `${data.radio_metadata.metadata} - ${data.radio_metadata.start_date}`;
+                                }
                                 var trackName = md.metadata;
                                 var artistName = "";
                                 var splitMD = trackName.split(" - ");
