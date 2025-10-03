@@ -7,8 +7,8 @@ const stationData = {
     orbPath: "us.wfmu",
     timestamp: "updated",
     timezone: "America/New_York",
-    pathRegex: /"([^"]+)" by ([^"]+?)(?=\son)/,
-    flipMeta: true,
+    pathRegex2: /"([^"]+)" by ([^"]+?)(?=\son)/,
+    flipMeta2: true,
     proxyStream: true,
     filter: ["on Wake on WFMU", "Your DJ speaks", "Cat Bomb! Radio", "Six Degrees with Alan"],
   }

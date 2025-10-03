@@ -7,6 +7,7 @@ const stationData = {
     timezone: "America/Toronto",
     stringPath: true,
     flipMeta: true,
+    pathRegex: /^(.*) - (.*) - (.+)$/,
   }
 };
 

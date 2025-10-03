@@ -807,6 +807,7 @@ class RadioPlayer {
 
         const getMetadata = (key) => this.getPath(data, this.currentStationData[this.stationName][key]);
         const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
+        const regexPattern2 = this.currentStationData[this.stationName].pathRegex2;
         const match = regexPattern.exec(data);
 
         let song = filterSongDetails(getMetadata('song'));
@@ -840,7 +841,7 @@ class RadioPlayer {
             albumArt = data.albumArt || '';
             spinUpdated = data.spinUpdated || '';
 
-           // console.log('albumArt from spinPath', albumArt);
+            console.log('spinUpdated being assigned here', spinUpdated);
         }
 
         if (this.currentStationData[this.stationName].htmlString) {
@@ -849,6 +850,8 @@ class RadioPlayer {
             album = this.applyFilters('album', data.album) || '';
             albumArt = data.albumArt || '';
             spinUpdated = data.spinUpdated || '';
+
+            console.log('spinUpdated being assigned here', spinUpdated);
         }
 
         if (this.currentStationData[this.stationName].orbPath || this.currentStationData[this.stationName].dataPath) {
@@ -871,6 +874,20 @@ class RadioPlayer {
                 if (this.currentStationData[this.stationName].flipMeta) {
                     [song, artist] = [artist, song];
                 }
+
+            } else if (!match && regexPattern2) {
+                const fallbackMatch = regexPattern2.exec(dataPath);
+
+                [artist, song, album] = fallbackMatch.slice(1, 4).map((str) => str?.trim());
+
+                song = filterSongDetails(song);
+                artist = this.applyFilters('artist', artist);
+                album = this.applyFilters('album', album);
+
+                if (this.currentStationData[this.stationName].flipMeta2) {
+                    [song, artist] = [artist, song];
+                }
+
             } else {
                 console.log('No match found', match);
             }
@@ -887,8 +904,12 @@ class RadioPlayer {
                     albumArt = match[4]?.trim() || urlCoverArt;
                     spinUpdated = match[5]?.trim() || '';
                     spinUpdated = Number(spinUpdated);
-                } else {
-                    spinUpdated = match[3]?.trim() || '';
+
+                    spinUpdated = new Date(spinUpdated).getTime(); // ⬅️ Epoch
+
+                    
+                } else { // if it is cbcmusic
+                    spinUpdated = Number(match[3]?.trim()) || '';
                 }
 
                 if (this.currentStationData[this.stationName].flipMeta) {
@@ -1353,8 +1374,7 @@ class RadioPlayer {
                             data = this.extractDataFromHTML(doc);  
                         } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic') {
 
-                            if (window.mytuner_scripts.mytunerMeta) {
-                                console.log('window.mytuner_scripts.mytunerMeta', window.mytuner_scripts.mytunerMeta)
+                            if (window.mytuner_scripts.mytunerMeta !== null) {
                                 data = window.mytuner_scripts.mytunerMeta;
                             }
                         } else if (contentType && contentType.includes('application/javascript')) {
@@ -1395,10 +1415,6 @@ class RadioPlayer {
                                 console.log("Skipping update: song metadata was altered externally.");
                                 this.songMetadataChanged = false; // Reset flag
                                 return; // Stop further processing
-                        }
-
-                        if (this.cbcData) {
-                            data = this.cbcData;
                         }
 
                         // Process the new data response
@@ -1671,9 +1687,12 @@ class RadioPlayer {
             } else {
                 apiUpdatedData = this.convertTimestamp(timestamp, timezone);
             }
-        } else if (spinUpdated) {
+        } else if (spinUpdated && this.stationName == 'cbcmusic') {
+            apiUpdatedData = this.convertTimestamp(spinUpdated, timezone);
+            console.log('spin cbc apiUpdatedData', apiUpdatedData);
+        } else if (spinUpdated && this.stationName !== 'cbcmusic') {
             // Handle timestamp conversion and formatting
-            let spinUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
+            let spinUpdatedData = this.formatTimeInTimezone(timezone, timestamp, Number(spinUpdated));
             console.log('spinUpdatedData', spinUpdatedData, Date.parse(spinUpdatedData));
 
             const now = new Date();
@@ -1883,20 +1902,22 @@ class RadioPlayer {
     formatTimeInTimezone(timezone, timestamp, spinUpdated) {
         let apiUpdatedTime = '';
 
-        console.log('timestamp', timestamp, 'spinUpdated', spinUpdated);
+        console.log('timestamp', timestamp, 'spinUpdated',  spinUpdated);
+
 
         const convertTo24HourFormat = (time12h) => {
-            const [time, modifier] = time12h.split(' ');
-            let [hours, minutes] = time.split(':');
+                const [time, modifier] = time12h.split(' ');
+                let [hours, minutes] = time.split(':');
 
-            if (modifier === 'PM' && hours !== '12') {
-                hours = parseInt(hours, 10) + 12;
-            } else if (modifier === 'AM' && hours === '12') {
-                hours = '00';
-            }
+                if (modifier === 'PM' && hours !== '12') {
+                    hours = parseInt(hours, 10) + 12;
+                } else if (modifier === 'AM' && hours === '12') {
+                    hours = '00';
+                }
 
-            return `${hours}:${minutes}`;
-        };
+                return `${hours}:${minutes}`;
+            };
+
 
         // Format the current date and time in the specified timezone
         const currentDatePart = new Date().toLocaleString('en-US', {
@@ -1913,14 +1934,17 @@ class RadioPlayer {
         }).split(' ').pop();
 
         // If there's a spinUpdated time, convert it to 24-hour format
-        if (spinUpdated && spinUpdated !== true) {
+        if ((spinUpdated && spinUpdated !== true) && this.stationName !== 'cbcmusic') {
             const updated24Hour = convertTo24HourFormat(spinUpdated);
             apiUpdatedTime = `${currentDatePart} ${updated24Hour}`;
+            console.log('spinUpdated apiUpdatedTime', apiUpdatedTime)
+        } else if ((spinUpdated && spinUpdated !== true) && this.stationName == 'cbcmusic') {
+            apiUpdatedTime = this.convertTimestamp(spinUpdated, timezone);
             console.log('spinUpdated apiUpdatedTime', apiUpdatedTime)
         }
 
         // Format the API-supplied timestamp, if provided, with timezone handling
-        if (timestamp) {
+        if (timestamp ) {
             const date = new Date(timestamp);
             const formatter = new Intl.DateTimeFormat('en-US', {
                 timeZone: timezone,

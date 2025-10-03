@@ -8,7 +8,7 @@ const stationData = {
     streamUrl: "https://localradio.streamb.live/SB00348",
     apiUrl: "https://socast-public.s3.amazonaws.com/player/np_3209_3446.js",
     timezone: "America/Toronto",
-    updated: "last_played",
+    timestamp: "last_played",
     jsonString: true,
   }
 };
