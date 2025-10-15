@@ -11,6 +11,10 @@ const stations = {
     stationName: "ABC - Triple J Unearthed",
     tags: ["au"],
   },
+  acrn: {
+    stationName: "ACRN",
+    tags: ["us", "college"],
+  },
   altradio: {
     stationName: "AltRadio",
     tags: ["us"],
@@ -324,8 +328,8 @@ const stations = {
     tags: ["us", "online"],
   },
   radiofrancefip: {
-    stationName: "Radio France",
-    tags: ["fr"],
+      stationName: "Radio France FIP",
+      tags: ["fr"],
   },
   radiohumber: {
     stationName: "Radio Humber",
@@ -419,9 +423,9 @@ const stations = {
     stationName: "WBRU",
     tags: ["us"],
   },
-  wcsb: {
-    stationName: "WCSB",
-    tags: ["us"],
+  wcbn: {
+    stationName: "WCBN",
+    tags: ["us", "college"],
   },
   wers: {
     stationName: "WERS",
@@ -500,6 +504,10 @@ const stations = {
   wprb: {
     stationName: "WPRB",
     tags: ["us"],
+  },
+  wrfl: {
+    stationName: "WRFL",
+    tags: ["us", "college"],
   },
   wrir: {
     stationName: "WRIR",
