@@ -7,5 +7,6 @@ const stationData = {
     spinPath: "kmgp",
     timezone: "America/Los_Angeles",
     filter: ["WPRB", "reverbnation.com"],
+    proxyStream: true,
   },
 }
