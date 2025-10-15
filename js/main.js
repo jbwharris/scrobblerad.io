@@ -62,7 +62,10 @@ function generateRadioButtons(tag = "all") {
         if (clickedButton) {
             const stationKey = clickedButton.name;
             window.location.hash = `#${stationKey}`;
+
+            console.log('stationKey', stationKey);
             radioPlayer.handleStationSelect(null, stationKey, true);
+
         }
     });
 
@@ -1352,7 +1355,6 @@ class RadioPlayer {
                         if (contentType && (contentType.includes('application/json') || 
                             contentType.includes('application/vnd.api+json') || 
                             (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString))) {
-                            
                             return response.json().then((data) => ({ data, contentType }));
                             
                         } else if (contentType && (contentType.includes('text/html') || 
@@ -1372,10 +1374,14 @@ class RadioPlayer {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(data, 'text/html');
                             data = this.extractDataFromHTML(doc);  
-                        } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic') {
+                        } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic' && window.mytuner_scripts.mytunerMeta !== null) {
+
+                            console.log("window.mytuner_scripts.mytunerMeta", window.mytuner_scripts.mytunerMeta)
 
                             if (window.mytuner_scripts.mytunerMeta !== null) {
                                 data = window.mytuner_scripts.mytunerMeta;
+                            } else {
+                                return;
                             }
                         } else if (contentType && contentType.includes('application/javascript')) {
                             // Extract the HTML content from the JavaScript response
@@ -1383,10 +1389,10 @@ class RadioPlayer {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
-                        } else if (contentType && contentType.includes('text/plain')) {
+                        } else if (contentType && contentType.includes('text/plain') && !this.currentStationData[this.stationName].phpString) {
                             data = this.extractJsonFromJS(data);
                         } else if (contentType && contentType.includes('text/html') && 
-                                    (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString)) {
+                                    (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString) || this.currentStationData[this.stationName].phpString && contentType.includes('text/plain')) {
                             data = data;
                         } else if (contentType && contentType.includes('text/html') && 
                                    this.currentStationData[this.stationName].htmlString) {
