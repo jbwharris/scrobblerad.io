@@ -54,7 +54,9 @@ const stationData = {
       "www",
       " PM",
       " AM",
-      "Clara Stryker"
+      "Clara Stryker",
+      "Jae Forman",
+      "Planet of Sound",
     ],
   },
 }

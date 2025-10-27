@@ -89,19 +89,19 @@ const stations = {
   },
   ciso: {
     stationName: "89.1 MAX FM - CISO",
-    tags: ["ca", "alt"],
+    tags: ["ca", "alt", "corp"],
   },
   civl: {
     stationName: "CIVL",
-    tags: ["ca"],
+    tags: ["ca", "college", "community"],
   },
   cjiq: {
     stationName: "CJIQ",
-    tags: ["ca"],
+    tags: ["ca", "college", "community"],
   },
   cjmp: {
     stationName: "CJMP",
-    tags: ["ca"],
+    tags: ["ca", "community"],
   },
   ckua: {
     stationName: "CKUA",
@@ -113,7 +113,7 @@ const stations = {
   },
   ckuw: {
     stationName: "CKUW",
-    tags: ["ca"],
+    tags: ["ca", "college", "community"],
   },
   coloradosound: {
     stationName: "The Colorado Sound",
@@ -187,6 +187,10 @@ const stations = {
     stationName: "The Indie Blend",
     tags: ["us"],
   },
+  indiediscotheque: {
+    stationName: "Indie Discotheque",
+    tags: ["us", "indie"],
+  },
   indiexfm: {
     stationName: "Indie X FM",
     tags: ["us"],
@@ -250,7 +254,7 @@ const stations = {
   kuom: {
     stationName: "KUOM - Radio K",
     tags: ["us", "college"],
-  },  
+  }, 
   kutx: {
     stationName: "KUTX",
     tags: ["us", "top"],
@@ -269,7 +273,7 @@ const stations = {
   },
   lemellotron: {
     stationName: "Le Mellotron",
-    tags: ["fr"],
+    tags: ["fr", "chill"],
   },
   lightning100: {
     stationName: "Lightning 100",
@@ -297,7 +301,7 @@ const stations = {
   },
   newsounds: {
     stationName: "New Sounds",
-    tags: ["us", "public"],
+    tags: ["us", "public", "chill"],
   },
   noiseboxradio: {
     stationName: "Noisebox Radio",
@@ -309,7 +313,7 @@ const stations = {
   },
   plazaone: {
     stationName: "Nightwave Plaza",
-    tags: ["us"],
+    tags: ["us", "chill"],
   },
   thepoint: {
     stationName: "The Point",
@@ -322,10 +326,6 @@ const stations = {
   qcindie: {
     stationName: "QCIndie",
     tags: ["ca", "online", "top"],
-  },
-  racketeer: {
-    stationName: "Racketeer Radio",
-    tags: ["us", "online"],
   },
   radiofrancefip: {
       stationName: "Radio France FIP",

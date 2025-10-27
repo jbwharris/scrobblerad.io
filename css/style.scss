@@ -146,6 +146,52 @@ body {
 
 }
 
+
+@media only screen and (max-height:450px) and (max-width:950px) and (orientation:landscape) {
+
+.mobile-swipe {
+
+   .col {
+      flex: 3 0 auto;
+      .panels {
+         display:block;
+      }
+   }
+
+   .off-canvas-left.show {
+     left: 0;
+     transform: translateX(-110%);
+   }
+
+   .off-canvas-right.show {
+     right: 0;
+     transform: translateX(-100%);
+   }
+
+   #panel2 {
+      transform:  translateX(-100%);
+      width: 100vw;
+      flex: stretch !important;
+
+   }
+
+   #playermeta .col {
+      flex: min-content;
+   }
+
+   #webamp {
+      top:.05rem;
+      max-width: 275px;
+      max-height: 275px;
+   }
+}
+
+}
+
+
+
+
+
 #togglePanels {
    position: absolute;
    top: 0;
@@ -525,6 +571,8 @@ body {
    }
 
 }
+
+#mytuner-container {opacity: 0;}
 
 .metainfo {
    display: flex;

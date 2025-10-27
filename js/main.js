@@ -56,19 +56,6 @@ function generateRadioButtons(tag = "all") {
 
     stationSelectDiv.appendChild(fragment);
 
-    // Event delegation for station selection
-    stationSelectDiv.addEventListener('click', (event) => {
-        const clickedButton = event.target.closest('button');
-        if (clickedButton) {
-            const stationKey = clickedButton.name;
-            window.location.hash = `#${stationKey}`;
-
-            console.log('stationKey', stationKey);
-            radioPlayer.handleStationSelect(null, stationKey, true);
-
-        }
-    });
-
     // Offcanvas Panels Toggle
     document.getElementById("togglePanels").addEventListener("click", function () {
     const leftPanel = document.getElementById("panel1");
@@ -94,6 +81,16 @@ function generateRadioButtons(tag = "all") {
   });
 }
 
+function handleStationClick(event) {
+  const clickedButton = event.target.closest('button');
+  if (clickedButton) {
+    const stationKey = clickedButton.name;
+    window.location.hash = `#${stationKey}`;
+    radioPlayer.handleStationSelect(null, stationKey, true);
+  }
+}
+
+
 function animateElement(element, duration = 2000) {
     element.classList.add("animated", "fadeIn");
     setTimeout(() => {
@@ -107,7 +104,6 @@ class Page {
         this.radioPlayer = radioPlayer;
         this.displayStationName = this.radioPlayer.currentStationData[this.stationName].stationName;
         this.scrobbleTimeout = null;
-        this.currentTrack = null;
 
         this.cacheDOMElements();
 
@@ -294,12 +290,11 @@ class RadioPlayer {
         // Misc
         this.firstRun = true;
         this.debounceTimeout = null;
-        this.streamingInterval = null;
-
-        this.currentSong = null; // Current song title
-        this.previousSong = null; // Previous song title
         this.songStartTime = null; // Timestamp when the current song started
-        this.scrobbleTimeout = null; // Timeout ID for the 60-second timer       
+        this.scrobbleTimeout = null; // Timeout ID for the 60-second timer    
+        this.currentTrack = null;   
+        this.currentPage = null; // Track the current Page instance
+        this.streamingInterval = null;
 
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
@@ -367,8 +362,6 @@ class RadioPlayer {
             navigator.serviceWorker
                 .register("serviceWorker.js")
                 .then((registration) => {
-                    console.log("Service worker registered", registration);
-
                     // Optionally, check for updates to the service worker
                     if (registration.waiting) {
                         // If there's a waiting SW, prompt the user or refresh
@@ -499,6 +492,12 @@ class RadioPlayer {
             return;
         }
 
+
+        // Destroy the previous Page instance if it exists
+        if (this.currentPage) {
+          this.currentPage.destroy(); // Assuming Page has a destroy method
+          this.currentPage = null;
+        }
 
 
         document.getElementById("playermeta").classList.add("opacity-50");
@@ -1051,9 +1050,6 @@ class RadioPlayer {
                         mbData.releases[0]['artist-credit'][0]?.name || currentArtist
                 ];
 
-
-                console.log('this.jaccardSimilarity(mbResult[3], currentArtist)', this.jaccardSimilarity(mbResult[3], currentArtist), mbResult[3], currentArtist);
-
                 if ((mbResult[3] != currentArtist ) || (mbResult[2] != currentSong)) {
 
                     // check if the result is close enough, but not the same as the existing result. Sometimes MB will find a completely new artist or song, which isn't what we want
@@ -1490,8 +1486,6 @@ class RadioPlayer {
         const albumArt = doc.querySelector(`${targetSelector[4]}`)?.src || '';
         const spinUpdated = doc.querySelector(`${targetSelector[0]}${targetSelector[5]}`)?.textContent.trim() || '';
 
-
-        console.log('extractedfromhtml', song, artist, album, albumArt, spinUpdated)
         // Return the extracted data in the format expected by processData
         return {song, artist, album, albumArt, spinUpdated};
     }
@@ -1548,7 +1542,7 @@ class RadioPlayer {
             const extractedData = this.extractSongAndArtist(data, this.stationName);
 
              // Compare the extractedData response with the previous one
-            if (JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) {
+            if ((JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) && navigator.mediaSession.metadata.title !== 'Station data loading') {
                 console.log('extracted data the same, returning')
                 return;
             } else {
@@ -1683,23 +1677,17 @@ class RadioPlayer {
             const isDecimalEpoch = /^\d{10}(\.\d+)?$/.test(timestamp); // 10-digit epoch with optional decimal
             const isEpoch = /^\d{10,13}$/.test(timestamp); // integer epoch
 
-
-
             if (isDecimalEpoch || isEpoch) {
                 const numericTs = parseFloat(timestamp); // works for both int & float
                 apiUpdatedData = numericTs < 1e12 ? Math.floor(numericTs * 1000) : Math.floor(numericTs); // Ensure ms, strip decimals
-
-                console.log('apiUpdatedData from isEpoch', apiUpdatedData);
             } else {
                 apiUpdatedData = this.convertTimestamp(timestamp, timezone);
             }
         } else if (spinUpdated && this.stationName == 'cbcmusic') {
             apiUpdatedData = this.convertTimestamp(spinUpdated, timezone);
-            console.log('spin cbc apiUpdatedData', apiUpdatedData);
         } else if (spinUpdated && this.stationName !== 'cbcmusic') {
             // Handle timestamp conversion and formatting
             let spinUpdatedData = this.formatTimeInTimezone(timezone, timestamp, Number(spinUpdated));
-            console.log('spinUpdatedData', spinUpdatedData, Date.parse(spinUpdatedData));
 
             const now = new Date();
             let spinOffset = new Intl.DateTimeFormat("en-US", {
@@ -1710,7 +1698,6 @@ class RadioPlayer {
             const parts = spinOffset.formatToParts(now);
             const lookup = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
             apiUpdatedData = `${spinUpdatedData} ${lookup.timeZoneName}`;
-            console.log('spin apiUpdatedData', apiUpdatedData);
 
             apiUpdatedData = Date.parse(apiUpdatedData);
         } else if ((timezone && !timestamp)) {
@@ -1834,9 +1821,7 @@ class RadioPlayer {
         return Math.round((hours * 3600 + minutes * 60 + wholeSeconds) * 1000 + milliseconds);
     }
 
-    convertTimestamp(timestamp, timezone, spinUpdated, duration) {
-
-        console.log('timestamp before conversion', timestamp);
+    convertTimestamp(timestamp, timezone, spinUpdated) {
 
         const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
         const isEpoch = /^\d{10,13}$/.test(timestamp); // Check for 10 or 13 digits
@@ -2155,7 +2140,26 @@ class RadioPlayer {
         }
         return url.includes('?') ? `${url}&t=${timestamp}` : `${url}?t=${timestamp}`;
     }
+
+    destroy() {
+
+        if (this.streamingInterval) {
+          clearInterval(this.streamingInterval);
+          this.streamingInterval = null;
+        }
+
+        if (this.currentPage) {
+          this.currentPage.destroy();
+          this.currentPage = null;
+        }
+    }
+
+
 }
+
+const stationSelectDiv = document.getElementById('stationSelect');
+stationSelectDiv.addEventListener('click', handleStationClick);
+
 
 // Initialize radio buttons and radio player
 const radioPlayer = new RadioPlayer(
