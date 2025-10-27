@@ -7,5 +7,6 @@ const stationData = {
     spinPath: "kxlu",
     timezone: "America/Los_Angeles",
     filter: ["KXLU", "Rickie Lee Jones"],
+    proxyStream: true,
   }
 };
