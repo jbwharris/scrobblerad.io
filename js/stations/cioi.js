@@ -13,6 +13,6 @@ const stationData = {
     timezone: "America/New_York",
     proxyApi: true,
     xmlString: true,
-    filter: ["AD", "MOHAWK", "PSA"],
+    filter: ["AD", "MOHAWK", "PSA", "LEGAL ID"],
   }
 };
