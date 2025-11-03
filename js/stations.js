@@ -88,7 +88,7 @@ const stations = {
     tags: ["ca", "alt"],
   },
   cioi: {
-    stationName: "INDI 1015 - CIOI",
+    stationName: "INDI 101.5 - CIOI",
     tags: ["ca", "alt"],
   },
   ciso: {
