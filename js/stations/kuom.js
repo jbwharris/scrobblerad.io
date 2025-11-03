@@ -7,5 +7,6 @@ const stationData = {
     spinPath: "kuom",
     timezone: "America/Chicago",
     filter: ["KUOM", "Radio K"],
+    proxyStream: true,
   },
 }

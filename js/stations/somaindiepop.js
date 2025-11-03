@@ -10,6 +10,6 @@ const stationData = {
     apiUrl: "https://somafm.com/songs/indiepop.json",
     timestamp: "songs.0.date",
     timezone: "America/Los_Angeles",
-    needPath: true,
-  }
-};
+    proxyStream: true,
+  },
+}

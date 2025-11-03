@@ -1,4 +1,4 @@
-const SCROBBLERADIO_CACHE = "app-v3.8";  // Updated cache version
+const SCROBBLERADIO_CACHE = "app-v3.801";  // Updated cache version
 const staticPlayer = SCROBBLERADIO_CACHE;
 const assets = [
   "/",
@@ -9,7 +9,8 @@ const assets = [
   "/img/defaultArt.png",
   "/css/external/bootstrap.min.css",
   "/js/external/bootstrap.min.js",
-  "/js/external/filter.min.js"
+  "/js/external/filter.min.js",
+  "/js/external/player-v1.js"
 ];
 
 // Function to check for updates

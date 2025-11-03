@@ -87,6 +87,10 @@ const stations = {
     stationName: "89X - CIMX",
     tags: ["ca", "alt"],
   },
+  cioi: {
+    stationName: "INDI 1015 - CIOI",
+    tags: ["ca", "alt"],
+  },
   ciso: {
     stationName: "89.1 MAX FM - CISO",
     tags: ["ca", "alt", "corp"],
@@ -257,11 +261,11 @@ const stations = {
   }, 
   kutx: {
     stationName: "KUTX",
-    tags: ["us", "top"],
+    tags: ["us", "top", "college"],
   },
   kxll: {
     stationName: "KXLL",
-    tags: ["us"],
+    tags: ["us", "npr"],
   },
   kxlu: {
     stationName: "KXLU",
@@ -309,7 +313,7 @@ const stations = {
   },
   novaphonicfm: {
     stationName: "Novaphonic.FM",
-    tags: ["us", "top"],
+    tags: ["us", "top", "npr", "public"],
   },
   plazaone: {
     stationName: "Nightwave Plaza",
@@ -413,11 +417,11 @@ const stations = {
   },
   wber: {
     stationName: "WBER",
-    tags: ["us"],
+    tags: ["us", "college"],
   },
   wbor: {
     stationName: "WBOR",
-    tags: ["us"],
+    tags: ["us", "college"],
   },
   wbru: {
     stationName: "WBRU",
@@ -434,32 +438,32 @@ const stations = {
   wext: {
     stationName: "WEXT",
     tags: [
-      "us", "aaa", "npr", "United States", "New York"
+      "us", "aaa", "npr", "United States", "New York", "npr", "public"
     ],
   },
   wfmu: {
     stationName: "WFMU",
-    tags: ["us", "top"],
+    tags: ["us", "top", "community"],
   },
   wfmudrummer: {
     stationName: "WFMU - Give The Drummer Radio",
-    tags: ["us"],
+    tags: ["us", "community"],
   },
   wfmusoul: {
     stationName: "WFMU - Rock'n'Soul Radio",
-    tags: ["us", "rock", "soul"],
+    tags: ["us", "rock", "soul", "community"],
   },
   wfmusheena: {
     stationName: "WFMU - Sheena's Jungle Room",
-    tags: ["us"],
+    tags: ["us", "community"],
   },
   wfpk: {
     stationName: "WFPK",
-    tags: ["us"],
+    tags: ["us", "npr", "public"],
   },
   wfuv: {
     stationName: "WFUV",
-    tags: ["us"],
+    tags: ["us", "public"],
   },
   wicb: {
     stationName: "WICB",
@@ -491,7 +495,7 @@ const stations = {
   },
   wnxp: {
     stationName: "WNXP",
-    tags: ["us", "top"],
+    tags: ["us", "top", "npr", "public"],
   },
   worldwidefm: {
     stationName: "Worldwide FM",
@@ -515,11 +519,11 @@ const stations = {
   },
   wrur: {
     stationName: "WRUR - The Route",
-    tags: ["us"],
+    tags: ["us", "npr", "public"],
   },
   wtmd: {
     stationName: "WTMD",
-    tags: ["us"],
+    tags: ["us", "npr", "public"],
   },
   wudr: {
     stationName: "WUDR - Flyer Radio",
@@ -527,7 +531,7 @@ const stations = {
   },
   wuky: {
     stationName: "WUKY",
-    tags: ["us"],
+    tags: ["us", "npr"],
   },
   wusc: {
     stationName: "WUSC",
@@ -535,11 +539,11 @@ const stations = {
   },
   wyep: {
     stationName: "WYEP",
-    tags: ["us"],
+    tags: ["us", "npr"],
   },
   wyomingsounds: {
     stationName: "Wyoming Sounds",
-    tags: ["us"],
+    tags: ["us", "npr"],
   },
   wzbc: {
     stationName: "WZBC",
@@ -555,7 +559,7 @@ const stations = {
   },
   xpn2: {
     stationName: "XPoNential Radio",
-    tags: ["us"],
+    tags: ["us", "npr"],
   },
   xrayfm: {
     stationName: "XRAY FM",
