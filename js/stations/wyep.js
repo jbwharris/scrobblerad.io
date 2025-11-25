@@ -10,8 +10,7 @@ const stationData = {
     location: "Pittsburgh, PA 🇺🇸",
     webUrl: "https://wyep.org/",
     streamUrl: "https://ais-sa3.cdnstream1.com/2557_128.mp3",
-    apiUrl:
-      "https://api.composer.nprstations.org/v1/widget/50e451b6a93e91ee0a00028e/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
+    nprPath: "50e451b6a93e91ee0a00028e",
     filter: ["WYEP"],
     timestamp: "onNow.song._end_time",
     timestamp2: "tracklist.results.0.song._end_time",

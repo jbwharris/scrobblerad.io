@@ -7,5 +7,6 @@ const stationData = {
     spinPath: "kalx",
     timezone: "America/Los_Angeles",
     filter: ["KALX"],
+    proxyStream: true,
   }
 };

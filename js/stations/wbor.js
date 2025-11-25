@@ -7,5 +7,6 @@ const stationData = {
     spinPath: "wbor",
     timezone: "America/New_York",
     filter: ["WBOR"],
+    proxyStream: true,
   }
 };

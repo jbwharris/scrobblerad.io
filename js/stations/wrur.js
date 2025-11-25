@@ -10,8 +10,7 @@ const stationData = {
     location: "Rochester, NY 🇺🇸",
     webUrl: "https://www.wrur.org",
     streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/WRURFM.mp3",
-    apiUrl:
-      "https://api.composer.nprstations.org/v1/widget/5187f6b2e1c8cd3b9b26815c/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
+    nprPath: "5187f6b2e1c8cd3b9b26815c",
     timestamp: "onNow.song._end_time",
     timestamp2: "tracklist.results.0.song._end_time",
     timezone: "America/New_York",

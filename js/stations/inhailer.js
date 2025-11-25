@@ -1,6 +1,8 @@
 const stationData = {
   inhailer: {
     stationName: "Inhailer Radio",
+    artist: "data.track_artist",
+    song: "data.track_title",
     albumArt: "data.artwork_urls.large",
     location: "Cincinnati, OH 🇺🇸",
     webUrl: "https://inhailer.com",
@@ -8,7 +10,6 @@ const stationData = {
     apiUrl: "https://public.radio.co/api/v2/seac6e5991/track/current",
     timestamp: "data.start_time",
     timezone: "America/New_York",
-    dataPath: true,
     filter: [
       "Inhailer",
       "WGUC",

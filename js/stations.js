@@ -33,11 +33,11 @@ const stations = {
   },   
   birchstreet: {
     stationName: "Birch Street Radio",
-    tags: ["ca"],
+    tags: ["ca", "justmusic"],
   },
   blacklightradio: {
     stationName: "Blacklight Radio",
-    tags: ["us"],
+    tags: ["us", "justmusic"],
   },
   blowupradio: {
     stationName: "BlowupRadio",
@@ -65,7 +65,7 @@ const stations = {
   },
   charlies80sattic: {
     stationName: "Charlie's 80s Attic",
-    tags: ["us", "80s"],
+    tags: ["us", "80s", "justmusic"],
   },
   chillfiltr: {
     stationName: "CHILLFILTR",
@@ -129,19 +129,19 @@ const stations = {
   },
   d1alt: {
     stationName: "D1 Alternative",
-    tags: ["ca"],
+    tags: ["ca", "justmusic"],
   },
   d2relax: {
     stationName: "D2 Relax",
-    tags: ["ca"],
+    tags: ["ca", "justmusic"],
   },
   dkfm: {
     stationName: "DKFM",
-    tags: ["us"],
+    tags: ["us", "justmusic"],
   },
   dkfmclassic: {
     stationName: "DKFM Classic",
-    tags: ["ca"],
+    tags: ["ca", "justmusic"],
   },
   easternalt: {
     stationName: "Eastern Alternative Radio",
@@ -161,7 +161,7 @@ const stations = {
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
-    tags: ["ca"],
+    tags: ["ca", "justmusic"],
   },
   kffp: {
     stationName: "Freeform Portland",
@@ -169,11 +169,11 @@ const stations = {
   },
   funkymoose: {
     stationName: "Funky Moose Radio",
-    tags: ["ca"],
+    tags: ["ca", "justmusic"],
   },
   gorillafm: {
     stationName: "Gorilla FM",
-    tags: ["ch"],
+    tags: ["ch", "justmusic"],
   },
   indie1023: {
     stationName: "Indie 102.3",
@@ -189,15 +189,15 @@ const stations = {
   },
   indieblend: {
     stationName: "The Indie Blend",
-    tags: ["us"],
+    tags: ["us", "justmusic"],
   },
   indiediscotheque: {
     stationName: "Indie Discotheque",
-    tags: ["us", "indie"],
+    tags: ["us", "indie", "justmusic"],
   },
   indiexfm: {
     stationName: "Indie X FM",
-    tags: ["us"],
+    tags: ["us", "justmusic"],
   },
   idobianthm: {
     stationName: "idobi anthm",
@@ -207,17 +207,25 @@ const stations = {
     stationName: "Inhailer Radio",
     tags: ["us", "top"],
   },
+  kalw: {
+    stationName: "KALW",
+    tags: ["us", "npr"],
+  },
   kalx: {
     stationName: "KALX",
-    tags: ["us"],
+    tags: ["us", "community", "npr"],
   },
   kboo: {
     stationName: "KBOO",
     tags: ["us"],
   },
   kcrw: {
+    stationName: "KCRW",
+    tags: ["us", "public"],
+  },
+  kcrweclectic24: {
     stationName: "KCRW Eclectic 24",
-    tags: ["us"],
+    tags: ["us", "public"],
   },
   kexp: {
     stationName: "KEXP",
@@ -227,13 +235,9 @@ const stations = {
     stationName: "KFJC",
     tags: ["us", "public", "community"],
   },
-  kosu: {
-    stationName: "KOSU - The Spy",
-    tags: ["us", "public", "npr"],
-  },
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
-    tags: ["us"],
+    tags: ["us", "community"],
   },
   kpiss: {
     stationName: "KPISS",
@@ -277,7 +281,7 @@ const stations = {
   },
   lemellotron: {
     stationName: "Le Mellotron",
-    tags: ["fr", "chill"],
+    tags: ["fr", "chill", "justmusic"],
   },
   lightning100: {
     stationName: "Lightning 100",
@@ -285,7 +289,7 @@ const stations = {
   },
   megashuffle: {
     stationName: "MegaShuffle",
-    tags: ["ca"],
+    tags: ["ca", "justmusic"],
   },
   metradio: {
     stationName: "Met Radio",
@@ -297,15 +301,15 @@ const stations = {
   },
   tmm1: {
     stationName: "The Music Machine 1",
-    tags: ["uk"],
+    tags: ["uk", "justmusic"],
   },
   tmm2: {
     stationName: "The Music Machine 2",
-    tags: ["uk"],
+    tags: ["uk", "justmusic"],
   },
   newsounds: {
     stationName: "New Sounds",
-    tags: ["us", "public", "chill"],
+    tags: ["us", "public", "chill", "justmusic"],
   },
   noiseboxradio: {
     stationName: "Noisebox Radio",
@@ -317,7 +321,7 @@ const stations = {
   },
   plazaone: {
     stationName: "Nightwave Plaza",
-    tags: ["us", "chill"],
+    tags: ["us", "chill", "justmusic"],
   },
   thepoint: {
     stationName: "The Point",
@@ -329,7 +333,7 @@ const stations = {
   },
   qcindie: {
     stationName: "QCIndie",
-    tags: ["ca", "online", "top"],
+    tags: ["ca", "online", "top", "justmusic"],
   },
   radiofrancefip: {
       stationName: "Radio France FIP",
@@ -349,11 +353,11 @@ const stations = {
   },
   radioparadiseglobal: {
     stationName: "Radio Paradise Global Mix",
-    tags: ["us", "online"],
+    tags: ["us", "online", "justmusic"],
   },
   radioparadisemain: {
     stationName: "Radio Paradise Main Mix",
-    tags: ["us", "online", "top"],
+    tags: ["us", "online", "top", "justmusic"],
   },
   radiosydney: {
     stationName: "Radio Sydney",
@@ -369,7 +373,7 @@ const stations = {
   },
   sabotage: {
     stationName: "Sabotage Radio",
-    tags: ["fr"],
+    tags: ["fr", "justmusic"],
   },
   skylab: {
     stationName: "Skylab Radio",
@@ -381,19 +385,19 @@ const stations = {
   },
   soma80sunderground: {
     stationName: "SomaFM 80s Underground",
-    tags: ["us", "soma"],
+    tags: ["us", "soma", "justmusic"],
   },
   somafolkfwd: {
     stationName: "SomaFM Folk Forward",
-    tags: ["us", "soma"],
+    tags: ["us", "soma", "justmusic"],
   },
   somagroovesalad: {
     stationName: "SomaFM Groove Salad",
-    tags: ["us", "soma"],
+    tags: ["us", "soma", "justmusic"],
   },
   somaindiepop: {
     stationName: "SomaFM Indie Pop Rocks!",
-    tags: ["us", "soma"],
+    tags: ["us", "soma", "justmusic"],
   },
   soniccoast: {
     stationName: "The Sonic Coast",
@@ -407,13 +411,13 @@ const stations = {
     stationName: "The Summit",
     tags: ["us"],
   },
-  trendradio: {
-    stationName: "Trend Radio",
-    tags: ["uk"],
-  },
   uncertainfm: {
     stationName: "UncertainFM",
     tags: ["us"],
+  },
+  untidyradio: {
+    stationName: "Untidy Radio",
+    tags: ["us", ""],
   },
   wber: {
     stationName: "WBER",
@@ -472,6 +476,10 @@ const stations = {
   witt: {
     stationName: "WITT",
     tags: ["us"],
+  },
+  wknc: {
+    stationName: "WKNC",
+    tags: ["us", "college"],
   },
   wluw: {
     stationName: "WLUW",

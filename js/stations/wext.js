@@ -10,8 +10,7 @@ const stationData = {
     location: "Troy, NY 🇺🇸",
     webUrl: "https://wext.drupal.publicbroadcasting.net/  ",
     streamUrl: "https://wmht.streamguys1.com/wext1",
-    apiUrl:
-      "https://api.composer.nprstations.org/v1/widget/5182cfc4e1c891fe553a5b52/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false",
+    nprPath: "5182cfc4e1c891fe553a5b52",
     timestamp: "onNow.song._end_time",
     timestamp2: "tracklist.results.0.song._end_time",
     altPath: true,

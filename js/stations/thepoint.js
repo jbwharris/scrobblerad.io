@@ -5,7 +5,6 @@ const stationData = {
     webUrl: "https://wcyt.org/",
     streamUrl: "https://securestreams2.autopo.st:1069/WCYT.mp3",
     spinPath: "wcyt",
-    timestamp: "updated",
     timezone: "America/Indiana/Indianapolis",
     filter: ["The Point", "WCYT"],
   }
