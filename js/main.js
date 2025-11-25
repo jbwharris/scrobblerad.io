@@ -867,9 +867,9 @@ class RadioPlayer {
                 dataPath = data.data.title;
                 console.log('dataPath is true', dataPath)
             } else if (this.currentStationData[this.stationName].dataPath) {
-                dataPath = getMetadata('dataPath');
+                dataPath = data[`${[this.currentStationData[this.stationName].dataPath]}`];
 
-                console.log('dataPath exists', this.getPath(data, this.currentStationData[stationName].dataPath, data));
+                console.log('dataPath exists', data.dataPath);
             }
 
             const match = regexPattern.exec(dataPath);
@@ -1806,7 +1806,7 @@ class RadioPlayer {
         console.log('apiUpdatedData', apiUpdatedData, 'timezoneTime', timezoneTime, 'timeDifference', timeDifference);
 
         // Check if the data is stale (older than 15 minutes)
-        if (timeDifference > 900 && apiUpdatedData !== "") {
+        if ((timeDifference > 900 || timeDifference < -900) && apiUpdatedData !== "") {
             staleData = 'Streaming data is stale';
         }
 
