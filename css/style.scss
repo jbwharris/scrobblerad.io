@@ -748,7 +748,7 @@ input[type="checkbox"]:checked~.menuIconToggle {
       height: fit-content;
       overflow: revert;
       width: 100vw;
-      min-width:400px;
+      min-width:100vw;
       border:0;
       mask-image: -webkit-gradient(linear, left top, left bottom, 
       color-stop(0.00,  rgba(0,0,0,1)),
@@ -795,7 +795,6 @@ input[type="checkbox"]:checked~.menuIconToggle {
       margin-bottom: 1rem;
       align-self: safe;
       width: 100vw;
-      min-width:400px;
 
       p {
          max-width: 85vw;
