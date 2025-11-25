@@ -525,7 +525,7 @@ body {
    position: relative;
    top: -2rem;
    transition: all .3s ease-in;
-   max-height: clamp(320px, 240px + 25vw, 600px);
+   max-height: clamp(350px, 64.286px + 89.286vw, 600px);
    max-width: clamp(320px, 240px + 25vw, 600px);
    overflow: hidden;
    background: var(--albumArt) no-repeat 0 0;
@@ -534,6 +534,7 @@ body {
    height:100%;
    width:100%;
    aspect-ratio: 1 / 1;
+
 
    &:has(#albumArt[src=""]), &:has(#albumArt[src="undefined"]) {
       background: var(--stationArt) no-repeat 0 0;
@@ -555,6 +556,21 @@ body {
    }
 }
 
+@container playermeta (width < 1025px) {
+  .metainfo {
+    width: 100%;
+  }
+
+  .justify-content-between {
+   justify-content: center !important;
+  }
+
+  #webamp, #albumart {
+   max-width: clamp(350px, 178.571px + 53.571vw, 500px);
+   max-height: clamp(350px, 178.571px + 53.571vw, 500px);
+  }
+}
+
 #metadata {
    height: calc(100dvh - 4rem);
    display: flex;
@@ -568,6 +584,8 @@ body {
       height: calc(100dvh - 4rem);
       max-width: 1400px;
       margin: 0 auto;
+      container-type: inline-size;
+      container-name: playermeta;
    }
 
 }
