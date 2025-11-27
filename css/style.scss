@@ -874,6 +874,59 @@ input[type="checkbox"]:checked~.menuIconToggle {
 }
 
 
+@media screen and (max-width:960px) and (max-height:480px) and (orientation:landscape) {
+   
+   .mobile-swipe {
+     display: grid;
+     grid-template-columns: repeat(3, 100%);
+     will-change: transform;
+     align-content: center;
+     overflow-x: auto;
+     scroll-snap-coordinate: 0 0;
+     scroll-snap-points-x: repeat(100%);
+     scroll-snap-type: x mandatory;
+     -webkit-overflow-scrolling: touch;
+     width: 100vw;
+
+     & > .panels {
+      scroll-snap-align: start;
+     }
+
+
+   .off-canvas-left.show {
+     left: 0;
+     transform: translateX(0);
+     z-index: 1;
+     background: hsl(0 0 0 / .7);
+   }
+
+   .off-canvas-right.show {
+     right: 0;
+     transform: translateX(0);
+     background: hsl(0 0 0 / .7);
+   }
+
+   #panel2 {
+
+      transform: translateX(-100%);
+      z-index: 0;
+      .metainfo {
+         width: 45vw !important;
+      }
+
+      #webamp {
+         width: 35vw !important;
+      }
+   }
+
+
+   }
+
+
+
+}
+
+
 .fullscreen-mode {
     padding-bottom: env(safe-area-inset-bottom, 1rem); /* Adds space at the bottom for home indicator */
 
