@@ -4,9 +4,9 @@ const stationData = {
     location: "London, UK 🇬🇧",
     webUrl: "https://worldwidefm.net/",
     streamUrl: "https://worldwidefm.out.airtime.pro/worldwidefm_b",
-    apiUrl: "https://worldwidefm.airtime.pro/api/live-info",
-    timestamp: "schedulerTime",
+    orbPath: "uk.worldwide",
+    timestamp: "updated",
     timezone: "UTC",
-    dataPath: "current.metadata.live_metadata",
+    pathRegex: /.* - (.+?) - (.+)/,
   }
 };
