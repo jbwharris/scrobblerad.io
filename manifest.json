@@ -10,7 +10,7 @@
     "categories": "entertainment,music",
     "background_color": "#fdfdfd",
     "theme_color": "#111111",
-    "orientation": "portrait-primary",
+    "orientation": "natural",
     "display": "minimal-ui",
     "icons": [
     {
