@@ -69,11 +69,11 @@ const stations = {
   },
   chillfiltr: {
     stationName: "CHILLFILTR",
-    tags: ["ca"],
+    tags: ["ca", "chill"],
   },
   chirpradio: {
     stationName: "CHIRP Radio",
-    tags: ["us", "top"],
+    tags: ["us", "top", "public"],
   },
   chly: {
     stationName: "CHLY",
@@ -85,7 +85,7 @@ const stations = {
   },
   cimx: {
     stationName: "89X - CIMX",
-    tags: ["ca", "alt"],
+    tags: ["ca", "alt", "corp"],
   },
   cioi: {
     stationName: "INDI 101.5 - CIOI",
@@ -157,7 +157,7 @@ const stations = {
   }, 
   wyms: {
     stationName: "88Nine - Radio Milwaukee",
-    tags: ["us", "top"],
+    tags: ["us", "npr", "top"],
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
@@ -177,7 +177,7 @@ const stations = {
   },
   indie1023: {
     stationName: "Indie 102.3",
-    tags: ["us"],
+    tags: ["us", "public"],
   },
   indie617: {
     stationName: "indie617",
@@ -185,7 +185,7 @@ const stations = {
   },
   indie88: {
     stationName: "Indie88",
-    tags: ["ca", "corp", "top"],
+    tags: ["ca", "corp"],
   },
   indieblend: {
     stationName: "The Indie Blend",
@@ -298,6 +298,10 @@ const stations = {
   midtownradio: {
     stationName: "Midtown Radio",
     tags: ["ca"],
+  },
+  mountainchill: {
+    stationName: "Mountain Chill",
+    tags: ["us", "chill"],
   },
   tmm1: {
     stationName: "The Music Machine 1",
@@ -567,7 +571,7 @@ const stations = {
   },
   xpn2: {
     stationName: "XPoNential Radio",
-    tags: ["us", "npr"],
+    tags: ["us", "npr", "justmusic"],
   },
   xrayfm: {
     stationName: "XRAY FM",
