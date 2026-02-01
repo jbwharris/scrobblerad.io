@@ -200,8 +200,6 @@ class Page {
         document.querySelector('#panel2').click();
 
         this.setupMediaSession(song, artist, artworkUrl, errorMessage);
-
-
     }
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
@@ -805,7 +803,9 @@ class RadioPlayer {
                 .replace(/\s-\s.*mix.*$/i, '')    // Removes " - Something Mix" or similar
                 .replace(/\s*-\s*\([^\)]*\)/g, '') // Removes " - (Anything in brackets)"
                 .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
-                .replace(/\s*\(.*?Feat\..*?\)|\s+Feat\..*?/gi, '')   // Removes text in brackets containing "Feat." or "Song Feat. Other Artist"
+                .replace(/\s*\(\s*(feat\.?|ft\.?|featuring).*?\)|\s+(feat\.?|ft\.?|featuring)\s.*$/gi, '') // Removes text in brackets containing "Feat." or "Song Feat. Other Artist"
+                .replace(/\s+(feat\.?|ft\.?|featuring)\s.*$/i, '')   // Removes text to the end of the string containing "Feat." or "Song Feat. Other Artist"
+
                 .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
                 .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
                 .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
@@ -1368,7 +1368,7 @@ class RadioPlayer {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(data, 'text/html');
                             data = this.extractDataFromHTML(doc);  
-                        } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic' && window.mytuner_scripts.mytunerMeta !== null) {
+                        } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic' && window.mytuner_scripts.mytunerMeta !== '') {
 
                             console.log("window.mytuner_scripts.mytunerMeta", window.mytuner_scripts.mytunerMeta)
 
@@ -1492,33 +1492,56 @@ class RadioPlayer {
     // Helper function to extract necessary data from HTML response
     extractDataFromXML(doc) {
 
-        const replaceEnDashWithEmDash = str => str.replace(/—/g, '—');
-        const replaceHyphenWithEmDash = str => str.replace(/—/g, '—');
-        const replaceDoubleSpaces = str => str.replace(/ {2}/g, ' ');
+        const removeAsterisk = str => str.replace(/\*/g, '');
+        let entries;
 
         const parser = new DOMParser();
-        // Example XML DOM object
         const xmlDoc = parser.parseFromString(doc, "text/xml");
 
-        // Get all Entry elements
-        const entries = xmlDoc.getElementsByTagName("Entry");
+        // Determine the correct tag name for entries
+        const entryTagName = this.currentStationData[this.stationName].xmlString || "Entry";
+        entries = xmlDoc.getElementsByTagName(entryTagName);
 
-        // Loop through each Entry and access the Title attribute
-        for (let i = 0; i < entries.length; i++) {
-            const entry = entries[i];
-            const song = replaceEnDashWithEmDash(entry.getAttribute("Title") || 'No streaming data currently available');
-            const artist = replaceEnDashWithEmDash(entry.getAttribute("Artist") || '');
-            const album = replaceEnDashWithEmDash(entry.getAttribute("Album") || '');
-            const albumArt = '';
-            const spinUpdated = replaceDoubleSpaces(entry.getAttribute("StartTime")) || '';
-
-            console.log('xml data', song, artist, album, albumArt, spinUpdated);
-
-            // Return the extracted data in the format expected by processData
-            return {song, artist, album, albumArt, spinUpdated};
+        if (entries.length === 0) {
+            console.log("No entries found in the XML.");
+            return { song: 'No streaming data currently available', artist: '', album: '', albumArt: '', spinUpdated: '' };
         }
 
+        // Check if the first entry has attributes (second XML format)
+        const isAttributeBased = entries[0].attributes && entries[0].attributes.Title;
+
+        // Extract data based on the format
+        for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+
+            let song, artist, album, timestamp;
+
+            if (isAttributeBased) {
+                // Attribute-based XML format
+                song = removeAsterisk(entry.attributes.Title ? entry.attributes.Title.value : 'No streaming data currently available');
+                artist = entry.attributes.Artist ? entry.attributes.Artist.value : '';
+                album = entry.attributes.Album ? entry.attributes.Album.value : '';
+                timestamp = entry.attributes.StartTime ? entry.attributes.StartTime.value : '';
+            } else {
+                // Tag-based XML format
+                song = (entry.querySelector(this.currentStationData[this.stationName].song) || {}).textContent || 'No streaming data currently available';
+                artist = (entry.querySelector(this.currentStationData[this.stationName].artist) || {}).textContent || '';
+                album = (entry.querySelector(this.currentStationData[this.stationName].album) || {}).textContent || '';
+                timestamp = (entry.querySelector(this.currentStationData[this.stationName]?.timestamp?.textContent) || entry.attributes[this.currentStationData[this.stationName]?.timestamp] || {}).textContent || '';
+            }
+
+            const albumArt = ''; // Assuming albumArt is not part of either XML format
+
+            console.log('xml data', song, artist, album, timestamp);
+
+            // Return the extracted data for the first entry
+            return { song, artist, album, timestamp };
+        }
+
+        // Return a default value if no entries are found (though we already checked for this)
+        return { song: 'No streaming data currently available', artist: '', album: '', albumArt: '', spinUpdated: '' };
     }
+
 
 
    // Function to compare the current data response with the previous one
@@ -2136,6 +2159,7 @@ class RadioPlayer {
     reloadStream() {
         this.shouldReloadStream = true;
         console.log('reload working');
+        this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, true]);
         this.playButton.lastElementChild.className = "spinner-grow text-light";
 
         // Reset scrobble (assuming scrobbleReset is a method)
