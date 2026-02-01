@@ -9,7 +9,7 @@ const stations = {
   },
   abctriplejunearthed: {
     stationName: "ABC - Triple J Unearthed",
-    tags: ["au"],
+    tags: ["au", "justmusic"],
   },
   acrn: {
     stationName: "ACRN",
@@ -17,7 +17,7 @@ const stations = {
   },
   altradio: {
     stationName: "AltRadio",
-    tags: ["us"],
+    tags: ["us", "npr", "public"],
   },
   bagelradio: {
     stationName: "BagelRadio",
@@ -83,6 +83,10 @@ const stations = {
     stationName: "CHMA",
     tags: ["ca"],
   },
+  chop: {
+    stationName: "102.7 CHOP FM",
+    tags: ["ca", "indie", "community", "college"],
+  },
   cimx: {
     stationName: "89X - CIMX",
     tags: ["ca", "alt", "corp"],
@@ -107,9 +111,13 @@ const stations = {
     stationName: "CJMP",
     tags: ["ca", "community"],
   },
+  cjsw: {
+    stationName: "CJSW",
+    tags: ["ca", "community"],
+  },
   ckua: {
     stationName: "CKUA",
-    tags: ["ca"],
+    tags: ["ca", "community"],
   },
   ckut: {
     stationName: "CKUT",
@@ -121,7 +129,7 @@ const stations = {
   },
   coloradosound: {
     stationName: "The Colorado Sound",
-    tags: ["us"],
+    tags: ["us", "indie", "public"],
   },
   thecurrent: {
     stationName: "The Current",
@@ -177,19 +185,19 @@ const stations = {
   },
   indie1023: {
     stationName: "Indie 102.3",
-    tags: ["us", "public"],
+    tags: ["us", "public", "indie"],
   },
   indie617: {
     stationName: "indie617",
-    tags: ["us"],
+    tags: ["us", "indie"],
   },
   indie88: {
     stationName: "Indie88",
-    tags: ["ca", "corp"],
+    tags: ["ca", "corp", "indie"],
   },
   indieblend: {
     stationName: "The Indie Blend",
-    tags: ["us", "justmusic"],
+    tags: ["us", "justmusic", "indie"],
   },
   indiediscotheque: {
     stationName: "Indie Discotheque",
@@ -197,7 +205,7 @@ const stations = {
   },
   indiexfm: {
     stationName: "Indie X FM",
-    tags: ["us", "justmusic"],
+    tags: ["us", "justmusic", "indie"],
   },
   idobianthm: {
     stationName: "idobi anthm",
@@ -205,7 +213,7 @@ const stations = {
   },
   inhailer: {
     stationName: "Inhailer Radio",
-    tags: ["us", "top"],
+    tags: ["us", "top", "indie"],
   },
   kalw: {
     stationName: "KALW",
@@ -319,6 +327,10 @@ const stations = {
     stationName: "Noisebox Radio",
     tags: ["uk", ""],
   },
+  nostalgie: {
+    stationName: "Nostalgie",
+    tags: ["be", "80s"],
+  },
   novaphonicfm: {
     stationName: "Novaphonic.FM",
     tags: ["us", "top", "npr", "public"],
@@ -337,7 +349,7 @@ const stations = {
   },
   qcindie: {
     stationName: "QCIndie",
-    tags: ["ca", "online", "top", "justmusic"],
+    tags: ["ca", "online", "top", "justmusic", "indie"],
   },
   radiofrancefip: {
       stationName: "Radio France FIP",
@@ -389,7 +401,7 @@ const stations = {
   },
   soma80sunderground: {
     stationName: "SomaFM 80s Underground",
-    tags: ["us", "soma", "justmusic"],
+    tags: ["us", "soma", "80s", "justmusic"],
   },
   somafolkfwd: {
     stationName: "SomaFM Folk Forward",
@@ -401,7 +413,7 @@ const stations = {
   },
   somaindiepop: {
     stationName: "SomaFM Indie Pop Rocks!",
-    tags: ["us", "soma", "justmusic"],
+    tags: ["us", "soma", "justmusic", "indie"],
   },
   soniccoast: {
     stationName: "The Sonic Coast",
