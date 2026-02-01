@@ -1532,8 +1532,6 @@ class RadioPlayer {
 
             const albumArt = ''; // Assuming albumArt is not part of either XML format
 
-            console.log('xml data', song, artist, album, timestamp);
-
             // Return the extracted data for the first entry
             return { song, artist, album, timestamp };
         }
