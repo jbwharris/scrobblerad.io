@@ -755,44 +755,48 @@ class RadioPlayer {
     }
 
     extractSongAndArtist(data, stationName) {
-        const replaceSpecialCharacters = str => str
-            ?.replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")     // Apostrophe variants
-            .replace(/–|—/g, "-")                    // En and em dashes
-            .replace(/[“”„]/g, '"')                  // Curly quotes
-            .replace(/…/g, "...")                    // Ellipsis
-            .replace(/\u00A0/g, " ")                 // Non-breaking spaces
-            .replace(/[\t\n\r]/g, '')                // Control characters
-            .replace(/&amp;/g, '&')                  // HTML entities
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/\s*\[.*?\]/g, '')              // Strips text in square brackets
-            .replace(/[*/|\\]/g, '')                 // Asterisks, pipes, and slashes
-            .replace(/--/g, '-')                     // Double hyphens
-            .replace(/\s*\(Current Track\)\s*/gi, '') // Removes "(Current Track) " from full string
-            .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
-            .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs') // the band tUnE-yArDs often gets messed up 
-            .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, (match) => { // common contractions that can sometimes be input incorrectly
+        const replaceSpecialCharacters = str => {
+    if (str == null) return ''; // Handle null or undefined
+    const strValue = String(str); // Ensure it's a string
+    return strValue
+        .replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")
+        .replace(/–|—/g, "-")
+        .replace(/[“”„]/g, '"')
+        .replace(/…/g, "...")
+        .replace(/\u00A0/g, " ")
+        .replace(/[\t\n\r]/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/\s*\[.*?\]/g, '')
+        .replace(/[*/|\\]/g, '')
+        .replace(/--/g, '-')
+        .replace(/\s*\(Current Track\)\s*/gi, '')
+        .replace(/\s-\s.*single.*$/i, '')
+        .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs')
+        .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, match => {
+            const replacements = {
+                Lets: "Let's",
+                Its: "It's",
+                Ive: "I've",
+                Dont: "Don't",
+                Cant: "Can't",
+                Wont: "Won't",
+                Aint: "Ain't",
+                Youve: "You've"
+            };
+            return replacements[match] || match;
+        })
+        .replace(/\b(Somethin|Nothin)\b/gi, match => {
+            const replacements = {
+                Somethin: "Somethin'",
+                Nothin: "Nothin'"
+            };
+            return replacements[match] || match;
+        })
+        .trim() || '';
+};
 
-                    const replacements = {
-                        Lets: "Let's",
-                        Its: "It's",
-                        Ive: "I've",
-                        Dont: "Don't",
-                        Cant: "Can't",
-                        Wont: "Won't",
-                        Aint: "Ain't",
-                        Youve: "You've"
-                    };
-                    return replacements[match] || match;
-                })
-                .replace(/\b(Somethin|Nothin)\b/gi, (match) => {
-                    const replacements = {
-                        Somethin: "Somethin'",
-                        Nothin: "Nothin'"
-                    };
-                    return replacements[match] || match;
-                })
-            .trim() || '';                           // Fallback if string is empty
 
         const filterSongDetails = song => {
             if (!song) return ''; // Return an empty string if song is undefined
@@ -826,7 +830,7 @@ class RadioPlayer {
         const getMetadata = (key) => replaceSpecialCharacters(this.getPath(data, this.currentStationData[this.stationName][key]));
         const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
         const regexPattern2 = this.currentStationData[this.stationName].pathRegex2;
-        const match = regexPattern.exec(data);
+        const match = regexPattern.exec(replaceSpecialCharacters(data));
 
         let song = getMetadata('song');
         let artist = getMetadata('artist');
@@ -896,7 +900,6 @@ class RadioPlayer {
         }
 
         if ((this.currentStationData[this.stationName].stringPath)) {
-
             if (match) {
                 song = match[1]?.trim() || '';
                 artist = match[2]?.trim() || '';
@@ -1386,8 +1389,8 @@ class RadioPlayer {
                         } else if (contentType && contentType.includes('text/plain') && !this.currentStationData[this.stationName].phpString) {
                             data = this.extractJsonFromJS(data);
                         } else if (contentType && contentType.includes('text/html') && 
-                                    (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString) || this.currentStationData[this.stationName].phpString && contentType.includes('text/plain')) {
-                            data = data;
+                                    (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString) || this.currentStationData[this.stationName].phpString && contentType.includes('text/plain') || this.currentStationData[this.stationName].phpString && contentType.includes('text/html')) {
+                            data = String(data);
                         } else if (contentType && contentType.includes('text/html') && 
                                    this.currentStationData[this.stationName].htmlString) {
                             const htmlContent = data;

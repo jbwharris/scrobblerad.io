@@ -115,6 +115,10 @@ const stations = {
     stationName: "CJSW",
     tags: ["ca", "community"],
   },
+  cjuc: {
+    stationName: "CJUC",
+    tags: ["ca", "community"],
+  },
   ckua: {
     stationName: "CKUA",
     tags: ["ca", "community"],
