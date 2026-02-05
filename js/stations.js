@@ -1,15 +1,15 @@
 const stations = {
   abcdoublej: {
     stationName: "ABC - Double J",
-    tags: ["au"],
+    tags: ["au", "public"],
   },
   abctriplej: {
     stationName: "ABC - Triple J",
-    tags: ["au"],
+    tags: ["au", "public"],
   },
   abctriplejunearthed: {
     stationName: "ABC - Triple J Unearthed",
-    tags: ["au", "justmusic"],
+    tags: ["au", "public", "justmusic"],
   },
   acrn: {
     stationName: "ACRN",
