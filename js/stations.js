@@ -243,6 +243,10 @@ const stations = {
     stationName: "KEXP",
     tags: ["us", "public", "top"],
   }, 
+  kfai: {
+    stationName: "KFAI",
+    tags: ["us", "public", "community"],
+  },
   kfjc: {
     stationName: "KFJC",
     tags: ["us", "public", "community"],
@@ -290,6 +294,10 @@ const stations = {
   kxt: {
     stationName: "KXT",
     tags: ["us", "public", "npr", "top"],
+  },
+  kzsc: {
+    stationName: "KZSC",
+    tags: ["us", "college", "community"],
   },
   lemellotron: {
     stationName: "Le Mellotron",
