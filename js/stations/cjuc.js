@@ -12,5 +12,6 @@ const stationData = {
     proxyApi: true,
     pathRegex: /^(.*)-(.*)$/,
     flipMeta: true,
+    filter: ["CJUC", "podcast"]
   }
 };
