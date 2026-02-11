@@ -879,6 +879,17 @@ input[type="checkbox"]:checked~.menuIconToggle {
 
 @media screen and (max-width:960px) and (min-width:667px) and (min-height:375px) and (max-height:480px) and (orientation:landscape) {
    
+
+   .col {
+      flex: 3 0 auto;
+      .panels {
+         display:block;
+      }
+   }
+
+
+   #togglePanels {display:none;}
+
    .mobile-swipe {
      display: grid;
      grid-template-columns: repeat(3, 100%);
@@ -889,7 +900,6 @@ input[type="checkbox"]:checked~.menuIconToggle {
      scroll-snap-points-x: repeat(100%);
      scroll-snap-type: x mandatory;
      -webkit-overflow-scrolling: touch;
-     width: 100vw;
 
      & > .panels {
       scroll-snap-align: start;
@@ -898,27 +908,41 @@ input[type="checkbox"]:checked~.menuIconToggle {
 
    .off-canvas-left.show {
      left: 0;
-     transform: translateX(0);
+     transform: translateX(0%);
      z-index: 1;
-     background: hsl(0 0 0 / .7);
+     background: hsl(0 0% 0% / .7);
+     width: 100vw;
    }
 
    .off-canvas-right.show {
      right: 0;
-     transform: translateX(0);
-     background: hsl(0 0 0 / .7);
+     transform: translateX(200%);
+     background: hsl(0 0% 0% / .7);
+     width: 100vw;
+   }
+
+   nav.stationNav #stationSelect {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr 1fr;
+
+      button {
+         width: 97%;
+      }
    }
 
    #panel2 {
 
-      transform: translateX(-100%);
+      transform: translateX(0%);
       z-index: 0;
+      width: 100vw;
       .metainfo {
          width: 45vw !important;
       }
 
       #webamp {
-         width: 35vw !important;
+         width: 30vw !important;
+         top: -.25rem;
+         left: .5rem;
       }
    }
 
