@@ -74,7 +74,7 @@
                   <div id="collapseMusic" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
                       <p>ScrobbleRadio is primarily focused on Indie and the many facets of music that can branch off that genre. A lot of the stations are very freeform and can play a broad selection of music that can venture into rock, alternative, hip-hop, pop, jazz, soul, funk, country, electronic or dance from a wide span of eras. Many of the stations are public radio, college stations or listener supported organizations. If your goal is music exploration and hearing tons of different, interesting and challenging music, you've found the right place.</p>
-                      <p>Given the nature of these stations, sometimes they might be playing talk segments, or some genre you're simply not interested in. That's cool, just skip to the next station like you would with your car radio. You genuinely never know what you might hear next. </p>
+                      <p>Given the nature of these stations, sometimes they might be playing talk segments or syndicated shows during certain parts of the day, or have genre shows you're simply not interested in. That's cool, just skip to the next station like you would with your car radio. You genuinely never know what you might hear next.</p>
                     </div>
                   </div>
                 </div>
@@ -86,7 +86,7 @@
                   </h2>
                   <div id="collapseScrobble" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
-                      ScrobbleRadio relies on <a href="https://web-scrobbler.com">Web Scrobbler</a> browsers extensions for iOS/iPadOS (Safari), and desktop browsers (Chrome, Firefox, Safari and other modern browsers) on macOS, Windows and Linux. Android scrobbling can be done by <a href="https://github.com/kawaiiDango/pano-scrobbler" target="_blank">Pano Scrobbler</a>. I considered building scrobbling functionality for the site, but relying on existing, robust scrobbling apps that support <a href="https://last.fm" target="_blank">last.fm</a>, <a href="https://libre.fm" target="_blank">libre.fm</a>, <a href="https://listenbrainz.org" target="_blank">ListenBrainz</a> and <a href="https://github.com/krateng/maloja" target="_blank">Maloja</a> just made more sense.
+                      ScrobbleRadio can scrobble directly to <a href="https://last.fm" target="_blank">last.fm</a>. For other platforms, like <a href="https://libre.fm" target="_blank">libre.fm</a>, <a href="https://listenbrainz.org" target="_blank">ListenBrainz</a> and <a href="https://github.com/krateng/maloja" target="_blank">Maloja</a>, you can use <a href="https://web-scrobbler.com">Web Scrobbler</a>. I believe platforms like <a href="https://rocksky.app/" target="_blank">Rocksky</a> and <a href="https://teal.fm">teal.fm</a> can be used as well using the webhook feature. I haven't actually tried the last two out, so if you give it a go, let me know how it works out.
                     </div>
                   </div>
                 </div>
@@ -111,35 +111,57 @@
                   </h2>
                   <div id="collapseAccuracy" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
                     <div class="accordion-body">
-                      <p>ScrobbleRadio does its best to clean up the data coming from a radio station source, but it can be imperfect. Music metadata is complex and easy to get mixed up. Songs with guest vocalists and collaborations are a nightmare and given the data is coming radio stations around the world, there is little consistency. This app is a best effort to clean-up the incoming data, removing data like (2007 Remaster), (Radio Edit) or (Clean Version). It checks with the last.fm api whether there's corrections for the song and artist. But sometimes there's just things you can't account for like human error (spelling mistakes), or maybe a long song name getting truncated in the stations database.</p>
+                      <p>ScrobbleRadio does its best to clean up the data coming from a radio station source, but it can be imperfect. Music metadata is complex and easy to get mixed up. Songs with guest vocalists and collaborations are a nightmare and given the data is coming radio stations around the world, there can be very little consistency. This app is a best effort to clean-up the incoming data, removing data like (2007 Remaster), (Radio Edit) or (Clean Version). It checks with the last.fm api whether there's corrections for the song and artist. But sometimes there's just things you can't account for like human error (spelling mistakes), or maybe a long song name getting truncated in the stations database.</p>
 
-                      <p>If 100% scrobble accuracy is necessary for you, there is a setting in Web Scrobbler called "Scrobble recognized or edited tracks (default)" which would only scrobble a song if it's properly identified or edited. Then there is a Cache that you can review the disallowed scrobbles and edit them manually.</p>
+                      <p>If 100% scrobble accuracy is necessary for you, there is a setting in Web Scrobbler called "Scrobble recognized or edited tracks (default)" which would only scrobble a song if it's properly identified or edited. Then there is a Cache that you can review the disallowed scrobbles and edit them manually. The scrobbling features built into the site don't currently handle that.</p>
                     </div>
                   </div>
                 </div>
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                      How does Apple Carplay support work?
-                    </button>
-                  </h2>
-                  <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
-                    <div class="accordion-body">
-                      <p>This website can be used with Apple Carplay and pretty much anywhere else that supports the mediaSession API. While this is an web app that can be run anywhere, it does have some playback quirks when being used in a car. This app relies on the built-in Now Playing app in Carplay to show the song data. Unfortunately there doesn't seem to be anything similar for Android Auto 🤷🏼‍♂️</p>
+                iv class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    How does Apple Carplay support work?
+                  </button>
+                </h2>
+                <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                  <div class="accordion-body">
+                    <p>This website can be used with Apple Carplay and pretty much anywhere else that supports the mediaSession API. While this is an web app that can be run anywhere, it does have some playback quirks when being used in a car. This app relies on the built-in Now Playing app in Carplay to show the song data. Unfortunately there doesn't seem to be anything similar for Android Auto 🤷🏼‍♂️</p>
 
-                      <ul>
-                        <li>Playback on iOS can be initiated before you start driving. Simply open the site in Safari, pick a station and playback should start and the song, artist, station name and album cover should be visible on screen.</li>
-                        <li>You can use the in-car media controls to switch between stations. Playback will continue for the current station until the new audio stream begins loading. There is an on-screen notice of what station is loading. You can skip multiple stations if you're looking for a particular station.</li>
-                        <li>If playback stops while driving due to poor mobile data coverage, the app will keep trying to load the feed. If it pauses for awhile, try skipping to the next station and back again and it should initiate a new session. As iOS only allows access to play/pause, next and previous track, unfortunately there's no way to reload a feed directly with Carplay.</li>
-                        <li>Resume playback after leaving the car and coming back seems to be hit-and-miss. If it's been a short period of time, it will sometimes just resume playing the session. Otherwise you'll just need to go into Safari and start playing music again.</li>
-                        <li><em>Be sure to obey local traffic laws and not use your phone while driving.</em></li>
-                      </ul>
-                    </div>
+                    <ul>
+                      <li>Playback on iOS can be initiated before you start driving. Simply open the site in Safari, pick a station and playback should start and the song, artist, station name and album cover should be visible on screen.</li>
+                      <li>You can use the in-car media controls to switch between stations. Playback will continue for the current station until the new audio stream begins loading. There is an on-screen notice of what station is loading. You can skip multiple stations if you're looking for a particular station.</li>
+                      <li>If playback stops while driving due to poor mobile data coverage, the app will keep trying to load the feed. If it pauses for awhile, try skipping to the next station and back again and it should initiate a new session. As iOS only allows access to play/pause, next and previous track, unfortunately there's no way to reload a feed directly with Carplay.</li>
+                      <li>Resume playback after leaving the car and coming back seems to be hit-and-miss. If it's been a short period of time, it will sometimes just resume playing the session. Otherwise you'll just need to go into Safari and start playing music again.</li>
+                      <li><em>Be sure to obey local traffic laws and not use your phone while driving.</em></li>
+                    </ul>
                   </div>
                 </div>
               </div>
-
-              <footer class="p-3 text-center text-md-left">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePwa" aria-expanded="false" aria-controls="collapsePwa">
+                    Can I install this app on my phone?
+                  </button>
+                </h2>
+                <div id="collapsePwa" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                  <div class="accordion-body">
+                    <p>ScrobbleRadio is what is called a Progressive Web App (PWA). It can be installed on your phone's homescreen and act similar to the way a regular phone app does. This will allow you to access ScrobbleRadio without seeing the browser URL bar and utilize the whole screen.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrivacy" aria-expanded="false" aria-controls="collapsePrivacy">
+                    Does ScrobbleRadio store any of my data?
+                  </button>
+                </h2>
+                <div id="collapsePrivacy" class="accordion-collapse collapse" data-bs-parent="#accordionFaq">
+                  <div class="accordion-body">
+                    <p>ScrobbleRadio uses a privacy focused analytics software called <a href="https://matomo.org/">Matomo</a>. It respects do not track user settings in browsers. It is kinda cool seeing what stations are popular and being listened to.</p>
+                  </div>
+                </div>
+              </div>
+              <d </div> <footer class="p-3 text-center text-md-left">
 
                 <small>Scrobbling Beta</small>
                 <button id="lastfm-auth"><i class="icon-lastfm"></i> Login with Last.fm</button>
@@ -150,11 +172,11 @@
                 <p class="fs-6">Monthly ScrobbleRadio Mix<br />
                   discovery playlist<br />
                   <a href="https://music.apple.com/ca/playlist/scrobbleradio-mix/pl.u-dkelCypyBM" class="iconLink"><i class="icon-apple" aria-hidden="true"></i><span class="visually-hidden">opens Apple Music ScrobbleRadio Mix in a new tab</span></a>
-                  <a href="https://open.spotify.com/playlist/2MJuX8Lx1IyvEzSXTcUw42?go=1&sp_cid=1b8011ab28a385db6cd8f67005590e9d" class="iconLink"><i class="icon-spotify" aria-hidden="true" target="_blank"></i><span class="visually-hidden">opens Spotify Music JayBeeDub Mixtape in a new tab</span></a>
+                  <a href="https://open.spotify.com/playlist/2MJuX8Lx1IyvEzSXTcUw42?go=1&sp_cid=1b8011ab28a385db6cd8f67005590e9d" class="iconLink"><i class="icon-spotify" aria-hidden="true" target="_blank"></i><span class="visually-hidden">opens Spotify Music ScrobbleRadio Mix in a new tab</span></a>
                 </p>
 
                 <div id="mt-box"></div>
-              </footer>
+                </footer>
             </div>
 
             <div class="col col-xxl-8 col-md-6 panels" id="panel2">
