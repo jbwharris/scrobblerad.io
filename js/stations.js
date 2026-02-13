@@ -175,6 +175,10 @@ const stations = {
     stationName: "Flashback Alternatives",
     tags: ["ca", "justmusic"],
   },
+  floodfm: {
+    stationName: "Flood FM",
+    tags: ["us", "justmusic"],
+  },
   kffp: {
     stationName: "Freeform Portland",
     tags: ["us"],
@@ -496,6 +500,10 @@ const stations = {
   wfuv: {
     stationName: "WFUV",
     tags: ["us", "public"],
+  },
+  whsn: {
+    stationName: "WHSN",
+    tags: ["us", "college"],
   },
   wicb: {
     stationName: "WICB",
