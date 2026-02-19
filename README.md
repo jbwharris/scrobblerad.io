@@ -47,24 +47,29 @@ There are a few different factors that can cause a site to not have streaming da
 2. The station is playing a syndicated show, which will typically not have the song data split up. You may just get the last song played before the show started, or the name of the show in the data. 
 3. The API might have stopped updating for some reason. I have a check in there with some stations to check for stale API data, but it's not with all stations. It all depends on whether they have a timestamp on when a track is played in their API. 
 
-### Why doesn’t BBC6 work?
-It does, though only in browsers that support HLS playback. I could have added a 3rd party JavaScript library for that, but it was literally the only station with that problem. BBC streams will work in Safari on macOS and iOS. Beyond that there are browser extensions that can enable HLS. I honestly don’t know how compatibility might fare on Windows/Linux/Android, as my primary focus was on macOS/iOS/iPadOS. 
-
 ### Does this work with Apple CarPlay?
 Yes it does. I originally started this project with the goal of being able to scrobble radio on the go and found it actually integrated really well with car stereos. It’ll show the song and artist in even basic stereo systems and will show the song, artist, album and album art. Skipping stations now works well using the media controls.
 
-### The station seems to be skipping, how do I fix this while using Carplay?
-To correct a feed that might be out of sync, press skip forward, then back. This will cause the stream to reload and correct itself nearly seamlessly. In Carplay, there are no additional buttons that can be assigned, so this is a handy trick to get things working while driving. 
+### The audio feed is skipping, how do I fix this while using Carplay?
+To correct a feed that might be out of sync, press skip forward, then back. This will cause the stream to reload and correct itself nearly seamlessly. In Carplay, there are no additional buttons that can be assigned, so this is a handy trick to get things working while driving. The station has a 10 second playback buffer to ensure when skipping between stations it isn't going to load multiple audio streams, so skipping to the next station won't actually load the next station immediately, as it gives a few seconds to ensure that's the station you actually want to listen to.
+
+## Completed
+- [X] Add native scrobbling to make this a complete PWA solution.
+- [X] Add a filter for if the station name is in the metadata and not scrobble it. Sometimes a station will throw in a station ID or commercial into their API metadata.
+- [X] Get station skipping working in iOS for Apple CarPlay.
+- [X] Fix responsive styling and breakpoints.
+- [X] Add lastfm listeners and total listens.
+- [X] Add HLS playback to fix the BBC6 playback issue only working on iOS/Safari
 
 
 ## To-Do List
-- [X] Add native scrobbling to make this a complete PWA solution.
-- [X] Add a filter for if the station name is in the metadata and not scrobble it. Sometimes a station will throw in a station ID or commercial into their API metadata.
 - [ ] Add Song.link links to add to various streaming platforms.
-- [X] Get station skipping working in iOS for Apple CarPlay.
+- [ ] Add share station functionality
+- [ ] Build station grouping functionality and get away from having one mega list of stations. Station grouping will be good for stations like SomaFM that have 30 stations, but I don't want 30 station connector files.
+- [ ] Refine initial load screen, allowing user to pick a station group.
+- [ ] Load the station that was previously playing on app refresh for iOS.
 - [ ] Add recently scrobbled data to the page, so you could have a local indication of what has scrobbled.
 - [ ] Fix responsive styling and breakpoints.
-- [X] Add lastfm listeners and total listens.
 - [ ] Randomize station selection.
 - [ ] Choose your favourite stations to play instead of selecting from complete list.
 - [ ] Add volume controls
