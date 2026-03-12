@@ -7,12 +7,11 @@ const stationData = {
     location: "Edmonton, AB 🇨🇦",
     webUrl: "https://www.ckua.com",
     streamUrl: "https://ais-sa1.streamon.fm/7000_48k.aac",
-    apiUrl:
-      "https://yp.cdnstream1.com/metadata/7000_48k/current.json?cb=308869",
-    needPath: true,
+    apiUrl: "https://yp.cdnstream1.com/metadata/7000_48k/current.json?cb=308869",
     timestamp: "0.last_seen",
     timezone: "America/Edmonton",
-    filter: ["Creating A Better World"],
+    filter: ["Creating A Better World", "gifted donated"],
+    offset: -108,
     quietStream: true,
     gainBoost: 3
   }

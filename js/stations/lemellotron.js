@@ -11,5 +11,6 @@ const stationData = {
     timestamp: "started_at",
     duration: "duration",
     timezone: "Europe/Paris",
+    proxyApi: true,
   }
 };

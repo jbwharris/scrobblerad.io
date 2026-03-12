@@ -12,5 +12,6 @@ const stationData = {
       "https://api.radioking.io/widget/radio/sabotage/track/current",
     timestamp: "end_at",
     timezone: "UTC",
+    proxyApi: true,
   }
 };

@@ -7,5 +7,6 @@ const stationData = {
     spinPath: "civl",
     timezone: "America/Vancouver",
     filter: ["CIVL"],
+    proxyStream: true,
   }
 };

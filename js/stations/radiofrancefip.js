@@ -1,14 +1,32 @@
 const stationData = {
   radiofrancefip: {
-    stationName: "Radio France FIP",
-    artist: "recenttracks.track.0.artist.name",
-    song: "recenttracks.track.0.name",
+    artist: "now.secondLine.title",
+    song: "now.firstLine.title",
     location: "Paris, France 🇫🇷",
+    timestamp: "now.startTime",
     webUrl: "https://www.nova.fr/",
     streamUrl: "https://icecast.radiofrance.fr/fip-hifi.aac",
-    apiUrl: "https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=twifip&limit=1&extended=1&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&format=json",
-    timestamp: "recenttracks.track.0.date.uts",
+    apiUrl: "https://www.radiofrance.fr/fip/api/live?webradio=fip",
     timezone: "UTC",
-    filter: ["Club Jazzaflip", "Radio France", ],
+    proxyApi: true,
+    filter: ["Club Jazzaflip", "Radio France", "electro", "Le Direct"],
+    electro: {
+      stationName: "Radio France Fip: Electro",
+      webUrl: "https://www.nova.fr/",
+      streamUrl: "https://icecast.radiofrance.fr/fipelectro-hifi.aac",
+      apiUrl: "https://www.radiofrance.fr/fip/api/live?webradio=fip_electro",
+    },
+    jazz: {
+      stationName: "Radio France Fip: Jazz",
+      webUrl: "https://www.nova.fr/",
+      streamUrl: "https://icecast.radiofrance.fr/fipjazz-hifi.aac",
+      apiUrl: "https://www.radiofrance.fr/fip/api/live?webradio=fip_jazz",
+    },
+    rock: {
+      stationName: "Radio France Fip: Rock",
+      webUrl: "https://www.nova.fr/",
+      streamUrl: "https://icecast.radiofrance.fr/fiprock-hifi.aac",
+      apiUrl: "https://www.radiofrance.fr/fip/api/live?webradio=fip_rock",
+    },
   }
 };
