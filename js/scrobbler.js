@@ -12,7 +12,7 @@ function removeTokenFromUrl() {
         const cleanSearch = search.replace(/(\&|\?)token([_A-Za-z0-9=\.%]+)/g, '').replace(/^&/, '?');
         
         // Replace search params with clean params
-        const cleanURL = location.origin + location.pathname + (cleanSearch || '');
+        const cleanURL = location.origin + location.pathname + cleanSearch;
         
         // Use browser history API to clean the params
         history.replaceState({}, document.title, cleanURL);
@@ -34,6 +34,10 @@ function authenticateFM(callback) {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
 
+    // Log the current URL and token for debugging
+    console.log("Current URL:", window.location.href);
+    console.log("Token extracted:", token);
+
     // If no token, redirect to Last.fm for authentication
     if (!token) {
         console.log("No token found. Redirecting to Last.fm...");
@@ -42,7 +46,8 @@ function authenticateFM(callback) {
         return;
     }
 
-    removeTokenFromUrl();
+    // Verify the URL has been cleaned
+    console.log("Final URL after cleaning:", window.location.href);
 
     // Prepare request to exchange token for session key
     const sig = md5(`api_key${APIKEY}methodauth.getSessiontoken${token}${SECRET}`);
@@ -82,6 +87,7 @@ function authenticateFM(callback) {
     })
     .catch(err => console.error("Auth error:", err));
 }
+
 
 
 function updateNowPlaying(track) {
@@ -145,7 +151,7 @@ function scrobbleIt(track) {
 
 
   if (isDuplicate) {
-    console.log("🚫 Skipping duplicate scrobble:", track);
+    console.log("🚫 Skipping duplicate scrobble");
     return;
   }
 
@@ -186,14 +192,7 @@ function scrobbleIt(track) {
   }
 
   // Log the request details for debugging
-  console.log("Scrobbling:", {
-    artist: track.trackArtist,
-    title: track.trackTitle,
-    album: track.trackAlbum,
-    albumArtist: track.trackArtist,
-    timestamp: track.trackTimestamp,
-    sig: sig
-  });
+  console.log("Scrobbling:", track.trackArtist, " - ", track.trackTitle);
 
   // Send the request using fetch
   fetch(lastFmBaseScrobbleUrl, {
