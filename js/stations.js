@@ -375,15 +375,15 @@ const stations = {
     stationName: "Radio France Fip",
     tags: ["fr", "eclectic", "jazz"],
     electro: {
-      stationName: "Radio France Fip",
+      stationName: "Radio France Fip Electro",
       tags: ["fr", "eclectic", "electronic"],
     },
     jazz: {
-      stationName: "Radio France Fip",
+      stationName: "Radio France Fip Jazz",
       tags: ["fr", "eclectic", "jazz"],
     },
     rock: {
-      stationName: "Radio France Fip",
+      stationName: "Radio France Fip Rock",
       tags: ["fr", "eclectic", "rock", "indie"],
     },
   },
