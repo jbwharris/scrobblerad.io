@@ -246,7 +246,7 @@ class Page {
         } else if (artist === 'currently loading') {
             albumDisplay = '';
         } else if ((song && artist) && artist !== 'currently loading') {
-            albumDisplay = `Now playing on ${this.displayStationName}`;
+            albumDisplay = `Now playing on ${radioPlayer.stationDisplayName}`;
         }
 
         // Ensure stationArt always has a valid value
@@ -270,7 +270,7 @@ class Page {
                 document.title = '';
                 return;
             } else if (song && artist || !errorMessage) {
-                document.title = `${song} - ${artist} | ${this.displayStationName} on scrobblerad.io`;
+                document.title = `${song} - ${artist} | ${radioPlayer.stationDisplayName} on scrobblerad.io`;
             }
 
             const actionHandlers = {
