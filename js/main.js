@@ -3,94 +3,125 @@ let stationKeys = Object.keys(stations);
 let currentTag = 'all'; // Global variable to track the currently selected tag
 
 function generateRadioButtons(tag = "all") {
-    currentTag = tag; // Update the global currentTag
+  currentTag = tag; // Update the global currentTag
 
-    const stationSelectDiv = document.getElementById('stationSelect');
-    stationSelectDiv.innerHTML = '';
+  const stationSelectDiv = document.getElementById('stationSelect');
+  stationSelectDiv.innerHTML = '';
 
-    const fragment = document.createDocumentFragment();
+  const fragment = document.createDocumentFragment();
 
-    let filteredStationKeys;
+  let filteredStationKeys = [];
 
-    if (tag === "all") {
-        filteredStationKeys = stationKeys.filter(stationKey => {
-            const station = stations[stationKey];
-            return !!station; // Include all valid stations
-        });
-    } else {
-        filteredStationKeys = stationKeys.filter(stationKey => {
-            const station = stations[stationKey];
-            return !!station && station.tags && station.tags.includes(tag);
-        });
-
-        // Fallback to all stations if no stations match the tag
-        if (filteredStationKeys.length === 0) {
-            filteredStationKeys = stationKeys.filter(stationKey => !!stations[stationKey]);
-        }
+  // Helper function to check if a station has a specific tag (handles nested tags)
+  function hasTag(station, targetTag) {
+    if (station.tags.includes(targetTag)) {
+      return true;
     }
-
-    filteredStationKeys.forEach(stationKey => {
-        const station = stations[stationKey];
-        if (!station) return;
-
-        const button = document.createElement('button');
-        button.name = stationKey;
-        button.textContent = station.stationName;
-
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.name = 'station';
-        input.value = stationKey;
-        input.checked = stationKey === radioPlayer.stationName;
-
-        const img = document.createElement('img');
-        img.src = `img/stations/${stationKey}.png`;
-        img.width = '45';
-        img.height = '45';
-        img.loading = 'lazy';
-        img.alt = station.stationName;
-
-        button.appendChild(input);
-        button.prepend(img);
-        fragment.appendChild(button);
-    });
-
-    stationSelectDiv.appendChild(fragment);
-
-    // Offcanvas Panels Toggle
-    document.getElementById("togglePanels").addEventListener("click", function () {
-    const leftPanel = document.getElementById("panel1");
-    const centrePanel = document.getElementById("panel2");
-    const rightPanel = document.getElementById("panel3");
-    const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels");
-
-    // Toggle the panels
-    leftPanel.classList.toggle("show");
-    centrePanel.classList.toggle("grow");
-    rightPanel.classList.toggle("show");
-
-    // Check if we have an icon to toggle
-    if (iconElement) {
-      if (iconElement.classList.contains("icon-hide-panels")) {
-        iconElement.classList.remove("icon-hide-panels");
-        iconElement.classList.add("icon-show-panels");
-      } else {
-        iconElement.classList.remove("icon-show-panels");
-        iconElement.classList.add("icon-hide-panels");
+    for (const tag of station.tags) {
+      if (Array.isArray(tag)) {
+        if (hasTag({ tags: tag }, targetTag)) {
+          return true;
+        }
       }
     }
+    return false;
+  }
+
+  // Flatten all stations into a list of station objects
+  const allStations = [];
+  for (const key in stations) {
+    const station = stations[key];
+    if (station.stationName) {
+      // Main station
+      allStations.push({
+        stationKey: key, // Use the object key as stationKey
+        stationDisplayName: station.stationName,
+        tags: station.tags || [], // Ensure tags exist
+        group: null,
+      });
+    }
+
+    // Detect sub-stations by checking for nested objects
+    for (const subKey in station) {
+      if (subKey !== 'stationName' && subKey !== 'tags' && typeof station[subKey] === 'object') {
+        const subStation = station[subKey];
+        if (subStation.stationName) {
+          const subStationKey = `${key}.${subKey}`; // Combine keys for sub-stations
+          allStations.push({
+            stationKey: subStationKey, // Use the combined key as stationKey
+            stationDisplayName: subStation.stationName,
+            tags: subStation.tags || [], // Ensure tags exist
+            group: key, // Reference to the parent station
+          });
+        }
+      }
+    }
+  }
+
+  // Filter stations based on the tag
+  if (tag === "all") {
+    filteredStationKeys = allStations;
+  } else {
+    filteredStationKeys = allStations.filter(station => 
+      hasTag(station, tag)
+    );
+
+    // Fallback to all stations if no stations match the tag
+    if (filteredStationKeys.length === 0) {
+      filteredStationKeys = allStations;
+    }
+  }
+
+  // Generate radio buttons for filtered stations
+  filteredStationKeys.forEach(station => {
+    const button = document.createElement('button');
+    button.name = station.stationKey;
+    button.textContent = station.stationDisplayName; // Use the display name
+
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'station';
+    input.value = station.stationKey;
+    input.checked = station.stationKey === radioPlayer.stationKey;
+
+    const img = document.createElement('img');
+    img.src = `img/stations/${station.stationKey}.png`; // Use the key for image path
+    img.width = '45';
+    img.height = '45';
+    img.loading = 'lazy';
+    img.alt = station.stationDisplayName;
+
+    button.appendChild(input);
+    button.prepend(img);
+    fragment.appendChild(button);
   });
+
+  stationSelectDiv.appendChild(fragment);
 }
 
 function handleStationClick(event) {
   const clickedButton = event.target.closest('button');
   if (clickedButton) {
-    const stationKey = clickedButton.name;
+    const stationKey = clickedButton.name; 
+    const stationDisplayName = clickedButton.textContent;
     window.location.hash = `#${stationKey}`;
-    radioPlayer.handleStationSelect(null, stationKey, true);
+    radioPlayer.handleStationSelect(null, stationKey, stationDisplayName, true);
   }
 }
 
+function hasTag(station, targetTag) {
+  if (station.tags.includes(targetTag)) {
+    return true;
+  }
+  for (const tag of station.tags) {
+    if (Array.isArray(tag)) {
+      if (hasTag({ tags: tag }, targetTag)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 function animateElement(element, duration = 2000) {
     element.classList.add("animated", "fadeIn");
@@ -100,9 +131,9 @@ function animateElement(element, duration = 2000) {
 }
 
 class Page {
-    constructor(stationName, radioPlayer) {
-        this.stationName = stationName;
-        this.displayStationName = radioPlayer.currentStationData[this.stationName].stationName;
+    constructor(stationKey, stationDisplayName, radioPlayer) {
+        this.stationKey = stationKey;
+        this.displayStationName = stationDisplayName;
         this.scrobbleTimeout = null;
 
         this.cacheDOMElements();
@@ -149,7 +180,8 @@ class Page {
             clearTimeout(this.scrobbleTimeout);
             this.scrobbleTimeout = null;
         }
-        const station = radioPlayer.currentStationData[this.stationName];
+
+        const station = radioPlayer.currentStationData;
 
         if ((!song && !artist) || !station) return;
 
@@ -189,9 +221,10 @@ class Page {
             }
         });
 
-        clone.querySelector('#radioNameLink').href = station.webUrl;
-        clone.querySelector('#radioName').textContent = station.stationName;
-        clone.querySelector('#stationLocation').textContent = station.location;
+        clone.querySelector('#radioNameLink').href = radioPlayer.getNestedValue(radioPlayer.currentStationData, this.stationKey, 'webUrl', null);
+        clone.querySelector('#radioName').textContent = radioPlayer.stationDisplayName;
+       clone.querySelector('#stationLocation').textContent = radioPlayer.getNestedValue(radioPlayer.currentStationData, this.stationKey, 
+        'location', null); 
 
         playerMetaElement.appendChild(clone);
         document.getElementById("playermeta").classList.remove("opacity-50");
@@ -203,7 +236,7 @@ class Page {
     }
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
-        if (song.includes("<br/>")) {
+        if (!song || song.includes("<br/>")) {
             return;
         }
 
@@ -217,7 +250,7 @@ class Page {
         }
 
         // Ensure stationArt always has a valid value
-        let stationArt = `../img/stations/${this.stationName}.png`; // Default to stationArt
+        let stationArt = `../img/stations/${this.stationKey}.png`; // Default to stationArt
         if (artworkUrl && (artworkUrl !== urlCoverArt || artworkUrl !== stationArt ) ) {
             stationArt = artworkUrl;
         }
@@ -274,14 +307,19 @@ class RadioPlayer {
         this.pauseTimeout = null;
         this.duration = null;
         this.currentPage = null;
+        this.stationDisplayName = null;
+        this.nextStationDisplayName = null;
+        this.prevStationDisplayName = null;
 
         // Station info
-        this.stationName = "";
+        this.stationKey = "";
         this.currentStationData = null;
         this.previousDataResponse = null;
         this.prevExtractedData = null;
         this.stationArt = '';
         this.currentIndex = null;
+        this.streamUrl = null;
+        this.streamApiUrl = null;
 
         // Metadata handling
         this.songMetadataChanged = false;
@@ -300,8 +338,18 @@ class RadioPlayer {
         this.firstRun = true;
         this.debounceTimeout = null;
         this.songStartTime = null; // Timestamp when the current song started
-        this.scrobbleTimeout = null; // Timeout ID for the 60-second timer    
-        this.currentTrack = null;   
+        this.scrobbleTimeout = null; // Timeout ID for the 60-second timer     
+        this.currentTrack = {
+          title: null,
+          artist: null,
+          album: null,
+          albumArt: null,
+          spinUpdated: null,
+          timestamp: null,
+          duration: null
+        };
+        this.currentScrobble;
+
         this.streamingInterval = null;
 
         // Debounce the audio playback
@@ -337,6 +385,7 @@ class RadioPlayer {
         this.skipForward = this.skipForward.bind(this);
         this.skipBackward = this.skipBackward.bind(this);
         this.reloadStream = this.reloadStream.bind(this);
+        this.getNestedValue = this.getNestedValue.bind(this);
     }
 
     async addEventListeners() {
@@ -347,7 +396,7 @@ class RadioPlayer {
 
         document.getElementById("stationSelect").addEventListener("click", (event) => {
             if (event.target && event.target.matches("input[name='station']")) {
-                this.handleStationSelect(event, event.target.value, true);
+                this.handleStationSelect(event, event.target.value, event.target.textContent, true);
 
                 //Scroll the selected station into view
                 event.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -394,45 +443,117 @@ class RadioPlayer {
         }
     }
 
-    initializePage(stationName) {
+    initializePage(stationKey) {
         if (this.currentPage) {
             this.currentPage.destroy(); // Cleanup previous instance
         }
-        this.currentPage = new Page(stationName, this); // Pass 'this' (RadioPlayer instance)
+        this.currentPage = new Page(stationKey, this); // Pass 'this' (RadioPlayer instance)
     }
 
 
-     calculateNextAndPreviousIndices(direction) {
-        let filteredStationKeys;
+    getNestedValue(obj, keyPath, targetProperty, defaultValue = undefined) {
+        if (!obj || !keyPath || !targetProperty) return defaultValue;
 
-        if (currentTag === "all") {
-            filteredStationKeys = stationKeys.filter(stationKey => !!stations[stationKey]);
-        } else {
-            filteredStationKeys = stationKeys.filter(stationKey => {
-                const station = stations[stationKey];
-                return !!station && station.tags && station.tags.includes(currentTag);
-            });
+        // If keyPath doesn't contain '.', it's a top-level property
+        if (!keyPath.includes('.')) {
+            return obj[keyPath]?.[targetProperty] ?? defaultValue;
+        }
 
-            // Fallback to all stations if no stations match the tag
-            if (filteredStationKeys.length === 0) {
-                filteredStationKeys = stationKeys.filter(stationKey => !!stations[stationKey]);
+        // Split the keyPath by '.' into an array of keys
+        const keys = keyPath.split('.');
+        let current = obj;
+        let result = undefined;
+
+        // Traverse the nested path and check for targetProperty at each level
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            if (current && typeof current === 'object' && key in current) {
+                current = current[key];
+
+                // Check if targetProperty exists at the current level
+                if (current?.[targetProperty]) {
+                    result = current[targetProperty]; // Store the result but continue traversing
+                }
+            } else {
+                return defaultValue;
             }
         }
 
-        this.currentIndex = filteredStationKeys.indexOf(this.stationName);
-        if (this.currentIndex === -1) {
-            console.error(`Current station "${this.stationName}" not found in filtered list.`);
-            return;
+        // After traversing the nested path, return the most specific result or defaultValue
+        return result ?? defaultValue;
+    }
+
+
+
+     calculateNextAndPreviousIndices(direction) {
+    // Flatten all stations into a list of station objects
+    const allStations = [];
+    for (const key in stations) {
+        const station = stations[key];
+        if (station.stationName) {
+            // Main station
+            allStations.push({
+                stationKey: key,
+                stationDisplayName: station.stationName,
+                tags: station.tags || [],
+                group: null,
+            });
         }
 
-        if (direction === 'next') {
-            this.nextIndex = (this.currentIndex + 1) % filteredStationKeys.length;
-            this.nextStationName = filteredStationKeys[this.nextIndex];
-        } else if (direction === 'previous') {
-            this.previousIndex = (this.currentIndex - 1 + filteredStationKeys.length) % filteredStationKeys.length;
-            this.previousStationName = filteredStationKeys[this.previousIndex];
+        // Detect sub-stations by checking for nested objects
+        for (const subKey in station) {
+            if (subKey !== 'stationName' && subKey !== 'tags' && typeof station[subKey] === 'object') {
+                const subStation = station[subKey];
+                if (subStation.stationName) {
+                    const subStationKey = `${key}.${subKey}`;
+                    allStations.push({
+                        stationKey: subStationKey,
+                        stationDisplayName: subStation.stationName,
+                        tags: subStation.tags || [],
+                        group: key,
+                    });
+                }
+            }
         }
     }
+
+    let filteredStations = []; // Store the full station objects
+
+    if (currentTag === "all") {
+        filteredStations = allStations;
+    } else {
+        filteredStations = allStations.filter(station => hasTag(station, currentTag));
+
+        // Fallback to all stations if no stations match the tag
+        if (filteredStations.length === 0) {
+            filteredStations = allStations;
+        }
+    }
+
+    // Ensure this.stationKey is in the filtered list
+    const currentStation = filteredStations.find(station => station.stationKey === this.stationKey);
+    if (!currentStation) {
+        return;
+    }
+
+    this.currentIndex = filteredStations.indexOf(currentStation);
+
+    if (direction === 'next') {
+        this.nextIndex = (this.currentIndex + 1) % filteredStations.length;
+        const nextStation = filteredStations[this.nextIndex];
+        this.nextStationKey = nextStation.stationKey;
+        this.nextStationDisplayName = nextStation.stationDisplayName;
+    } else if (direction === 'previous') {
+        this.previousIndex = (this.currentIndex - 1 + filteredStations.length) % filteredStations.length;
+        const previousStation = filteredStations[this.previousIndex];
+        this.previousStationKey = previousStation.stationKey;
+        this.previousStationDisplayName = previousStation.stationDisplayName;
+    }
+}
+
+
+
+
 
     // Debounce function
     debounce(func, wait) {
@@ -450,26 +571,45 @@ class RadioPlayer {
         const hash = window.location.hash;
 
         if (hash) {
-            const stationName = hash.substring(1); // Remove the '#' character
-            const button = document.querySelector(`button[name='${stationName}']`);
+            const stationKey = hash.substring(1); // Remove the '#' character
+            const button = document.querySelector(`button[name='${stationKey}']`);
 
             if (button) {
-                button.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to the button
-                this.handleStationSelect(null, stationName, true); // Simulate selecting the station
+                // Extract the station display name from the button's text content
+                const stationDisplayName = button.textContent.trim();
+
+                // Scroll the button into view
+                button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Pass both stationKey and stationDisplayName to handleStationSelect
+                this.handleStationSelect(null, stationKey, stationDisplayName, true);
             }
         }
     }
 
-    async loadStationData(url) {
-        try {
-            const response = await fetch(url);
-            const scriptContent = await response.text();
-            const script = new Function(scriptContent + "; return stationData;");
-            return script();
-        } catch (err) {
-            console.error('Error loading station data:', err);
-        }
+
+    async loadStationData(stationKey) {
+      let url;
+      if (stationKey.includes('.')) {
+        // If there's an underscore, load the parent station file (e.g., abc.js for abc_doublej)
+        const parentStation = stationKey.split('.')[0]; // Extract parent station name (e.g., abc from abc_doublej)
+        url = `/js/stations/${parentStation}.js`;
+      } else {
+        // Otherwise, load the specific station file (e.g., wfmu.js)
+        url = `/js/stations/${stationKey}.js`;
+      }
+
+      try {
+        const response = await fetch(url);
+        const scriptContent = await response.text();
+        const script = new Function(scriptContent + "; return stationData;");
+        return script();
+      } catch (err) {
+        console.error(`Error loading station data for ${stationKey}:`, err);
+        return null;
+      }
     }
+
 
     // Method to destroy HLS instance and reset audio
     destroyHLSAndResetAudio() {
@@ -483,8 +623,11 @@ class RadioPlayer {
         }
     }
 
-    async handleStationSelect(direction, stationName, firstRun) {
-        if (!stationName || direction === false) return;
+    async handleStationSelect(direction, stationKey, stationDisplayName, firstRun) {
+        if (!stationKey || direction === false) return;
+
+        this.stationKey = stationKey;
+        this.firstRun = firstRun;
 
         // Clear existing scrobble timeout
         if (this.currentPage && this.currentPage.scrobbleTimeout) {
@@ -494,7 +637,6 @@ class RadioPlayer {
         }
 
         if (this.shouldReloadStream) {
-            console.log('getting here on reload?');
             document.getElementById("playermeta").classList.remove("opacity-50");
             this.audio.load();
             if (this.hls) {
@@ -512,41 +654,52 @@ class RadioPlayer {
 
         document.getElementById("playermeta").classList.add("opacity-50");
 
-        const stationData = await this.loadStationData(`/js/stations/${stationName}.js`);
-        if (!stationData) return;
+        if (firstRun == true && !this.shouldReloadStream) {
+            this.currentStationData = await this.loadStationData(this.stationKey);
 
-        this.currentStationData = stationData;
+            if (!this.currentStationData) return;
 
-        // Initialize the new Page instance
-        this.initializePage(stationName);
+            if (!stationDisplayName) {
+                this.stationDisplayName = this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null);
+            } else if (stationDisplayName) {
+                this.stationDisplayName = stationDisplayName;
+            }
 
-        // Clear any existing streaming intervals
-        if (this.streamingInterval) {
-            clearInterval(this.streamingInterval);
-            this.streamingInterval = null;
-        }
+            this.streamUrl = this.getNestedValue(this.currentStationData, stationKey, 'streamUrl', null);
 
-        if (firstRun && !this.shouldReloadStream) {
-            this.stationName = stationName;
-            this.stationArt = `../img/stations/${this.stationName}.png`;
+
+            // Initialize the new Page instance
+            this.initializePage(stationKey);
+
+            // Clear any existing streaming intervals
+            if (this.streamingInterval) {
+                clearInterval(this.streamingInterval);
+                this.streamingInterval = null;
+            }
+
+            this.stationKey = stationKey;
+            this.stationArt = `../img/stations/${this.stationKey}.png`;
             document.documentElement.style.setProperty("--albumArt", `url("../${this.stationArt}")`);
             document.documentElement.style.setProperty("--stationArt", `url("../${this.stationArt}")`);
-            this.currentPage.setupMediaSession(this.currentStationData[stationName].stationName, 'currently loading', this.stationArt, false);
+            this.currentPage.setupMediaSession(this.stationDisplayName, 'currently loading', this.stationArt, false);
             this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, true]);
             this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false;
-            console.log(stationName);
+            console.log(stationKey);
             this.updateArt = true;
             this.isPlaying = true;
             this.songMetadataChanged = false;
             this.lastKnownUpdatedTime = null;
+            this.stationApiUrl = null;
+            this.firstRun = false;
             firstRun = false;
         }
 
         const debouncedSetupAudio = this.debounce(() => {
             if (!this.isPlaying) return;
 
-            if (!this.currentStationData[this.stationName]) {
+
+            if (!this.currentStationData) {
                 console.error("currentStationData is undefined or null");
                 return;
             }
@@ -558,29 +711,28 @@ class RadioPlayer {
             const newAudio = new Audio(); // Create new Audio element
             newAudio.crossOrigin = 'anonymous';
 
-            const streamUrl = this.currentStationData[this.stationName].streamUrl;
-            // const streamUrl = `https://scrobblerad.io/proxy.php?url=${this.currentStationData[this.stationName].streamUrl}`;
-            const isHlsStream = streamUrl.endsWith('.m3u8');
+            const isHlsStream = this.streamUrl.endsWith('.m3u8');
 
             if (isHlsStream) {
-                this.hlsStreamLoad(streamUrl, newAudio); // No need to assign return value
+                this.hlsStreamLoad(this.streamUrl, newAudio); // No need to assign return value
             } else {
-                if (this.currentStationData[this.stationName].proxyStream) {
-                        newAudio.src = this.addCacheBuster(`https://scrobblerad.io/proxy.php?url=${this.currentStationData[this.stationName].streamUrl}`);
+
+                if (this.getNestedValue(this.currentStationData, this.stationKey, 'proxyStream', null)) {
+                        newAudio.src = this.addCacheBuster(`https://scrobblerad.io/proxy.php?url=${this.streamUrl}`);
                 } else {
-                    newAudio.src = this.addCacheBuster(streamUrl);
+                    newAudio.src = this.addCacheBuster(this.streamUrl);
                 }
 
                 newAudio.load();
             }
 
             // If the stream is marked as quiet, boost it
-            if (this.currentStationData[this.stationName].quietStream) {
+            if (this.getNestedValue(this.currentStationData, this.stationKey, 'quietStream', null)) {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioContext.createMediaElementSource(newAudio);
                 const gainNode = audioContext.createGain();
 
-                gainNode.gain.value = this.currentStationData[this.stationName].gainBoost || 2;
+                gainNode.gain.value = this.getNestedValue(this.currentStationData, this.stationKey, 'gainBoost', null) || 2;
 
                 console.log('station audio boosted');
 
@@ -621,10 +773,10 @@ class RadioPlayer {
 
             newAudio.load();
 
-            const radioInput = document.querySelector(`input[name='station'][value='${stationName}']`);
+            const radioInput = document.querySelector(`input[name='station'][value='${this.stationKey}']`);
             if (radioInput) radioInput.checked = true;
 
-            window.location.hash = `#${stationName}`;
+            window.location.hash = `#${this.stationKey}`;
         }, 250);
 
         debouncedSetupAudio();
@@ -754,7 +906,7 @@ class RadioPlayer {
         return pathParts.join('.');
     }
 
-    extractSongAndArtist(data, stationName) {
+    extractSongAndArtist(data, stationKey) {
         const replaceSpecialCharacters = str => {
     if (str == null) return ''; // Handle null or undefined
     const strValue = String(str); // Ensure it's a string
@@ -794,8 +946,8 @@ class RadioPlayer {
             };
             return replacements[match] || match;
         })
-        .trim() || '';
-};
+            .trim() || '';
+        };
 
 
         const filterSongDetails = song => {
@@ -824,148 +976,154 @@ class RadioPlayer {
                 .replace(/\s*\(.*?\bsession\b.*?\)/gi, '') // Removes "(909 Session)"
                 .replace(/\s*\(.*?\bcover\b.*?\)/gi, '') // Removes "(_____ cover)"
                 .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
+                .replace(/\s*\([^)]*$/gi, '') // remove truncated brackets
                 .trim();
         };
 
-        const getMetadata = (key) => replaceSpecialCharacters(this.getPath(data, this.currentStationData[this.stationName][key]));
-        const regexPattern = this.currentStationData[this.stationName].pathRegex || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
-        const regexPattern2 = this.currentStationData[this.stationName].pathRegex2;
+        const getMetadata = (key) => replaceSpecialCharacters(this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, key)));
+        const regexPattern = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex', null) || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
+        const regexPattern2 = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex2', null);
         const match = regexPattern.exec(replaceSpecialCharacters(data));
 
-        let song = getMetadata('song');
-        let artist = getMetadata('artist');
-        let album = getMetadata('album');
-        let albumArt = getMetadata('albumArt');
-        let spinUpdated = '';
+
         let dataPath = data.title;
 
-        // CFMU inputs its latest songs at the end of the tracks object, so it needs to figure out what the last item in the array is, then output that
-        if (this.currentStationData[stationName].reverseArray) {
-            song = this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].song, data));
-            artist = this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].artist, data));
-            album = this.getPath(data, this.getLastJsonPath(this.currentStationData[stationName].album, data));
+        this.currentTrack = {
+            ...this.currentTrack,
+            title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song', null)),
+            artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null)),
+            album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album', null)),
+            albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, '', null)),
+            spinUpdated: ''
+        }
 
-            console.log('song, artist and album reverse array', song, artist, album)
+        // CFMU inputs its latest songs at the end of the tracks object, so it needs to figure out what the last item in the array is, then output that
+        if (this.getNestedValue(this.currentStationData, this.stationKey, 'reverseArray', null)) {
+            this.currentTrack = {
+                ...this.currentTrack,
+                title: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].song, data)),
+                artist: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].artist, data)),
+                album: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].album, data)),
+            }
         }
 
         // some APIs have instances where there's a second place you should look for info if the first item is empty
-        if (this.currentStationData[this.stationName].altPath && !song) {
-            song = getMetadata('song2');
-            artist = getMetadata('artist2');
-            album = getMetadata('album2');
-            albumArt = getMetadata('albumArt2');
+        if (this.getNestedValue(this.currentStationData, this.stationKey, 'altpath', null) && !this.currentTrack.title) {
+            
+            this.currentTrack = {
+                ...this.currentTrack,
+            title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null)),
+            artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null)),
+            album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album2', null)),
+            albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'albumArt2', null)),
+            spinUpdated: ''
+            }
+            
         }
 
-        if (this.currentStationData[this.stationName].spinPath || this.currentStationData[this.stationName].htmlString || this.currentStationData[this.stationName].xmlString) {
-            song = data.song || '';
-            artist = data.artist || '';
-            album = data.album || '';
-            albumArt = data.albumArt || '';
-            spinUpdated = data.spinUpdated || '';
+        if (this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null)) {
+            this.currentTrack = {
+                ...this.currentTrack,
+                title: data[0] || '',
+                artist: data[1] || '',
+                album: data[2] || '',
+                albumArt: data[3] || '',
+                spinUpdated: data[4] || '',
+            }
         }
 
-        if (this.currentStationData[this.stationName].orbPath || this.currentStationData[this.stationName].dataPath) {
+        if (this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
 
             //radio.co apis that have a string "song - artist" piggybacking on the orbPath function
-            if (this.currentStationData[this.stationName].dataPath == true) {
+            if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null) == true) {
                 dataPath = data.data.title;
-                console.log('dataPath is true', dataPath)
-            } else if (this.currentStationData[this.stationName].dataPath) {
-                dataPath = data[`${[this.currentStationData[this.stationName].dataPath]}`];
-
-                console.log('dataPath exists', data.dataPath);
+            } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
+                dataPath = data[`${[this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)]}`];
             }
 
             const match = regexPattern.exec(dataPath);
 
             if (match) {
-                [artist, song, album] = match.slice(1, 4).map((str) => str?.trim());
-
-                if (this.currentStationData[this.stationName].flipMeta) {
-                    [song, artist] = [artist, song];
-                }
-
+                [this.currentTrack.artist, this.currentTrack.title, this.currentTrack.album] = match.slice(1, 4).map((str) => str?.trim());
             } else if (!match && regexPattern2) {
                 const fallbackMatch = regexPattern2.exec(dataPath);
-
-                [artist, song, album] = fallbackMatch.slice(1, 4).map((str) => str?.trim());
-
-                if (this.currentStationData[this.stationName].flipMeta2) {
-                    [song, artist] = [artist, song];
-                }
-
+                [this.currentTrack.artist, this.currentTrack.title, this.currentTrack.album] = fallbackMatch.slice(1, 4).map((str) => str?.trim());
             } else {
                 console.log('No match found', match);
             }
         }
 
-        if ((this.currentStationData[this.stationName].stringPath)) {
+        if ((this.getNestedValue(this.currentStationData, this.stationKey, 'stringPath', null))) {
             if (match) {
-                song = match[1]?.trim() || '';
-                artist = match[2]?.trim() || '';
+                this.currentTrack.title = match[1]?.trim() || '';
+                this.currentTrack.artist = match[2]?.trim() || '';
 
-                if (this.stationName !== 'cbcmusic') {
-                    album = match[3]?.trim() || '';
-                    albumArt = match[4]?.trim() || urlCoverArt;
-                    spinUpdated = match[5]?.trim() || '';
-                    spinUpdated = Number(spinUpdated);
-
-                    spinUpdated = new Date(spinUpdated).getTime(); // ⬅️ Epoch
-
+                if (this.stationKey !== 'cbcmusic') {
+                    this.currentTrack = {
+                        ...this.currentTrack,
+                        album: match[3]?.trim() || '',
+                        albumArt: match[4]?.trim() || urlCoverArt,
+                        spinUpdated: new Date(Number(match[5]?.trim() || '')).getTime()
+                    }
+                }
                     
                 } else { // if it is cbcmusic
-                    spinUpdated = Number(match[3]?.trim()) || '';
-                }
-
-                if (this.currentStationData[this.stationName].flipMeta) {
-                    [song, artist] = [artist, song];
+                    this.currentTrack.spinUpdated = Number(match[3]?.trim()) || '';
                 }
             } else {
                 console.log('No match found');
             }
-        }
-
+        
         // Helper function to check if a string contains any of the filtered values (case-insensitive)
         const containsFilteredValue = (text, values) => {
             if (!text) return false; // Ensure text is defined and not null/undefined
             const lowerCaseText = text.toLowerCase();
-            return values.some(value => lowerCaseText.includes(value.toLowerCase()));
+            return values.some(value => 
+                value && lowerCaseText.includes(value.toLowerCase()) // Ensure value is also defined
+            );
         };
 
         // Helper function to check if any of the provided texts contain invalid content
         const checkAnyInvalidContent = (...texts) => {
-            const filteredValues = this.currentStationData[this.stationName].filter || [];
-            const stationNameValue = this.currentStationData[this.stationName].stationName;
-            const allValuesToCheck = [...filteredValues, stationNameValue];
+            const filteredValues = this.getNestedValue(this.currentStationData, this.stationKey, 'filter', null) || [];
+            const stationKeyValue = this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null);
+            const allValuesToCheck = [...filteredValues, stationKeyValue].filter(Boolean); // Remove falsy values
 
             return texts.some(text => 
                 text && containsFilteredValue(text, allValuesToCheck)
             );
         };
 
+
+        if (this.getNestedValue(this.currentStationData, this.stationKey, 'flipMeta', null)) {
+            [this.currentTrack.title, this.currentTrack.artist] = [this.currentTrack.artist, this.currentTrack.title];
+        }
+
         // Check the song, artist, and album values for invalid content
-        if (checkAnyInvalidContent(song, artist, album)) {
+        if (checkAnyInvalidContent(this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album)) {
             // Returning the message indicating the station may be taking a break
             return;
-        } else if (!artist && song !== undefined) {
+        } else if (!this.currentTrack.artist && this.currentTrack.title !== undefined) {
             // Returning the message indicating missing data
             return ['[Air break]', null, null, this.stationArt, '', '', true];
         }
 
         // filter the values after they've been defined above
-        song = filterSongDetails(song);
-        artist = this.applyFilters('artist', this.cleanupArtist(artist));
-        album = this.applyFilters('album', album) || '';
+        this.currentTrack.title = filterSongDetails(this.currentTrack.title);
+       if (this.currentTrack.artist) {
+            this.currentTrack.artist = this.applyFilters('artist', this.cleanupArtist(this.currentTrack.artist));
+        }
+        this.currentTrack.album = this.applyFilters('album', this.currentTrack.album) || '';
 
         // If the album is labeled as "single," set the album to the song title
-        if (/single/i.exec(album) || (album.toLowerCase().includes('single'))) {
-            return [song, artist, song, albumArt, spinUpdated, '', false];
+        if (/single/i.exec(this.currentTrack.album) || (this.currentTrack.album.toLowerCase().includes('single'))) {
+            this.currentTrack.album = filterSongDetails(this.currentTrack.title);
         }
 
         // If albumArt is empty, assign the fallback URL
-        albumArt = albumArt || urlCoverArt;
+        this.currentTrack.albumArt = this.currentTrack.albumArt || urlCoverArt;
 
-        return [song, artist, album, albumArt, spinUpdated, '', false];
+        return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated, '', false];
     }
 
     async getLfmMeta(currentSong, currentArtist, currentAlbum, currentArt, queryType) {
@@ -1081,7 +1239,7 @@ class RadioPlayer {
             if (lfmData.error !== 6 ) {
 
                 // return album art, album, song, artist, lfm listeners & playcount
-                if (lfmResult[7] && !this.currentStationData[this.stationName].duration) {
+                if (lfmResult[7] && !this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) {
                     this.duration = Number(lfmResult[7]);
                     console.log('this.duration', this.duration)
                 } 
@@ -1297,7 +1455,7 @@ class RadioPlayer {
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
 
-            if (!this.stationName) return;
+            if (!this.stationKey) return;
 
             // check if the last time it updated is still in the future
             if (((this.lastKnownUpdatedTime - Date.now()) < 35000) && ((this.lastKnownUpdatedTime - Date.now()) > 70000) && !this.shouldReloadStream) {
@@ -1308,7 +1466,7 @@ class RadioPlayer {
                 return;
             }
 
-            if (this.stationName === 'cbcmusic') {
+            if (this.stationKey === 'cbcmusic') {
                 if (!document.querySelector('.mytuner-widget')) {
                         this.appendMytunerWidget();
                     }
@@ -1319,41 +1477,38 @@ class RadioPlayer {
 
             if (this.isPlaying && !this.shouldReloadStream) {
 
-                let stationUrl;
+                let stationApiUrl;
+                if (!this.stationApiUrl) {
+                    if (this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null)) {
+                        stationApiUrl = `https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron206170750999458&station=${this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null)}&num=0&sharing=0&player=0&cover=0&merch=0&meta=0`;
+                    } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null)) {
+                        stationApiUrl = `https://scraper2.onlineradiobox.com/${this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null)}?l=0`;
 
-                if (this.currentStationData[this.stationName].spinPath) {
-                    stationUrl = `https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron206170750999458&station=${this.currentStationData[this.stationName].spinPath}&num=0&sharing=0&player=0&cover=0&merch=0&meta=0`;
-                } else if (this.currentStationData[this.stationName].orbPath && !this.currentStationData[this.stationName].dataPath) {
-                    stationUrl = `https://scraper2.onlineradiobox.com/${this.currentStationData[this.stationName].orbPath}?l=0`;
-                } else if (this.currentStationData[this.stationName].nprPath && !this.currentStationData[this.stationName].dataPath) {
-                    stationUrl = `https://api.composer.nprstations.org/v1/widget/${this.currentStationData[this.stationName].nprPath}/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false`;
-                } else {
-                    if (this.currentStationData[this.stationName].proxyApi) {
-                        stationUrl = `https://scrobblerad.io/proxy.php?url=${this.currentStationData[this.stationName].apiUrl}`;
+                        console.log('obPath condition', stationApiUrl, this.stationKey)
+                    } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'nprPath', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
+                        stationApiUrl = `https://api.composer.nprstations.org/v1/widget/${this.getNestedValue(this.currentStationData, this.stationKey, 'nprPath', null)}/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false`;
                     } else {
-                        stationUrl = this.currentStationData[this.stationName].apiUrl;
+                        if (this.getNestedValue(this.currentStationData, this.stationKey, 'proxyApi', null)) {
+                            stationApiUrl = `https://scrobblerad.io/proxy.php?url=${this.getNestedValue(this.currentStationData, this.stationKey, 'apiUrl', null)}`;
+                        } else {
+                            stationApiUrl = this.getNestedValue(this.currentStationData, this.stationKey, 'apiUrl', null);
+                        }
                     }
+                    this.stationApiUrl = stationApiUrl;
                 }
 
-                stationUrl = this.addCacheBuster(stationUrl);
-
-                const fetchOptions = {
-                    method: this.currentStationData[this.stationName].method || 'GET',
-                    headers: this.currentStationData[this.stationName].headers || {},
-                };
-
-                fetch(stationUrl, fetchOptions)
+                fetch(this.addCacheBuster(this.stationApiUrl))
                     .then((response) => {
                         const contentType = response.headers.get('content-type');
                         
                         // Check if contentType exists before calling includes
                         if (contentType && (contentType.includes('application/json') || 
                             contentType.includes('application/vnd.api+json') || 
-                            (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString))) {
+                            (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)))) {
                             return response.json().then((data) => ({ data, contentType }));
                             
                         } else if (contentType && (contentType.includes('text/html') || 
-                            (this.currentStationData[this.stationName].jsonString) && contentType.includes('text/plain') ||  
+                            (this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) && contentType.includes('text/plain') ||  
                             contentType.includes('application/javascript'))) {
                             return response.text().then((data) => ({ data, contentType }));
                         } else if (contentType && (contentType.includes('text/xml'))) {
@@ -1365,13 +1520,13 @@ class RadioPlayer {
                     })
                     .then(({ data, contentType }) => {
                         if (contentType && contentType.includes('text/html') && 
-                            !this.currentStationData[this.stationName].phpString && this.stationName !== 'cbcmusic') {
+                            !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && this.stationKey !== 'cbcmusic') {
                             
                             // Parse the HTML response
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(data, 'text/html');
                             data = this.extractDataFromHTML(doc);  
-                        } else if (contentType && contentType.includes('text/html') && this.stationName == 'cbcmusic' && window.mytuner_scripts.mytunerMeta !== '') {
+                        } else if (contentType && contentType.includes('text/html') && this.stationKey == 'cbcmusic' && window.mytuner_scripts.mytunerMeta !== '') {
 
                             console.log("window.mytuner_scripts.mytunerMeta", window.mytuner_scripts.mytunerMeta)
 
@@ -1386,13 +1541,13 @@ class RadioPlayer {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
-                        } else if (contentType && contentType.includes('text/plain') && !this.currentStationData[this.stationName].phpString) {
+                        } else if (contentType && contentType.includes('text/plain') && !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null)) {
                             data = this.extractJsonFromJS(data);
                         } else if (contentType && contentType.includes('text/html') && 
-                                    (this.currentStationData[this.stationName].phpString && !this.currentStationData[this.stationName].htmlString) || this.currentStationData[this.stationName].phpString && contentType.includes('text/plain') || this.currentStationData[this.stationName].phpString && contentType.includes('text/html')) {
+                                    (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/plain') || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/html')) {
                             data = String(data);
                         } else if (contentType && contentType.includes('text/html') && 
-                                   this.currentStationData[this.stationName].htmlString) {
+                                   this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) {
                             const htmlContent = data;
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -1474,22 +1629,25 @@ class RadioPlayer {
 
         let targetSelector; 
 
-        if (this.currentStationData[this.stationName].htmlString) {
+        if (this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) {
             targetSelector = ['div.song-details:first-child', '.radio-song-title', ' p:first-child', ' .album-title', ' .album-art', ' p:last-child']
-        } else if (this.currentStationData[this.stationName].xmlString) {
+        } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null)) {
             targetSelector = ['Entry', '[Title]', '[Artist]', '[Album]', '[MusicId]', '[StartTime]']
         } else {
             targetSelector = ['', '.song', '.artist', '.release', 'img', '.spin-time a']
         }
 
-        const song = replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[1]}`)?.textContent.trim() || 'No streaming data currently available');
-        const artist = replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[2]}`)?.textContent.trim() || '');
-        const album = replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[3]}`)?.textContent.trim() || '');
-        const albumArt = doc.querySelector(`${targetSelector[4]}`)?.src || '';
-        const spinUpdated = doc.querySelector(`${targetSelector[0]}${targetSelector[5]}`)?.textContent.trim() || '';
+        this.currentTrack = {
+            ...this.currentTrack,
+            title: replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[1]}`)?.textContent.trim() || 'No streaming data currently available'),
+            artist: replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[2]}`)?.textContent.trim() || ''),
+            album: replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[3]}`)?.textContent.trim() || ''),
+            albumArt: doc.querySelector(`${targetSelector[4]}`)?.src || '',
+            spinUpdated: doc.querySelector(`${targetSelector[0]}${targetSelector[5]}`)?.textContent.trim() || '',
+        }
 
         // Return the extracted data in the format expected by processData
-        return {song, artist, album, albumArt, spinUpdated};
+        return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated];
     }
 
     // Helper function to extract necessary data from HTML response
@@ -1502,7 +1660,7 @@ class RadioPlayer {
         const xmlDoc = parser.parseFromString(doc, "text/xml");
 
         // Determine the correct tag name for entries
-        const entryTagName = this.currentStationData[this.stationName].xmlString || "Entry";
+        const entryTagName = this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null) || "Entry";
         entries = xmlDoc.getElementsByTagName(entryTagName);
 
         if (entries.length === 0) {
@@ -1517,26 +1675,29 @@ class RadioPlayer {
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i];
 
-            let song, artist, album, timestamp;
-
             if (isAttributeBased) {
                 // Attribute-based XML format
-                song = removeAsterisk(entry.attributes.Title ? entry.attributes.Title.value : 'No streaming data currently available');
-                artist = entry.attributes.Artist ? entry.attributes.Artist.value : '';
-                album = entry.attributes.Album ? entry.attributes.Album.value : '';
-                timestamp = entry.attributes.StartTime ? entry.attributes.StartTime.value : '';
+
+                this.currentTrack = {
+                    ...this.currentTrack,
+                    title: removeAsterisk(entry.attributes.Title ? entry.attributes.Title.value : 'No streaming data currently available'),
+                    artist: entry.attributes.Artist ? entry.attributes.Artist.value : '',
+                    album: entry.attributes.Album ? entry.attributes.Album.value : '',
+                    timestamp: entry.attributes.StartTime ? entry.attributes.StartTime.value : '',
+                }
             } else {
                 // Tag-based XML format
-                song = (entry.querySelector(this.currentStationData[this.stationName].song) || {}).textContent || 'No streaming data currently available';
-                artist = (entry.querySelector(this.currentStationData[this.stationName].artist) || {}).textContent || '';
-                album = (entry.querySelector(this.currentStationData[this.stationName].album) || {}).textContent || '';
-                timestamp = (entry.querySelector(this.currentStationData[this.stationName]?.timestamp?.textContent) || entry.attributes[this.currentStationData[this.stationName]?.timestamp] || {}).textContent || '';
+                this.currentTrack = {
+                    ...this.currentTrack,
+                title: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'song', null)) || {}).textContent || 'No streaming data currently available',
+                artist: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null)) || {}).textContent || '',
+                album: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'album', null)) || {}).textContent || '',
+                timestamp: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null).textContent) || entry.attributes[this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null)] || {}).textContent || '',
+                }
             }
 
-            const albumArt = ''; // Assuming albumArt is not part of either XML format
-
             // Return the extracted data for the first entry
-            return { song, artist, album, timestamp };
+            return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.timestamp];
         }
 
         // Return a default value if no entries are found (though we already checked for this)
@@ -1553,37 +1714,37 @@ class RadioPlayer {
 
     updateScrobbleData(song, artist, album) {
         if (song && artist && album) {
-            const currentTrack = {
+            const currentScrobble = {
               trackTitle: song,
               trackArtist: artist,
               trackAlbum: album,
               trackTimestamp: Math.floor(Date.now() / 1000) // ✅ timestamp in seconds
             };
 
-            updateNowPlaying(currentTrack);
+            updateNowPlaying(currentScrobble);
 
-            if (this.currentTrack !== currentTrack || !this.currentTrack) {
-                if (this.currentTrack && this.currentTrack !== currentTrack) { // Song has changed
+            if (this.currentScrobble !== currentScrobble || !this.currentScrobble) {
+                if (this.currentScrobble && this.currentScrobble !== currentScrobble) { // Song has changed
                     if (this.scrobbleTimeout) {
                         clearTimeout(this.scrobbleTimeout); // Clear existing timeout
                         this.scrobbleTimeout = null;
                     }
 
                     if (this.songStartTime && (Date.now() - this.songStartTime >= 60000)) {
-                        scrobbleIt(this.currentTrack); // Scrobble the previous song
+                        scrobbleIt(this.currentScrobble); // Scrobble the previous song
                     }
 
                     this.songStartTime = null; // Reset song start time
                 }
 
-                this.currentTrack = currentTrack;
+                this.currentScrobble = currentScrobble;
 
                 // Set a new 60-second timer for the current song
-                if (this.currentTrack && !this.songStartTime) {
+                if (this.currentScrobble && !this.songStartTime) {
                     this.songStartTime = Date.now();
                     this.scrobbleTimeout = setTimeout(() => {
-                        if (this.currentTrack) {
-                            scrobbleIt(this.currentTrack);
+                        if (this.currentScrobble) {
+                            scrobbleIt(this.currentScrobble);
                         }
                     }, 60000);
                 } 
@@ -1592,8 +1753,8 @@ class RadioPlayer {
     }                          
 
     processData(data) {
-        // Check if data and stationName are available
-        if (data && this.stationName ) {
+        // Check if data and stationKey are available
+        if (data && this.stationKey ) {
 
             if ((this.lastKnownUpdatedTime > Date.now())) {
                 console.log("this.lastKnownUpdatedTime is greater", this.lastKnownUpdatedTime, Date.now())
@@ -1601,7 +1762,7 @@ class RadioPlayer {
                 console.log("this.lastKnownUpdatedTime is less", this.lastKnownUpdatedTime, Date.now())
             }
 
-            const extractedData = this.extractSongAndArtist(data, this.stationName);
+            const extractedData = this.extractSongAndArtist(data, this.stationKey);
 
              // Compare the extractedData response with the previous one
             if ((JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) && navigator.mediaSession.metadata.title !== 'Station data loading') {
@@ -1613,68 +1774,66 @@ class RadioPlayer {
 
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
-                const page = new Page(this.stationName, this);
+                const page = new Page(this.stationKey, this);
                 page.refreshCurrentData(['[ Air break ]', '', '', this.stationArt, null, null, true]);
                 return;
             }
 
             this.hasLoadedData = true;
-            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;             
+            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;     
 
             // Predefined values
-            const timezone = this.currentStationData[this.stationName].timezone;
+            const timezone = this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null);
             let timestamp;
 
-            if ([this.stationName] == 'indie1023') {
-                timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[0])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[1])} GMT-06:00`;
-                    console.log('102.3 timestamp', timestamp);
-            } else if (this.currentStationData[this.stationName].reverseArray) {
-                timestamp = this.getPath(data, this.getLastJsonPath(this.currentStationData[this.stationName].timestamp, data)); 
-                console.log('timestamp reverse array', timestamp);
+            if ([this.stationKey] == 'indie1023') {
+                this.currentTrack.timestamp = `${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[0]', null))} ${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[1]', null))} GMT-06:00`;
+                    console.log('102.3 timestamp', this.currentTrack.timestamp);
+            } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'reverseArray', null)) {
+                this.currentTrack.timestamp = this.getPath(data, this.getLastJsonPath(this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null), data)); 
+                console.log('timestamp reverse array', this.currentTrack.timestamp);
             } else {
-                timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp);
+                this.currentTrack.timestamp = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null));
 
-                if (timestamp == 0 || timestamp == '') {
-                    timestamp = undefined;
+                if (this.currentTrack.timestamp == 0 || this.currentTrack.timestamp == '') {
+                    this.currentTrack.timestamp = undefined;
                 }
             }
 
-            if (this.currentStationData[this.stationName].altPath && (!song || !timestamp)) {
-                if ([this.stationName] == 'indie1023') {
-                    timestamp = `${this.getPath(data, this.currentStationData[this.stationName].timestamp[2])} ${this.getPath(data, this.currentStationData[this.stationName].timestamp[3])}`;
-                    console.log('102.3 timestamp', timestamp);
+            if (this.getNestedValue(this.currentStationData, this.stationKey, 'altPath', null) && (!this.currentTrack.title || !this.currentTrack.timestamp)) {
+                if ([this.stationKey] == 'indie1023') {
+                    this.currentTrack.timestamp = `${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[2]', null))} ${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[3]', null))}`;
+                    console.log('102.3 timestamp', this.currentTrack.timestamp);
                 } else {
-                    timestamp = this.getPath(data, this.currentStationData[this.stationName].timestamp2);
-                    this.duration = this.getPath(data, this.currentStationData[this.stationName].duration2);
+                    this.currentTrack.timestamp = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp2', null));
+                    this.currentTrack.duration = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'duration2', null));
                     console.log('altpath timestamp', timestamp);
                 }
-            } else if (this.currentStationData[this.stationName].altPath && timestamp) {
+            } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'altPath', null) && timestamp) {
 
-                if (this.getPath(data, this.currentStationData[this.stationName].timestamp2) > this.getPath(data, this.currentStationData[this.stationName].timestamp)) {
+                if (this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp2', null)) > this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null))) {
                     console.log("timestamp2 is greater than timestamp");
                 }
             }
 
-            console.log("this.getPath(data, this.currentStationData[this.stationName].duration)", this.getPath(data, this.currentStationData[this.stationName].duration))
-
             // Format and check stale data in a separate function
-            const { staleData } = this.checkStaleData(timezone, timestamp, spinUpdated, this.getPath(data, this.currentStationData[this.stationName].duration), this.getPath(data, this.currentStationData[this.stationName].trackEnd), song);
+            const { staleData } = this.checkStaleData(timezone, this.currentTrack.timestamp, this.currentTrack.spinUpdated, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)), this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'trackEnd', null)), song);
 
             if ((staleData === "Live365 past" || staleData === "Still future") && (song)) {
                     return;   
-            } else if ([this.stationName] == 'indie1023' && song == "[Air break]") {
-                const page = new Page(this.stationName, this);
+            } else if ([this.stationKey] == 'indie1023' && song == "[Air break]") {
+                const page = new Page(this.stationKey, this);
                 page.refreshCurrentData(['[ Air Break ]', '', '', this.stationArt, null, null, true]);
                 return;
             } else if (song == "[Air break]" && !staleData ) {
-                const page = new Page(this.stationName, this);
+                const page = new Page(this.stationKey, this);
                 page.refreshCurrentData([song, '', '', this.stationArt, null, null, true]);
                 return;
             }
 
             // Handle stale data or invalid song
             if ((staleData) || song === 'No streaming data currently available' || errorMsg) {
-                const page = new Page(this.stationName, this);
+                const page = new Page(this.stationKey, this);
                 page.refreshCurrentData([(staleData || song), '', '', this.stationArt, null, null, true]);
                 return;
             }
@@ -1686,10 +1845,10 @@ class RadioPlayer {
                 this.getLfmMeta(song, artist, album, albumArt, '', '', false).then(lfmValues => {
                     const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
 
-                    this.song = lfmSong;
-                    this.artist = lfmArtist;
-                    this.album = lfmAlbum || lfmSong;
-                    this.artworkUrl = lfmArt || urlCoverArt;
+                    this.song = lfmSong || this.currentTrack.title;
+                    this.artist = lfmArtist || this.currentTrack.artist;
+                    this.album = lfmAlbum || this.currentTrack.album || lfmSong;
+                    this.artworkUrl = lfmArt || this.currentTrack.albumArt || urlCoverArt;
 
                     this.updateScrobbleData(this.song, this.artist, this.album);
 
@@ -1697,7 +1856,7 @@ class RadioPlayer {
                     this.playcount = lfmPlaycount || null;
                     this.lfmMetaChanged = true;
 
-                    const page = new Page(this.stationName, this);
+                    const page = new Page(this.stationKey, this);
                     page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.errorMessage]);
 
                 }).catch(error => {
@@ -1723,7 +1882,7 @@ class RadioPlayer {
     checkStaleData(timezone, timestamp, spinUpdated, duration, trackEnd, song) {  
         let staleData = '';
 
-        if ((!timezone && !timestamp && !spinUpdated) || (!timestamp && spinUpdated == true) || (timestamp === undefined && !this.currentStationData[this.stationName].spinPath && !timezone)) {
+        if ((!timezone && !timestamp && !spinUpdated) || (!timestamp && spinUpdated == true) || (timestamp === undefined && !this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null) && !timezone)) {
             return staleData;
         }
 
@@ -1745,9 +1904,9 @@ class RadioPlayer {
             apiUpdatedData = this.convertTimestamp(timestamp, timezone);
         } else if (timestamp && trackEnd) {
             apiUpdatedData = this.convertTimestamp(trackEnd, timezone);
-        } else if (spinUpdated && this.stationName == 'cbcmusic') {
+        } else if (spinUpdated && this.stationKey == 'cbcmusic') {
             apiUpdatedData = this.convertTimestamp(spinUpdated, timezone);
-        } else if (spinUpdated && this.stationName !== 'cbcmusic') {
+        } else if (spinUpdated && this.stationKey !== 'cbcmusic') {
             // Handle timestamp conversion and formatting
 
             let spinUpdatedData = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
@@ -1764,7 +1923,6 @@ class RadioPlayer {
 
             apiUpdatedData = Date.parse(apiUpdatedData);
         } else if ((timezone && !timestamp)) {
-            console.log('timezone and no timestamp', timestamp);
             if (song !== this.song) {
                 // Song changed: Set a new fallback timestamp
                 this.fallbackTimestamp = Date.parse(timezoneTime);
@@ -1780,9 +1938,9 @@ class RadioPlayer {
 
 
         // some stations have a pretty huge timing offset between the API and the stream, so this is an attempt to make it so the songs might be more likely to be showing the song data at the same time the song is actually playing. 
-        if ((this.currentStationData[this.stationName].offset + apiUpdatedData) < timezoneTime) {
-            apiUpdatedData = (this.currentStationData[this.stationName].offset + apiUpdatedData);
-            timezoneTime = (this.currentStationData[this.stationName].offset + timezoneTime);
+        if ((this.getNestedValue(this.currentStationData, this.stationKey, 'offset', null) + apiUpdatedData) < timezoneTime) {
+            apiUpdatedData = (this.getNestedValue(this.currentStationData, this.stationKey, 'offset', null) + apiUpdatedData);
+            timezoneTime = (this.getNestedValue(this.currentStationData, this.stationKey, 'offset', null) + timezoneTime);
         }
 
 
@@ -1817,10 +1975,12 @@ class RadioPlayer {
 
         if (apiUpdatedData.toString().length == 10) {
             apiUpdatedData = apiUpdatedData * 1000;
-            console.log('apiUpdatedData x 1000', apiUpdatedData)
+            console.log('apiUpdatedData x 1000', apiUpdatedData);
         } else if (apiUpdatedData.toString().length > 13) {
-            apiUpdatedData = Number.parseInt(apiUpdatedData.slice(0, 13));
+            // Convert to string before slicing
+            apiUpdatedData = Number.parseInt(apiUpdatedData.toString().slice(0, 13), 10);
         }
+
 
         this.lastKnownUpdatedTime = apiUpdatedData;
         console.log("this.lastKnownUpdatedTime", this.lastKnownUpdatedTime)
@@ -1859,18 +2019,18 @@ class RadioPlayer {
         const yyyymmddhhmmssRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?$/;
 
         if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
-            console.log('is string timezone')
+           // console.log('is string timezone')
             return new Date(timestamp).getTime(); // ⬅️ Epoch
         }
 
         if (dateWithoutTimezoneRegex.test(timestamp)) {
-            console.log('is dateWithoutTimezoneRegex')
+           // console.log('is dateWithoutTimezoneRegex')
             timestamp = this.formatTimeInTimezone(timezone, timestamp, spinUpdated);
             return new Date(timestamp).getTime(); // ⬅️ Epoch
         }
 
         if (yyyymmddhhmmssRegex.test(timestamp)) {
-            console.log('is yyyymmddhhmmssRegex')
+          //  console.log('is yyyymmddhhmmssRegex')
             const [datePart, timePart] = timestamp.split(' ');
             const [year, month, day] = datePart.split('-'); // Correct order: YYYY-MM-DD
 
@@ -1883,7 +2043,7 @@ class RadioPlayer {
         }
 
         if (yyyymmddhhmmRegex.test(timestamp)) {
-            console.log('is yyyymmddhhmmRegex')
+           // console.log('is yyyymmddhhmmRegex')
             const year = parseInt(timestamp.substring(0, 4), 10);
             const month = parseInt(timestamp.substring(4, 6), 10) - 1;
             const day = parseInt(timestamp.substring(6, 8), 10);
@@ -1894,20 +2054,20 @@ class RadioPlayer {
 
         if (isEpoch) {
 
-            console.log('is epoch')
+         //   console.log('is epoch')
             const epoch = Number(timestamp);
             return epoch < 1e12 ? epoch * 1000 : epoch; // ⬅️ Epoch in ms
         }
 
-        if (isUTC || this.currentStationData[this.stationName].timezone == "UTC") {
+        if (isUTC || this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null) == "UTC") {
 
-            console.log('is UTC')
+           // console.log('is UTC')
             return new Date(timestamp).getTime(); // ⬅️ Epoch
         }
 
         if (typeof timestamp === 'string' && isoRegex.test(timestamp)) {
 
-            console.log('is string iso')
+          //  console.log('is string iso')
             if (timestamp.endsWith('+0000')) {
                 timestamp = timestamp.replace('+0000', 'Z');
             }
@@ -1915,7 +2075,7 @@ class RadioPlayer {
         }
 
         if (mmddyyyyRegex.test(timestamp) || mmddyyyyRegex.test(this.formattedTimestamp)) {
-            console.log('is mmddyyyyRegex')
+          //  console.log('is mmddyyyyRegex')
             const [datePart, timePart] = timestamp.split(' ');
             const [month, day, year] = datePart.split('-');
             const formattedTimestamp = `${year}-${month}-${day}T${timePart}`;
@@ -1965,11 +2125,11 @@ class RadioPlayer {
         console.log('timezone', timezone);
 
         // If there's a spinUpdated time, convert it to 24-hour format
-        if ((spinUpdated && spinUpdated !== true) && this.stationName !== 'cbcmusic') {
+        if ((spinUpdated && spinUpdated !== true) && this.stationKey !== 'cbcmusic') {
             const updated24Hour = convertTo24HourFormat(spinUpdated);
             apiUpdatedTime = `${currentDatePart} ${updated24Hour}`;
             console.log('spinUpdated apiUpdatedTime', apiUpdatedTime)
-        } else if ((spinUpdated && spinUpdated !== true) && this.stationName == 'cbcmusic') {
+        } else if ((spinUpdated && spinUpdated !== true) && this.stationKey == 'cbcmusic') {
             apiUpdatedTime = this.convertTimestamp(spinUpdated, timezone);
             console.log('spinUpdated apiUpdatedTime', apiUpdatedTime)
         }
@@ -2047,8 +2207,9 @@ class RadioPlayer {
     }
 
     getPath(obj, prop) {
-        if (!obj || typeof obj !== 'object' || !prop) {
-            return; // Handle invalid arguments
+        // Ensure obj is an object and prop is a string
+        if (!obj || typeof obj !== 'object' || typeof prop !== 'string' || !prop.trim()) {
+            return undefined; // Return undefined if obj is invalid or prop is not a non-empty string
         }
 
         // Split the property path by "." for multi-layer paths
@@ -2057,10 +2218,11 @@ class RadioPlayer {
 
         // Traverse the object for each part of the path
         for (let i = 0; i < parts.length; i++) {
-            if (current[parts[i]] === undefined) {
-                return; // Return undefined if any part of the path is not found
+            const part = parts[i];
+            if (!Object.prototype.hasOwnProperty.call(current, part)) {
+                return undefined; // Return undefined if any part of the path is not found
             }
-            current = current[parts[i]]; // Drill down into the object
+            current = current[part]; // Drill down into the object
         }
 
         return current; // Return the final value
@@ -2072,7 +2234,7 @@ class RadioPlayer {
         // Check if the stream should be reloaded based on page visibility
         if (this.shouldReloadStream) {
             console.log("the stream is reloading");
-            this.handleStationSelect(null, this.stationName, false); // Reload the stream
+            this.handleStationSelect(null, this.stationKey, this.stationDisplayName, false); // Reload the stream
             this.shouldReloadStream = false; // Reset the flag
         } else {
             // Attempt to play audio
@@ -2111,7 +2273,7 @@ class RadioPlayer {
         // Set a timeout to mark stream reload after 30 seconds
         this.pauseTimeout = setTimeout(() => {
             console.log("the stream should be reloaded");
-            const page = new Page(this.stationName, this);
+            const page = new Page(this.stationKey, this);
             page.refreshCurrentData([`Press reload to refresh feed`, '', '', this.stationArt, null, null, true]);
             document.getElementById("playermeta").classList.add("opacity-50");
             if (this.hls) {
@@ -2133,17 +2295,23 @@ class RadioPlayer {
         this.isPlaying ? this.pause() : this.play();
     }
 
-    skipBackward() {
-        this.calculateNextAndPreviousIndices('previous');
-        const prevStationKey = this.previousStationName;
-        this.handleStationSelect(true, prevStationKey, true);
-    }
-
     skipForward() {
         this.calculateNextAndPreviousIndices('next');
-        const nextStationKey = this.nextStationName;
-        this.handleStationSelect(null, nextStationKey, true);
+        const nextStationKey = this.nextStationKey;
+        console.log('this.nextStationKey', this.nextStationKey, this.nextStationDisplayName);
+        const nextStationDisplayName = this.nextStationDisplayName;
+        this.stationApiUrl = null;
+        this.handleStationSelect(null, this.nextStationKey, this.nextStationDisplayName, true);
     }
+
+    skipBackward() {
+        this.calculateNextAndPreviousIndices('previous');
+        const prevStationKey = this.previousStationKey;
+        const prevStationDisplayName = this.previousStationDisplayName;
+        this.stationApiUrl = null;
+        this.handleStationSelect(true, prevStationKey, prevStationDisplayName, true);
+    }
+
 
 
     onTagSelected(tag) {
@@ -2179,7 +2347,7 @@ class RadioPlayer {
         const currentStationKey = stationKeys[this.currentIndex];
 
         console.log('this.currentIndex', this.currentIndex);
-        this.handleStationSelect(true, currentStationKey, true);
+        this.handleStationSelect(true, currentStationKey, null, true);
     }
 
     scrobbleReset() {
@@ -2192,8 +2360,8 @@ class RadioPlayer {
 
     addCacheBuster(url) {
         const timestamp = Date.now();
-        const skipCacheBuster = ['radiowestern', 'kexp', 'wrir', 'wprb', 'krcl', 'cbcmusic', 'indie1023', 'somagroovesalad', 'wusc'];
-        if (skipCacheBuster.includes(this.stationName) ) {
+        const skipCacheBuster = ['radiowestern', 'kexp', 'wrir', 'wprb', 'krcl', 'cbcmusic', 'indie1023', 'wusc'];
+        if (skipCacheBuster.includes(this.stationKey) ) {
             return url;
         }
         return url.includes('?') ? `${url}&t=${timestamp}` : `${url}?t=${timestamp}`;
@@ -2259,14 +2427,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     radioPlayer.jumpToStationFromHash();
 
     const defaultStation = stationKeys[0];
-    radioPlayer.handleStationSelect(false, defaultStation, true);
+    radioPlayer.handleStationSelect(false, defaultStation, null, true);
 
     const stationSelect = document.getElementById('stationSelect');
     if (stationSelect) {
         stationSelect.addEventListener('change', (event) => {
-            const stationName = event.target.value;
+            const stationKey = event.target.value;
             const direction = true; 
-            radioPlayer.handleStationSelect(direction, stationName, true);
+            radioPlayer.handleStationSelect(direction, stationKey, null, true);
         }, { once: true });
     } else {
         console.error('Element with ID "stationSelect" not found.');

@@ -1,59 +1,67 @@
 const stations = {
-  abcdoublej: {
-    stationName: "ABC - Double J",
-    tags: ["au", "public"],
-  },
-  abctriplej: {
-    stationName: "ABC - Triple J",
-    tags: ["au", "public"],
-  },
-  abctriplejunearthed: {
-    stationName: "ABC - Triple J Unearthed",
-    tags: ["au", "public", "justmusic"],
+  abc: {
+    doublej: {
+      stationName: "ABC - Double J",
+      tags: ["au", "public", "alt", "rock"],
+    },
+    triplej: {
+      stationName: "ABC - Triple J",
+      tags: ["au", "public", "alt", "indie"],
+    },
+    triplejunearthed: {
+      stationName: "ABC - Triple J Unearthed",
+      tags: ["au", "public", "indie", "unsigned"],
+    },
   },
   acrn: {
     stationName: "ACRN",
-    tags: ["us", "college"],
+    tags: ["us", "college", "alt", "top"],
   },
   altradio: {
     stationName: "AltRadio",
-    tags: ["us", "npr", "public"],
+    tags: ["us", "npr", "public", "eclectic"],
   },
   bagelradio: {
     stationName: "BagelRadio",
-    tags: ["us", "top"],
+    tags: ["us", "top", "pop"],
   },
-  bbcradio6: {
-    stationName: "BBC6 Music",
-    tags: ["uk", "public", "top"],
+  bbc: {
+    radio2: {
+      stationName: "BBC Radio 2",
+      tags: ["uk", "public", "alt", "top40"],
+    },
+    radio6: {
+      stationName: "BBC Radio 6 Music",
+      tags: ["uk", "public", "alt", "eclectic", "top"],
+    },
   },
   bfffm: {
     stationName: "BFF.fm",
-    tags: ["us"],
-  },   
+    tags: ["us", "community", "eclectic"],
+  },
   birchstreet: {
     stationName: "Birch Street Radio",
-    tags: ["ca", "justmusic"],
+    tags: ["ca", "indie", "folk"],
   },
   blacklightradio: {
     stationName: "Blacklight Radio",
-    tags: ["us", "justmusic"],
+    tags: ["us", "electronic", "ambient"],
   },
   blowupradio: {
     stationName: "BlowupRadio",
-    tags: ["us"],
+    tags: ["us", "indie", "rock"],
   },
   thebridge: {
     stationName: "The Bridge 90.9",
-    tags: ["us", "top"],
+    tags: ["us", "indie", "rock", "top"],
   },
   btpm: {
     stationName: "BTPM - The Bridge",
-    tags: ["us", "ca", "npr", "public", "top"],
+    tags: ["us", "ca", "npr", "public", "aaa", "top"],
   },
   cbcmusic: {
     stationName: "CBC Music",
-    tags: ["ca", "top"],
+    tags: ["ca", "public", "top40"],
   },
   cfny: {
     stationName: "102.1 The Edge - CFNY",
@@ -61,31 +69,27 @@ const stations = {
   },
   cfrc: {
     stationName: "CFRC",
-    tags: ["ca"],
-  },
-  charlies80sattic: {
-    stationName: "Charlie's 80s Attic",
-    tags: ["us", "80s", "justmusic"],
+    tags: ["ca", "college", "variety"],
   },
   chillfiltr: {
     stationName: "CHILLFILTR",
-    tags: ["ca", "chill"],
+    tags: ["ca", "chill", "electronic"],
   },
   chirpradio: {
     stationName: "CHIRP Radio",
-    tags: ["us", "top", "public"],
+    tags: ["us", "community", "indie", "top"],
   },
   chly: {
     stationName: "CHLY",
-    tags: ["ca"],
+    tags: ["ca", "community", "variety"],
   },
   chma: {
     stationName: "CHMA",
-    tags: ["ca"],
+    tags: ["ca", "community", "variety"],
   },
   chop: {
     stationName: "102.7 CHOP FM",
-    tags: ["ca", "indie", "community", "college"],
+    tags: ["ca", "indie", "community", "college", "alt", "top"],
   },
   cimx: {
     stationName: "89X - CIMX",
@@ -93,7 +97,7 @@ const stations = {
   },
   cioi: {
     stationName: "INDI 101.5 - CIOI",
-    tags: ["ca", "alt"],
+    tags: ["ca", "indie", "alt", "top"],
   },
   ciso: {
     stationName: "89.1 MAX FM - CISO",
@@ -101,31 +105,31 @@ const stations = {
   },
   civl: {
     stationName: "CIVL",
-    tags: ["ca", "college", "community"],
+    tags: ["ca", "community", "variety"],
   },
   cjiq: {
     stationName: "CJIQ",
-    tags: ["ca", "college", "community"],
+    tags: ["ca", "college", "rock"],
   },
   cjmp: {
     stationName: "CJMP",
-    tags: ["ca", "community"],
+    tags: ["ca", "community", "variety"],
   },
   cjsw: {
     stationName: "CJSW",
-    tags: ["ca", "community"],
+    tags: ["ca", "community", "alt"],
   },
   cjuc: {
     stationName: "CJUC",
-    tags: ["ca", "community"],
+    tags: ["ca", "community", "variety"],
   },
   ckua: {
     stationName: "CKUA",
-    tags: ["ca", "community"],
+    tags: ["ca", "public", "variety"],
   },
   ckut: {
     stationName: "CKUT",
-    tags: ["ca", "college"],
+    tags: ["ca", "college", "eclectic"],
   },
   ckuw: {
     stationName: "CKUW",
@@ -133,63 +137,63 @@ const stations = {
   },
   coloradosound: {
     stationName: "The Colorado Sound",
-    tags: ["us", "indie", "public"],
+    tags: ["us", "indie", "aaa"],
   },
   thecurrent: {
     stationName: "The Current",
-    tags: ["us", "public", "top"],
+    tags: ["us", "public", "aaa", "top"],
   },
   d1alt: {
     stationName: "D1 Alternative",
-    tags: ["ca", "justmusic"],
+    tags: ["ca", "alt", "justmusic"],
   },
   d2relax: {
     stationName: "D2 Relax",
-    tags: ["ca", "justmusic"],
+    tags: ["ca", "chill", "justmusic"],
   },
   dkfm: {
     stationName: "DKFM",
-    tags: ["us", "justmusic"],
+    tags: ["us", "electronic", "ambient"],
   },
   dkfmclassic: {
     stationName: "DKFM Classic",
-    tags: ["ca", "justmusic"],
+    tags: ["ca", "electronic", "classic"],
   },
   easternalt: {
     stationName: "Eastern Alternative Radio",
-    tags: ["uk"],
+    tags: ["uk", "alt"],
   },
   eastvillageradio: {
     stationName: "East Village Radio",
-    tags: ["us"],
+    tags: ["us", "community", "eclectic"],
   },
   eightradio: {
     stationName: "8Radio",
-    tags: ["ie"],
-  }, 
+    tags: ["ie", "indie", "eclectic"],
+  },
   wyms: {
     stationName: "88Nine - Radio Milwaukee",
-    tags: ["us", "npr", "top"],
+    tags: ["us", "npr", "aaa", "top"],
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
-    tags: ["ca", "justmusic"],
+    tags: ["ca", "alt", "retro"],
   },
   floodfm: {
     stationName: "Flood FM",
-    tags: ["us", "justmusic"],
+    tags: ["us", "indie", "online"],
   },
   kffp: {
     stationName: "Freeform Portland",
-    tags: ["us"],
+    tags: ["us", "community", "eclectic"],
   },
   funkymoose: {
     stationName: "Funky Moose Radio",
-    tags: ["ca", "justmusic"],
+    tags: ["ca", "funk", "soul"],
   },
   gorillafm: {
     stationName: "Gorilla FM",
-    tags: ["ch", "justmusic"],
+    tags: ["ch", "electronic", "justmusic"],
   },
   indie1023: {
     stationName: "Indie 102.3",
@@ -197,7 +201,7 @@ const stations = {
   },
   indie617: {
     stationName: "indie617",
-    tags: ["us", "indie"],
+    tags: ["us", "indie", "alt"],
   },
   indie88: {
     stationName: "Indie88",
@@ -205,401 +209,413 @@ const stations = {
   },
   indieblend: {
     stationName: "The Indie Blend",
-    tags: ["us", "justmusic", "indie"],
+    tags: ["us", "indie", "justmusic"],
   },
   indiediscotheque: {
     stationName: "Indie Discotheque",
-    tags: ["us", "indie", "justmusic"],
+    tags: ["us", "indie", "electronic"],
   },
   indiexfm: {
     stationName: "Indie X FM",
-    tags: ["us", "justmusic", "indie"],
+    tags: ["us", "indie", "justmusic"],
   },
   idobianthm: {
     stationName: "idobi anthm",
-    tags: ["us"],
+    tags: ["us", "pop", "rock"],
   },
   inhailer: {
     stationName: "Inhailer Radio",
-    tags: ["us", "top", "indie"],
+    tags: ["us", "indie", "rock", "top"],
   },
   kalw: {
     stationName: "KALW",
-    tags: ["us", "npr"],
+    tags: ["us", "npr", "public"],
   },
   kalx: {
     stationName: "KALX",
-    tags: ["us", "community", "npr"],
+    tags: ["us", "college", "eclectic"],
   },
   kboo: {
     stationName: "KBOO",
-    tags: ["us"],
+    tags: ["us", "community", "variety"],
   },
   kcrw: {
     stationName: "KCRW",
-    tags: ["us", "public"],
+    tags: ["us", "public", "npr", "eclectic"],
   },
   kcrweclectic24: {
     stationName: "KCRW Eclectic 24",
-    tags: ["us", "public"],
+    tags: ["us", "public", "eclectic"],
   },
   kexp: {
     stationName: "KEXP",
-    tags: ["us", "public", "top"],
-  }, 
+    tags: ["us", "public", "indie", "top"],
+  },
   kfai: {
     stationName: "KFAI",
-    tags: ["us", "public", "community"],
+    tags: ["us", "community", "eclectic"],
   },
   kfjc: {
     stationName: "KFJC",
-    tags: ["us", "public", "community"],
+    tags: ["us", "college", "eclectic"],
   },
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
-    tags: ["us", "community"],
+    tags: ["us", "community", "eclectic"],
   },
   kpiss: {
     stationName: "KPISS",
-    tags: ["us"],
+    tags: ["us", "punk", "indie"],
   },
   kqua: {
     stationName: "KQUA - The River",
-    tags: ["us"],
+    tags: ["us", "aaa", "rock"],
   },
   kroq: {
     stationName: "KROQ",
-    tags: ["us", "corp"],
+    tags: ["us", "corp", "alt"],
   },
   krsh: {
     stationName: "The Krush",
-    tags: ["us"],
+    tags: ["us", "hiphop", "rnb"],
   },
   krsm: {
     stationName: "KRSM",
-    tags: ["us"],
+    tags: ["us", "community", "variety"],
   },
   kuom: {
     stationName: "KUOM - Radio K",
-    tags: ["us", "college"],
-  }, 
+    tags: ["us", "college", "indie"],
+  },
   kutx: {
     stationName: "KUTX",
-    tags: ["us", "top", "college"],
+    tags: ["us", "college", "aaa", "top"],
   },
   kxll: {
     stationName: "KXLL",
-    tags: ["us", "npr"],
+    tags: ["us", "npr", "variety"],
   },
   kxlu: {
     stationName: "KXLU",
-    tags: ["us"],
+    tags: ["us", "college", "eclectic"],
   },
   kxt: {
     stationName: "KXT",
-    tags: ["us", "public", "npr", "top"],
+    tags: ["us", "public", "npr", "aaa"],
   },
   kzsc: {
     stationName: "KZSC",
-    tags: ["us", "college", "community"],
+    tags: ["us", "college", "eclectic"],
   },
   lemellotron: {
     stationName: "Le Mellotron",
-    tags: ["fr", "chill", "justmusic"],
+    tags: ["fr", "chill", "electronic"],
   },
   lightning100: {
     stationName: "Lightning 100",
-    tags: ["us"],
+    tags: ["us", "aaa", "rock", "top"],
   },
   megashuffle: {
     stationName: "MegaShuffle",
-    tags: ["ca", "justmusic"],
+    tags: ["ca", "variety", "justmusic"],
   },
   metradio: {
     stationName: "Met Radio",
-    tags: ["ca"],
+    tags: ["ca", "indie", "rock"],
   },
   midtownradio: {
     stationName: "Midtown Radio",
-    tags: ["ca"],
+    tags: ["ca", "indie", "rock"],
   },
   mountainchill: {
     stationName: "Mountain Chill",
-    tags: ["us", "chill"],
+    tags: ["us", "chill", "electronic"],
   },
   tmm1: {
     stationName: "The Music Machine 1",
-    tags: ["uk", "justmusic"],
+    tags: ["uk", "variety", "justmusic"],
   },
   tmm2: {
     stationName: "The Music Machine 2",
-    tags: ["uk", "justmusic"],
+    tags: ["uk", "variety", "justmusic"],
   },
   newsounds: {
     stationName: "New Sounds",
-    tags: ["us", "public", "chill", "justmusic"],
+    tags: ["us", "public", "experimental"],
   },
   noiseboxradio: {
     stationName: "Noisebox Radio",
-    tags: ["uk", ""],
+    tags: ["uk", "electronic", "experimental"],
   },
   nostalgie: {
     stationName: "Nostalgie",
-    tags: ["be", "80s"],
+    tags: ["be", "80s", "retro"],
   },
   novaphonicfm: {
     stationName: "Novaphonic.FM",
-    tags: ["us", "top", "npr", "public"],
+    tags: ["us", "aaa", "npr", "indie", "top"],
   },
   plazaone: {
     stationName: "Nightwave Plaza",
-    tags: ["us", "chill", "justmusic"],
+    tags: ["us", "synthwave", "electronic"],
   },
   thepoint: {
     stationName: "The Point",
-    tags: ["us", "top"],
+    tags: ["us", "aaa", "rock", "top"],
   },
   prpfm: {
     stationName: "Portland Radio Project",
-    tags: ["us", "community"],
+    tags: ["us", "community", "indie"],
   },
   qcindie: {
     stationName: "QCIndie",
-    tags: ["ca", "online", "top", "justmusic", "indie"],
+    tags: ["ca", "online", "indie", "top"],
   },
   radiofrancefip: {
-      stationName: "Radio France FIP",
-      tags: ["fr"],
+    stationName: "Radio France Fip",
+    tags: ["fr", "eclectic", "jazz"],
+    electro: {
+      stationName: "Radio France Fip",
+      tags: ["fr", "eclectic", "electronic"],
+    },
+    jazz: {
+      stationName: "Radio France Fip",
+      tags: ["fr", "eclectic", "jazz"],
+    },
+    rock: {
+      stationName: "Radio France Fip",
+      tags: ["fr", "eclectic", "rock", "indie"],
+    },
   },
   radiohumber: {
     stationName: "Radio Humber",
-    tags: ["ca", "college"],
+    tags: ["ca", "college", "variety"],
   },
   radiolaurier: {
     stationName: "Radio Laurier",
-    tags: ["ca", "college"],
+    tags: ["ca", "college", "variety"],
   },
   radionovanuit: {
     stationName: "Radio Nova - La Nuit",
-    tags: ["fr"],
+    tags: ["fr", "electronic", "night"],
   },
   radioparadiseglobal: {
     stationName: "Radio Paradise Global Mix",
-    tags: ["us", "online", "justmusic"],
+    tags: ["us", "online", "eclectic"],
   },
   radioparadisemain: {
     stationName: "Radio Paradise Main Mix",
-    tags: ["us", "online", "top", "justmusic"],
+    tags: ["us", "online", "rock", "top"],
   },
   radiosydney: {
     stationName: "Radio Sydney",
-    tags: ["au", "public"],
-  }, 
+    tags: ["au", "public", "variety"],
+  },
   radiowestern: {
     stationName: "Radio Western",
-    tags: ["ca", "college"],
-  }, 
+    tags: ["ca", "college", "variety"],
+  },
   radiox: {
     stationName: "Radio X",
-    tags: ["uk", "corp"],
+    tags: ["uk", "corp", "rock"],
   },
   sabotage: {
     stationName: "Sabotage Radio",
-    tags: ["fr", "justmusic"],
+    tags: ["fr", "indie", "rock"],
   },
   skylab: {
     stationName: "Skylab Radio",
-    tags: ["uk"],
+    tags: ["uk", "electronic", "ambient"],
   },
   socalsound: {
     stationName: "The SoCal Sound",
-    tags: ["us", "top"],
+    tags: ["us", "aaa", "rock", "top"],
   },
-  soma80sunderground: {
-    stationName: "SomaFM 80s Underground",
-    tags: ["us", "soma", "80s", "justmusic"],
-  },
-  somafolkfwd: {
-    stationName: "SomaFM Folk Forward",
-    tags: ["us", "soma", "justmusic"],
-  },
-  somagroovesalad: {
-    stationName: "SomaFM Groove Salad",
-    tags: ["us", "soma", "justmusic"],
-  },
-  somaindiepop: {
-    stationName: "SomaFM Indie Pop Rocks!",
-    tags: ["us", "soma", "justmusic", "indie"],
+  soma: {
+    eightiesunderground: {
+      stationName: "SomaFM 80s Underground",
+      tags: ["us", "soma", "80s", "new wave"],
+    },
+    folkfwd: {
+      stationName: "SomaFM Folk Forward",
+      tags: ["us", "soma", "folk", "indie"],
+    },
+    groovesalad: {
+      stationName: "SomaFM Groove Salad",
+      tags: ["us", "soma", "electronic", "downtempo"],
+    },
+    indiepop: {
+      stationName: "SomaFM Indie Pop Rocks!",
+      tags: ["us", "soma", "indie", "pop"],
+    },
+    sonicuniverse: {
+      stationName: "SomaFM Sonic Universe",
+      tags: ["us", "soma", "jazz", "eclectic"],
+    },
   },
   soniccoast: {
     stationName: "The Sonic Coast",
-    tags: ["us"],
+    tags: ["us", "indie", "rock"],
   },
   spacefm: {
     stationName: "Space 101.1FM",
-    tags: ["us"],
+    tags: ["us", "indie", "rock"],
   },
   thesummit: {
     stationName: "The Summit",
-    tags: ["us"],
+    tags: ["us", "aaa", "rock"],
   },
   uncertainfm: {
     stationName: "UncertainFM",
-    tags: ["us"],
+    tags: ["us", "experimental", "electronic"],
   },
   untidyradio: {
     stationName: "Untidy Radio",
-    tags: ["us", ""],
+    tags: ["us", "eclectic", "variety"],
   },
   wber: {
     stationName: "WBER",
-    tags: ["us", "college"],
+    tags: ["us", "college", "alt"],
   },
   wbor: {
     stationName: "WBOR",
-    tags: ["us", "college"],
+    tags: ["us", "college", "variety", "top"],
   },
   wbru: {
     stationName: "WBRU",
-    tags: ["us"],
+    tags: ["us", "college", "alt"],
   },
   wcbn: {
     stationName: "WCBN",
-    tags: ["us", "college"],
+    tags: ["us", "college", "eclectic"],
   },
   wers: {
     stationName: "WERS",
-    tags: ["us"],
+    tags: ["us", "college", "variety"],
   },
   wext: {
     stationName: "WEXT",
-    tags: [
-      "us", "aaa", "npr", "United States", "New York", "npr", "public"
-    ],
+    tags: ["us", "aaa", "npr", "public"],
   },
   wfmu: {
     stationName: "WFMU",
-    tags: ["us", "top", "community"],
-  },
-  wfmudrummer: {
-    stationName: "WFMU - Give The Drummer Radio",
-    tags: ["us", "community"],
-  },
-  wfmusoul: {
-    stationName: "WFMU - Rock'n'Soul Radio",
-    tags: ["us", "rock", "soul", "community"],
-  },
-  wfmusheena: {
-    stationName: "WFMU - Sheena's Jungle Room",
-    tags: ["us", "community"],
+    tags: ["us", "community", "eclectic", "top"],
+    drummer: {
+      stationName: "WFMU - Give The Drummer Radio",
+      tags: ["us", "community", "experimental"],
+    },
+    soul: {
+      stationName: "WFMU - Rock'n'Soul Radio",
+      tags: ["us", "community", "soul", "rock"],
+    },
+    sheena: {
+      stationName: "WFMU - Sheena's Jungle Room",
+      tags: ["us", "community", "punk"],
+    },
   },
   wfpk: {
     stationName: "WFPK",
-    tags: ["us", "npr", "public"],
+    tags: ["us", "public", "npr", "aaa"],
   },
   wfuv: {
     stationName: "WFUV",
-    tags: ["us", "public"],
+    tags: ["us", "public", "aaa"],
   },
   whsn: {
     stationName: "WHSN",
-    tags: ["us", "college"],
+    tags: ["us", "college", "variety"],
   },
   wicb: {
     stationName: "WICB",
-    tags: ["us"],
+    tags: ["us", "college", "alt"],
   },
   witt: {
     stationName: "WITT",
-    tags: ["us"],
+    tags: ["us", "college", "variety"],
   },
   wknc: {
     stationName: "WKNC",
-    tags: ["us", "college"],
+    tags: ["us", "college", "indie"],
   },
   wluw: {
     stationName: "WLUW",
-    tags: ["us"],
+    tags: ["us", "college", "variety"],
   },
   wmfo: {
     stationName: "WMFO",
-    tags: ["us"],
+    tags: ["us", "college", "eclectic"],
   },
   wmse: {
     stationName: "WMSE Radio",
-    tags: ["us"],
+    tags: ["us", "community", "variety"],
   },
   wnmc: {
     stationName: "WNMC",
-    tags: ["us"],
+    tags: ["us", "college", "variety"],
   },
   wnrn: {
     stationName: "WNRN",
-    tags: ["us"],
+    tags: ["us", "community", "aaa"],
   },
   wnxp: {
     stationName: "WNXP",
-    tags: ["us", "top", "npr", "public"],
+    tags: ["us", "public", "npr", "aaa", "top"],
   },
   worldwidefm: {
     stationName: "Worldwide FM",
-    tags: ["uk"],
+    tags: ["uk", "eclectic", "global"],
   },
   wpkn: {
     stationName: "WPKN",
-    tags: ["us"],
+    tags: ["us", "community", "variety"],
   },
   wprb: {
     stationName: "WPRB",
-    tags: ["us"],
+    tags: ["us", "college", "eclectic"],
   },
   wrfl: {
     stationName: "WRFL",
-    tags: ["us", "college"],
+    tags: ["us", "college", "indie"],
   },
   wrir: {
     stationName: "WRIR",
-    tags: ["us"],
+    tags: ["us", "community", "variety"],
   },
   wrur: {
     stationName: "WRUR - The Route",
-    tags: ["us", "npr", "public"],
+    tags: ["us", "public", "npr", "aaa"],
   },
   wtmd: {
     stationName: "WTMD",
-    tags: ["us", "npr", "public"],
+    tags: ["us", "public", "npr", "aaa"],
   },
   wudr: {
     stationName: "WUDR - Flyer Radio",
-    tags: ["us", "top"],
+    tags: ["us", "college", "indie", "top"],
   },
   wuky: {
     stationName: "WUKY",
-    tags: ["us", "npr"],
-  },
-  wusc: {
-    stationName: "WUSC",
-    tags: ["us"],
+    tags: ["us", "public", "npr", "aaa"],
   },
   wyep: {
     stationName: "WYEP",
-    tags: ["us", "npr"],
+    tags: ["us", "public", "npr", "aaa"],
   },
   wyomingsounds: {
     stationName: "Wyoming Sounds",
-    tags: ["us", "npr"],
+    tags: ["us", "public", "npr", "aaa"],
   },
   wzbc: {
     stationName: "WZBC",
-    tags: ["us"],
-  }, 
+    tags: ["us", "college", "alt"],
+  },
   x929: {
     stationName: "X92.9",
-    tags: ["ca", "corp"],
-  }, 
+    tags: ["ca", "corp", "alt"],
+  },
   xpn: {
     stationName: "XPN",
-    tags: ["us", "npr", "top"],
+    tags: ["us", "npr", "aaa", "top"],
   },
   xpn2: {
     stationName: "XPoNential Radio",
@@ -607,10 +623,10 @@ const stations = {
   },
   xrayfm: {
     stationName: "XRAY FM",
-    tags: ["us"],
+    tags: ["us", "community", "indie"],
   },
   ynotradio: {
     stationName: "Y-Not Radio",
-    tags: ["us", "top"],
+    tags: ["us", "indie", "rock", "top"],
   },
 };
