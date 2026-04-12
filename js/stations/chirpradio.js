@@ -10,7 +10,7 @@ const stationData = {
     streamUrl: "https://chirpradio1.streamguys1.com/live",
     apiUrl:
       "https://storage.googleapis.com/chirpradio-public/playlist.json",
-    needPath: true,
+    proxyApi: true,
     timestamp: "now_playing.played_at_gmt_ts",
     timezone: "America/Chicago",
   }

@@ -19,16 +19,17 @@
 
   <link rel="icon" href="img/icons/icon.svg" />
 
-  <!-- pwa support -->
-  <link rel="manifest" href="manifest.json" />
-  <!-- ios support -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ScrobbleRadio" />
+
+  <link rel="manifest" href="/manifest.json" />
+
   <!-- The page color schemes -->
   <meta name="color-scheme" content="light dark">
   <!-- Optional Meta Theme Color is also supported on Safari and Chrome -->
-  <meta name="theme-color" content="#eeeeee" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#5f2ada" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#d342d7" media="(prefers-color-scheme: dark)">
 
   <meta property="og:title" content="ScrobbleRadio - Awesome radio, everyday!">
   <meta property="og:site_name" content="ScrobbleRadio">
@@ -209,19 +210,20 @@
                     </h2>
                     <div id="collapseFilters" class="accordion-collapse collapse" data-bs-parent="#accordionFilters">
                       <div class="accordion-body">
-                        <select id="tagCountry" onchange="generateRadioButtons(this.value)">
+                        <select id="tagCountry">
                           <option value="all">All Countries</option>
                           <option value="au">Australia 🇦🇺</option>
                           <option value="be">Belgium 🇧🇪</option>
                           <option value="ca">Canada 🇨🇦</option>
-                          <option value="us">United States 🇺🇸</option>
-                          <option value="uk">United Kingdom 🇬🇧</option>
                           <option value="fr">France 🇫🇷</option>
                           <option value="ie">Ireland 🇮🇪</option>
+                          <option value="nl">Netherlands 🇳🇱</option>
                           <option value="ch">Switzerland 🇨🇭</option>
+                          <option value="us">United States 🇺🇸</option>
+                          <option value="uk">United Kingdom 🇬🇧</option>
                         </select>
 
-                        <select id="tagFormat" onchange="generateRadioButtons(this.value)">
+                        <select id="tagFormat">
                           <option value="all">All Formats</option>
                           <option value="top">Top Picks</option>
                           <option value="npr">NPR</option>
@@ -238,8 +240,8 @@
                           <option value="experimental">Experimental</option>
                         </select>
 
-                        <select id="tagGenre" onchange="generateRadioButtons(this.value)">
-                          <option value="all">All Genres</option>
+                        <select id="tagGenre">
+                          <option value="all">All Genres </option>
                           <option value="alt">Alternative</option>
                           <option value="chill">Chill</option>
                           <option value="indie">Indie</option>
@@ -326,14 +328,12 @@
 
   <!-- Bootstrap JavaScript Libraries -->
   <script src="js/external/bootstrap.min.js"></script>
-  <script src="js/external/filter.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/hls.js/latest/hls.js"></script>
 
-  <script src="js/stations-dist.js"></script>
   <script src="js/scrobbler.js"></script>
-  <script src="js/main.js"></script>
+  <script type="module" src="js/src/main.js"></script>
 
   <!-- Matomo -->
   <script>

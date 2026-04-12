@@ -1,15 +1,21 @@
-const SCROBBLERADIO_CACHE = "app-v4.0";  // Updated cache version
+const SCROBBLERADIO_CACHE = "app-v4.1";  // Updated cache version
 const staticPlayer = SCROBBLERADIO_CACHE;
 const assets = [
   "/",
   "/css/style.css",
-  "/js/main-dist.js",
-  "/js/stations-dist.js",
+  "/js/src/main.js",
+  "/js/src/constants.js",
+  "/js/src/filter.min.js",
+  "/js/src/page.js",
+  "/js/src/radioButtons.js",
+  "/js/src/radioPlayer.js",
+  "/js/src/timing.js",
+  "/js/src/utils.js",
+  "/js/src/stations-dist.js",
   "/js/scrobbler.js",
   "/img/defaultArt.png",
   "/css/external/bootstrap.min.css",
   "/js/external/bootstrap.min.js",
-  "/js/external/filter.min.js",
   "/js/external/player-v1.js"
 ];
 

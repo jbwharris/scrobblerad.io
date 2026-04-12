@@ -298,7 +298,7 @@ body {
          padding-right: 2rem;
 
          &[aria-expanded="true"] {
-            background: var(--sidebar-gradient);
+            background: var(--sidebar-gradient); 
             border-radius: 0 .5rem 0 0;
          }
 
@@ -315,6 +315,8 @@ body {
 
       .accordion-body {
          background: var(--sidebar-bg);
+
+         select {width: 100%; margin-bottom: .5rem;}
       }
    }
   }
