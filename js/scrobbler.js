@@ -20,82 +20,122 @@ function removeTokenFromUrl() {
 }
 
 function authenticateFM(callback) {
-    // Check if already authenticated
-    const existingKey = Cookies.get("scrobbleradio-lastfm-key");
+  const userCookie = Cookies.get("scrobbleradio-lastfm-user");
+  let isLoggedin = false;
 
-    if (existingKey) {
-        console.log("Already authenticated. Updating UI...");
-        updateAuthButton();
-        if (callback) callback();
-        return;
+  if (userCookie) {
+    try {
+      const userData = JSON.parse(userCookie);
+      // Only consider us logged in if the session key actually exists
+      if (userData && userData.key) {
+        isLoggedin = true;
+      }
+    } catch (e) {
+      console.error("Error parsing user cookie:", e);
+      // If JSON is malformed, clear it so we can re-auth
+      Cookies.remove("scrobbleradio-lastfm-user");
     }
+  }
 
-    // Extract token from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
+  if (isLoggedin) {
+    updateAuthButton();
+    if (callback) callback();
+    return;
+  }
 
-    // Log the current URL and token for debugging
-    console.log("Current URL:", window.location.href);
-    console.log("Token extracted:", token);
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get("token");
+  if (!token) {
+    const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
+    window.location.href = authUrl;
+    return;
+  }
 
-    // If no token, redirect to Last.fm for authentication
-    if (!token) {
-        console.log("No token found. Redirecting to Last.fm...");
-        const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-        window.location.href = authUrl;
-        return;
-    }
+  // Exchange token for session key + username
+  const sig = md5(`api_key${APIKEY}methodauth.getSessiontoken${token}${SECRET}`);
+  const body = new URLSearchParams({
+    method: "auth.getSession",
+    api_key: APIKEY,
+    token: token,
+    api_sig: sig,
+    format: "json"
+  });
 
-    // Verify the URL has been cleaned
-    console.log("Final URL after cleaning:", window.location.href);
+  fetch(lastFmBaseScrobbleUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data?.session?.key) {
+      const userKey = data.session.key;
+      const username = data.session.name;
 
-    // Prepare request to exchange token for session key
-    const sig = md5(`api_key${APIKEY}methodauth.getSessiontoken${token}${SECRET}`);
-    const body = new URLSearchParams({
-        method: "auth.getSession",
+      // Fetch user info (including avatar)
+      const userInfoSig = md5(`api_key${APIKEY}methoduser.getInfouser${username}${SECRET}`);
+      const userInfoBody = new URLSearchParams({
+        method: "user.getInfo",
         api_key: APIKEY,
-        token: token,
-        api_sig: sig,
+        user: username,
+        api_sig: userInfoSig,
         format: "json"
-    });
+      });
 
-    // Fetch session key from Last.fm
-    fetch(lastFmBaseScrobbleUrl, {
+      return fetch(lastFmBaseScrobbleUrl, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log("Session Data:", data);
-        if (data?.session?.key) {
-            const userKey = data.session.key;
+        body: userInfoBody
+      })
+      .then(res => res.json())
+      .then(userData => {
+        console.log("Full user.getInfo response:", userData); // Debug: Log the entire response
 
-            // Save userKey to cookie
-            Cookies.set("scrobbleradio-lastfm-key", userKey, {
-                expires: 30,
-                path: '/',
-                sameSite: 'Lax'
-            });
-
-            // Update UI and call callback
-            updateAuthButton();
-            if (callback) callback();
-        } else {
-            console.error("Failed to get session key:", data);
+        // Extract the medium-sized avatar URL
+        let avatarUrl = "";
+        if (userData?.user?.image) {
+          const mediumImage = userData.user.image.find(img => img.size === "medium");
+          if (mediumImage && mediumImage["#text"]) {
+            avatarUrl = mediumImage["#text"];
+          }
         }
-    })
-    .catch(err => console.error("Auth error:", err));
-}
 
+        console.log("Extracted avatar URL:", avatarUrl); // Debug: Log the avatar URL
+
+        // Save all data to a single cookie
+        const userCookie = {
+          key: userKey,
+          username: username,
+          avatar: avatarUrl
+        };
+
+        Cookies.set("scrobbleradio-lastfm-user", JSON.stringify(userCookie), {
+          expires: 30,
+          path: '/',
+          sameSite: 'Lax'
+        });
+
+        updateAuthButton();
+        if (callback) callback();
+      });
+    } else {
+      console.error("Failed to get session key:", data);
+    }
+  })
+  .catch(err => console.error("Auth error:", err));
+}
 
 
 function updateNowPlaying(track) {
  // console.log("🎵 Now Playing update triggered for", track);
   
-  const userKey = Cookies.get("scrobbleradio-lastfm-key");
-  if (!userKey) return;
+  const userCookie = Cookies.get("scrobbleradio-lastfm-user");
+  if (!userCookie) return;
+  
+  const userData = JSON.parse(userCookie);
+  const userKey = userData.key; 
 
+  if (!userKey) return;
   const sigBase =
     "album" + track.trackAlbum +
     "albumArtist" + track.trackArtist +
@@ -127,100 +167,129 @@ function updateNowPlaying(track) {
   })
   .then(res => res.json())
   .then(data => {
-    console.log("🎧 Now playing updated");
+    console.log("🎧 Now playing updated", track.trackArtist, track.trackTitle );
   })
   .catch(err => console.error("❌ Now Playing error:", err));
 }
 
-function scrobbleIt(track) {
-  const userKey = Cookies.get("scrobbleradio-lastfm-key");
+async function isAlreadyScrobbledOnServer(username, artist, track) {
+    try {
+        const url = `https://ws.audioscrobbler.com/2.0/?api_key=${APIKEY}&method=user.getrecenttracks&user=${encodeURIComponent(username)}&format=json&limit=5`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            console.warn("Error fetching Last.fm recent tracks:", response.statusText);
+            return false;
+        }
+
+        const data = await response.json();
+        const recentTracks = data.recenttracks?.track || [];
+
+        // If no tracks returned, it's definitely not a duplicate
+        if (!Array.isArray(recentTracks)) {
+            return false;
+        }
+
+        const currentArtistLower = artist.toLowerCase();
+        const currentTrackLower = track.toLowerCase();
+
+        console.log('recentTracks', recentTracks, 'recentTracks', currentArtistLower, 'currentTrackLower', currentTrackLower);
+
+        return recentTracks.some(t => {
+            // Defensive check: Ensure artist and track are valid strings
+            if (typeof t.artist !== 'string' || typeof t.track !== 'string') {
+                return false;
+            }
+
+            return (
+                t.artist.toLowerCase() === currentArtistLower &&
+                t.track.toLowerCase() === currentTrackLower
+            );
+        });
+
+    } catch (error) {
+        console.error("Error in isAlreadyScrobbledOnServer:", error);
+        // Fallback to false so we don't block scrobbling if the check fails
+        return false;
+    }
+}
+
+async function scrobbleIt(track) {
+  const userCookie = Cookies.get("scrobbleradio-lastfm-user");
+  if (!userCookie) return;
+
+  const userData = JSON.parse(userCookie);
+  const userKey = userData.key;
+  const username = userData.username; // We need the username now
+
+  if (!userKey || !username) return;
 
   if (!track.trackTitle || !track.trackArtist || !track.trackTimestamp) {
     console.info("Missing required track info:", track);
     return;
   }
 
-  // 🔄 Always pull fresh history
+  // 1. Local Duplicate Check (Fast)
   const scrobbleHistory = JSON.parse(Cookies.get("scrobbleHistory") || "[]");
-
-  // ✅ Check for duplicates based only on artist and title
-  const isDuplicate = scrobbleHistory.some(entry =>
+  const isLocalDuplicate = scrobbleHistory.some(entry =>
     entry.artist.toLowerCase() === track.trackArtist.toLowerCase() &&
     entry.title.toLowerCase() === track.trackTitle.toLowerCase()
   );
 
-
-  if (isDuplicate) {
-    console.log("🚫 Skipping duplicate scrobble");
+  if (isLocalDuplicate) {
+    console.log("🚫 Skipping local duplicate scrobble");
     return;
   }
 
-  // Build the signature string (parameters must be in alphabetical order!)
-  let sigParts = "";
+  // 2. Server Duplicate Check (Cross-device)
+  console.log("🔍 Checking Last.fm server for cross-device duplicates...");
+  const isServerDuplicate = await isAlreadyScrobbledOnServer(username, track.trackArtist, track.trackTitle);
 
-  // Include album only if present
+  if (isServerDuplicate) {
+    console.log("🚫 Skipping server-side duplicate scrobble");
+    return;
+  }
+
+  // 3. Proceed with Scrobbling (Existing logic follows...)
+  let sigParts = "";
   if (track.trackAlbum) {
     sigParts += "album" + track.trackAlbum;
     sigParts += "albumArtist" + track.trackArtist;
   }
-
   sigParts += "api_key" + APIKEY;
   sigParts += "artist" + track.trackArtist;
-  sigParts += "methodtrack.scrobble"; // method should be included in the signature string
+  sigParts += "methodtrack.scrobble";
   sigParts += "sk" + userKey;
   sigParts += "timestamp" + track.trackTimestamp;
   sigParts += "track" + track.trackTitle;
   sigParts += SECRET;
 
-  // Generate the MD5 hash signature
   const sig = md5(sigParts);
 
-  // Build POST data
-  let data =
-    "method=track.scrobble" +
-    "&api_key=" + APIKEY +
-    "&artist=" + encodeURIComponent(track.trackArtist) +
-    "&track=" + encodeURIComponent(track.trackTitle) +
-    "&timestamp=" + track.trackTimestamp +
-    "&sk=" + userKey +
-    "&api_sig=" + sig +
-    "&format=json";
+  let data = `method=track.scrobble&api_key=${APIKEY}&artist=${encodeURIComponent(track.trackArtist)}&track=${encodeURIComponent(track.trackTitle)}&timestamp=${track.trackTimestamp}&sk=${userKey}&api_sig=${sig}&format=json`;
 
   if (track.trackAlbum) {
-    data += "&album=" + encodeURIComponent(track.trackAlbum)+
-    "&albumArtist=" + encodeURIComponent(track.trackArtist);
+    data += `&album=${encodeURIComponent(track.trackAlbum)}&albumArtist=${encodeURIComponent(track.trackArtist)}`;
   }
 
-  // Log the request details for debugging
-  console.log("Scrobbling:", track.trackArtist, " - ", track.trackTitle);
-
-  // Send the request using fetch
   fetch(lastFmBaseScrobbleUrl, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: data,
   })
-    .then(response => response.json())  // Parse the JSON response
-    .then(responseData => {
-      // console.log("Scrobble response:", responseData);
-      if (responseData.error) {
-        console.error("Scrobble error:", responseData.message);
-      } else {
-        const wasAccepted = responseData.scrobbles?.['@attr']?.accepted > 0;
-
-        if (wasAccepted) {
-          console.log("😎 Scrobble accepted!");
-          updateHistory(track);
-        } else {
-          console.warn("😬 Scrobble ignored by Last.fm:", responseData);
-        }
+  .then(response => response.json())
+  .then(responseData => {
+    if (responseData.error) {
+      console.error("Scrobble error:", responseData.message);
+    } else {
+      const wasAccepted = responseData.scrobbles?.['@attr']?.accepted > 0;
+      if (wasAccepted) {
+        console.log("😎 Scrobble accepted!");
+        updateHistory(track);
       }
-    })
-    .catch(error => {
-      console.error("Scrobble error:", error);
-    });
+    }
+  })
+  .catch(error => console.error("Scrobble error:", error));
 }
 
 function updateHistory(track) {
@@ -259,25 +328,34 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function updateAuthButton() {
-    const button = document.getElementById("lastfm-auth");
-    const userKey = Cookies.get("scrobbleradio-lastfm-key");
+  const button = document.getElementById("lastfm-auth");
+  const userCookie = Cookies.get("scrobbleradio-lastfm-user");
+  const userData = userCookie ? JSON.parse(userCookie) : null;
 
-    if (button) {
-        if (!userKey) {
-            button.innerHTML = '<i class="icon-lastfm"></i> Login with Last.fm';
-            button.onclick = () => {
-                const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-                window.location.href = authUrl;
-            };
-        } else {
-            button.innerHTML = '<i class="icon-lastfm"></i> Logout of Last.fm';
-            button.onclick = () => {
-                Cookies.remove("scrobbleradio-lastfm-key");
-                alert("Logged out of Last.fm");
-                updateAuthButton();
-            };
-        }
-    }
+  if (button) {
+    // Unified button structure (icon + text)
+    const icon = '<i class="icon-lastfm"></i>';
+    const avatar = userData?.avatar
+      ? `<img src="${userData.avatar}" alt="${userData.username}" style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; margin-right: 8px;">`
+      : icon; // Fallback to icon if no avatar
+
+    const text = userData?.key
+      ? `${userData.username} (Logout)`
+      : "Login with Last.fm";
+
+    button.innerHTML = `${avatar} ${text}`;
+
+    // Set click handler
+    button.onclick = () => {
+      if (userData?.key) {
+        Cookies.remove("scrobbleradio-lastfm-user");
+      } else {
+        const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.href)}`;
+        window.location.href = authUrl;
+      }
+      updateAuthButton();
+    };
+  }
 }
 
 
