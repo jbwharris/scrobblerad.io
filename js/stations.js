@@ -21,11 +21,23 @@ const stations = {
     stationName: "AltRadio",
     tags: ["us", "npr", "public", "eclectic"],
   },
+  amazingradiouk: {
+    stationName: "Amazing Radio UK",
+    tags: ["uk", "indie"],
+  },
+  amazingradious: {
+    stationName: "Amazing Radio US",
+    tags: ["us", "indie"],
+  },
   bagelradio: {
     stationName: "BagelRadio",
     tags: ["us", "top", "pop"],
   },
   bbc: {
+    radio1: {
+      stationName: "BBC Radio 1",
+      tags: ["uk", "public", "pop", "top40"],
+    },
     radio2: {
       stationName: "BBC Radio 2",
       tags: ["uk", "public", "alt", "top40"],
@@ -58,10 +70,6 @@ const stations = {
   btpm: {
     stationName: "BTPM - The Bridge",
     tags: ["us", "ca", "npr", "public", "aaa", "top"],
-  },
-  cbcmusic: {
-    stationName: "CBC Music",
-    tags: ["ca", "public", "top40"],
   },
   cfny: {
     stationName: "102.1 The Edge - CFNY",
@@ -142,6 +150,14 @@ const stations = {
   thecurrent: {
     stationName: "The Current",
     tags: ["us", "public", "aaa", "top"],
+    purple: {
+      stationName: "Purple Current",
+      tags: ["us", "public", "soul", "funk", "r&b"],
+    },
+    radioheartland: {
+      stationName: "Radio Heartland",
+      tags: ["us", "public", "americana", "folk"],
+    }
   },
   d1alt: {
     stationName: "D1 Alternative",
@@ -287,6 +303,10 @@ const stations = {
     stationName: "KUOM - Radio K",
     tags: ["us", "college", "indie"],
   },
+  kusf: {
+    stationName: "KUSF",
+    tags: ["us", "college", "indie"],
+  },
   kutx: {
     stationName: "KUTX",
     tags: ["us", "college", "aaa", "top"],
@@ -371,6 +391,10 @@ const stations = {
     stationName: "QCIndie",
     tags: ["ca", "online", "indie", "top"],
   },
+  r2eesti: {
+    stationName: "R2 Eesti",
+    tags: ["ee", "hidden"],
+  },
   radiofrancefip: {
     stationName: "Radio France Fip",
     tags: ["fr", "eclectic", "jazz"],
@@ -399,13 +423,23 @@ const stations = {
     stationName: "Radio Nova - La Nuit",
     tags: ["fr", "electronic", "night"],
   },
-  radioparadiseglobal: {
-    stationName: "Radio Paradise Global Mix",
-    tags: ["us", "online", "eclectic"],
-  },
-  radioparadisemain: {
-    stationName: "Radio Paradise Main Mix",
-    tags: ["us", "online", "rock", "top"],
+  radioparadise: {
+    beyond: {
+      stationName: "Radio Paradise - Beyond",
+      tags: ["us", "online", "eclectic", "justmusic"],
+    },
+      global: {
+      stationName: "Radio Paradise - The Globe",
+      tags: ["us", "online", "global", "justmusic"],
+    },
+    main: {
+      stationName: "Radio Paradise - Main Mix",
+      tags: ["us", "online", "rock", "top", "justmusic"],
+    },
+      rock: {
+      stationName: "Radio Paradise - RockIt",
+      tags: ["us", "online", "rock", "justmusic"],
+    },
   },
   radiosydney: {
     stationName: "Radio Sydney",
@@ -465,6 +499,10 @@ const stations = {
     stationName: "The Summit",
     tags: ["us", "aaa", "rock"],
   },
+  thirdrock: {
+    stationName: "NASA's Third Rock Radio ",
+    tags: ["us", "rock", "alt"],
+  },
   uncertainfm: {
     stationName: "UncertainFM",
     tags: ["us", "experimental", "electronic"],
@@ -472,6 +510,10 @@ const stations = {
   untidyradio: {
     stationName: "Untidy Radio",
     tags: ["us", "eclectic", "variety"],
+  },
+  viker: {
+    stationName: "Vikerradio",
+    tags: ["ee", "hidden"],
   },
   wber: {
     stationName: "WBER",
@@ -484,6 +526,10 @@ const stations = {
   wbru: {
     stationName: "WBRU",
     tags: ["us", "college", "alt"],
+  },
+  wcbe: {
+    stationName: "WCBE",
+    tags: ["us", "npr", "AAA"],
   },
   wcbn: {
     stationName: "WCBN",
@@ -573,6 +619,10 @@ const stations = {
     stationName: "WPRB",
     tags: ["us", "college", "eclectic"],
   },
+  wrek: {
+    stationName: "WREK",
+    tags: ["us", "college", "eclectic", "variety"],
+  },
   wrfl: {
     stationName: "WRFL",
     tags: ["us", "college", "indie"],
@@ -596,6 +646,10 @@ const stations = {
   wuky: {
     stationName: "WUKY",
     tags: ["us", "public", "npr", "aaa"],
+  },
+  wwoz: {
+    stationName: "WWOZ",
+    tags: ["us", "community", "public", "jazz"],
   },
   wyep: {
     stationName: "WYEP",
@@ -629,4 +683,10 @@ const stations = {
     stationName: "Y-Not Radio",
     tags: ["us", "indie", "rock", "top"],
   },
+  zeilsteen: {
+    stationName: "Zeilsteen Radio",
+    tags: ["nl", "pop", "rock"],
+  },
 };
+
+export default stations;
