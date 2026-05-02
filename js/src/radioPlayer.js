@@ -15,7 +15,6 @@ export class RadioPlayer {
         this.isPlaying = null;
         this.shouldReloadStream = false;
         this.pauseTimeout = null;
-        this.duration = null;
         this.currentPage = null;
         this.stationDisplayName = null;
         this.nextStationDisplayName = null;
@@ -128,7 +127,30 @@ export class RadioPlayer {
             this.handleStationSelect(null, selectedStationKey, selectedStationDisplayName, true);
         });
 
+        // Offcanvas Panels Toggle
+        const toggleBtn = document.getElementById("togglePanels");
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", () => {
+                const leftPanel = document.getElementById("panel1");
+                const centrePanel = document.getElementById("panel2");
+                const rightPanel = document.getElementById("panel3");
+                const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels");
 
+                leftPanel.classList.toggle("show");
+                centrePanel.classList.toggle("grow");
+                rightPanel.classList.toggle("show");
+
+                if (iconElement) {
+                    if (iconElement.classList.contains("icon-hide-panels")) {
+                        iconElement.classList.remove("icon-hide-panels");
+                        iconElement.classList.add("icon-show-panels");
+                    } else {
+                        iconElement.classList.remove("icon-show-panels");
+                        iconElement.classList.add("icon-hide-panels");
+                    }
+                }
+            });
+        }
     }
 
 
@@ -922,7 +944,7 @@ export class RadioPlayer {
                 // return album art, album, song, artist, lfm listeners & playcount
                 if (lfmResult[7] && !this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) {
                     this.currentTrack.duration = Number(lfmResult[7]);
-                    console.log('this.duration', this.currentTrack.duration)
+                    console.log('this.currentTrack.duration', this.currentTrack.duration)
                 } 
                 return [finalAlbumArt, lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null, lfmResult[8] || null];
             } else {
