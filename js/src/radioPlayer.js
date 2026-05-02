@@ -73,6 +73,7 @@ export class RadioPlayer {
           duration: null
         };
         this.currentScrobble;
+        this.lastfmUsername = this.getLastFmUsername(); 
 
         this.streamingInterval = null;
 
@@ -111,28 +112,24 @@ export class RadioPlayer {
         this.skipBackward = this.skipBackward.bind(this);
         this.reloadStream = this.reloadStream.bind(this);
         this.getNestedValue = this.getNestedValue.bind(this);
+        this.getLastFmUsername = this.getLastFmUsername.bind(this);
     }
 
-async addEventListeners() {
-    this.playButton.addEventListener("click", this.togglePlay);
-    this.skipForwardButton.addEventListener("click", this.skipForward);
-    this.skipBackButton.addEventListener("click", this.skipBackward);
-    this.reloadStreamButton.addEventListener("click", this.reloadStream);
+    async addEventListeners() {
+        this.playButton.addEventListener("click", this.togglePlay);
+        this.skipForwardButton.addEventListener("click", this.skipForward);
+        this.skipBackButton.addEventListener("click", this.skipBackward);
+        this.reloadStreamButton.addEventListener("click", this.reloadStream);
 
-    // Correctly listen for the change event on the <select> element
-    document.getElementById("stationSelect").addEventListener("change", (event) => {
-        const selectedStationKey = event.target.value;
-        const selectedStationDisplayName = event.target.options[event.target.selectedIndex].text;
-        this.handleStationSelect(null, selectedStationKey, selectedStationDisplayName, false);
-    });
+        // Correctly listen for the change event on the <select> element
+        document.getElementById("stationSelect").addEventListener("change", (event) => {
+            const selectedStationKey = event.target.value;
+            const selectedStationDisplayName = event.target.options[event.target.selectedIndex].text;
+            this.handleStationSelect(null, selectedStationKey, selectedStationDisplayName, true);
+        });
 
-    // Run jumpToStationFromHash after buttons are generated
-    this.jumpToStationFromHash();
 
-    document.addEventListener('DOMContentLoaded', () => {
-        this.jumpToStationFromHash();
-    }, { once: true });
-}
+    }
 
 
     init() {
@@ -174,7 +171,6 @@ async addEventListeners() {
         this.currentPage = new Page(stationKey, this.radioPlayer); // Pass radioPlayer instance
       }
 
-
     getNestedValue(obj, keyPath, targetProperty, defaultValue = undefined) {
         if (!obj || !keyPath || !targetProperty) return defaultValue;
 
@@ -207,33 +203,30 @@ async addEventListeners() {
         return result ?? defaultValue;
     }
 
-
-
     calculateNextAndPreviousIndices(direction) {
+        const allStations = this.stations.map((stationKey) => ({
+            stationKey,
+            stationDisplayName: stationKey,
+            tags: [],
+            group: null,
+        }));
 
-    const allStations = this.stations.map((stationKey) => ({
-        stationKey,
-        stationDisplayName: stationKey,
-        tags: [],
-        group: null,
-    }));
+        let filteredStations = [];
 
-    let filteredStations = [];
-
-    if (this.currentTag === "all") {
-        filteredStations = allStations;
-    } else {
-        filteredStations = allStations.filter(station => hasTag(station, this.currentTag));
-        if (filteredStations.length === 0) {
+        if (this.currentTag === "all") {
             filteredStations = allStations;
+        } else {
+            filteredStations = allStations.filter(station => hasTag(station, this.currentTag));
+            if (filteredStations.length === 0) {
+                filteredStations = allStations;
+            }
         }
-    }
 
-    const currentStation = filteredStations.find(station => station.stationKey === this.stationKey);
-    if (!currentStation) {
-        console.log('no currentStation, returning');
-        return;
-    }
+        const currentStation = filteredStations.find(station => station.stationKey === this.stationKey);
+        if (!currentStation) {
+            console.log('no currentStation, returning');
+            return;
+        }
 
 
         this.currentIndex = filteredStations.indexOf(currentStation);
@@ -367,7 +360,7 @@ async addEventListeners() {
             document.documentElement.style.setProperty("--albumArt", `url("../${this.stationArt}")`);
             document.documentElement.style.setProperty("--stationArt", `url("../${this.stationArt}")`);
             this.currentPage.setupMediaSession(this.stationDisplayName, 'currently loading', this.stationArt, false);
-            this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, true]);
+            this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, null, true]);
             this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false;
             console.log(stationKey);
@@ -452,8 +445,7 @@ async addEventListeners() {
             newAudio.onerror = (error) => {
                 console.warn('Error loading audio:', error);
                 if (this.isPlaying && this.currentPage) {
-                    console.log('this.currentPage', this.currentPage);
-                    this.currentPage.refreshCurrentData([`Audio not loading, skipping station`, '', '', this.stationArt, null, null, true]);
+                    this.currentPage.refreshCurrentData([`Audio not loading, skipping station`, '', '', this.stationArt, null, null, null, true]);
                    // direction === true ? this.skipBackward() : this.skipForward();
                 }
             };
@@ -595,9 +587,9 @@ async addEventListeners() {
 
     extractSongAndArtist(data, stationKey) {
         const replaceSpecialCharacters = str => {
-    if (str == null) return ''; // Handle null or undefined
-    const strValue = String(str); // Ensure it's a string
-    return strValue
+        if (str == null) return ''; // Handle null or undefined
+        const strValue = String(str); // Ensure it's a string
+        return strValue
         .replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")
         .replace(/–|—/g, "-")
         .replace(/[“”„]/g, '"')
@@ -642,7 +634,7 @@ async addEventListeners() {
             return song
                 .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
                 .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
-                .replace(/\s-\s.*kqua.*$/i, '')    // Removes " - Radio Version" or similar
+                .replace(/\s-\s.*kqua.*$/i, '')    // Removes " - kqua
                 .replace(/\s-\s.*mix.*$/i, '')    // Removes " - Something Mix" or similar
                 .replace(/\s*-\s*\([^)]*\)/g, '') // Removes " - (Anything in brackets)"
                 .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
@@ -668,11 +660,9 @@ async addEventListeners() {
                 .trim();
         };
 
-        const getMetadata = (key) => replaceSpecialCharacters(this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, key)));
         const regexPattern = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex', null) || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
         const regexPattern2 = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex2', null);
         const match = regexPattern.exec(replaceSpecialCharacters(data));
-
 
         let dataPath = data.title;
 
@@ -870,7 +860,8 @@ async addEventListeners() {
                     lfmData.track.listeners || null,
                     lfmData.track.playcount || null,
                     lfmData.track.album?.artist || '',
-                    lfmData.track?.duration || null
+                    lfmData.track?.duration || null,
+                    lfmData.track.userplaycount || null
                 ];
             } else if (lfmData.error !== 6  && (queryType == 'album')) {
                 lfmResult = [
@@ -879,12 +870,14 @@ async addEventListeners() {
                     currentSong || 'No streaming data available',
                     this.applyFilters('artist', lfmData.album?.artist) || currentArtist,
                     lfmData.album?.listeners || null,
-                    lfmData.album?.playcount || null
+                    lfmData.album?.playcount || null,
+                    lfmData.album?.userplaycount || null
                 ];
             }
             const isLfmArtMissing = Array.isArray(lfmResult) ? !lfmResult[0] : true;
             const lfmListeners = Array.isArray(lfmResult) ? lfmResult[4] || null : null;
             const lfmPlaycount = Array.isArray(lfmResult) ? lfmResult[5] || null : null;
+            const lfmUserPlaycount = Array.isArray(lfmResult) ? lfmResult[8] || null : null;
 
             if (mbData.releases?.length && (lfmData.error === 6 || isLfmArtMissing || lfmResult?.[7] == 'Various Artists')) {
                 mbResult = [
@@ -909,10 +902,10 @@ async addEventListeners() {
 
                     if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
                         // return album art, album, song, artist, lfm listeners & playcount
-                        return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount];
+                        return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount, lfmUserPlaycount];
                     } else {
                         // return album art, album, song, artist, lfm listeners & playcount
-                        return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount];
+                        return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount];
                     }
                 }
             }
@@ -928,10 +921,10 @@ async addEventListeners() {
 
                 // return album art, album, song, artist, lfm listeners & playcount
                 if (lfmResult[7] && !this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) {
-                    this.duration = Number(lfmResult[7]);
-                    console.log('this.duration', this.duration)
+                    this.currentTrack.duration = Number(lfmResult[7]);
+                    console.log('this.duration', this.currentTrack.duration)
                 } 
-                return [finalAlbumArt, lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null];
+                return [finalAlbumArt, lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null, lfmResult[8] || null];
             } else {
                 // return album art, album, song, artist, lfm listeners & playcount
                 return [finalAlbumArt, currentAlbum || '', currentSong, currentArtist, null, null];
@@ -972,6 +965,10 @@ async addEventListeners() {
 
         // Construct the LFM query URL
         lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(this.applyFilters('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(this.applyFilters(lfmQueryField, queryDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
+
+        if (this.lastfmUsername) {
+            lfmQueryUrl += `&username=${encodeURIComponent(this.lastfmUsername)}`;
+        }
 
         // Construct the MusicBrainz query URL
         mbQueryUrl = `https://musicbrainz.org/ws/2/release?fmt=json&query=title:+"${encodeURIComponent(this.applyFilters('track', currentSong))}"^3%20${encodeURIComponent(currentSong)}%20artistname:+"${encodeURIComponent(this.applyFilters('artist', currentArtist))}"^4${encodeURIComponent(this.applyFilters('artist', currentArtist))}%20artistname:+"-Various Artists"^4-various artists%20format:+"cd"^4cd&limit=3`;
@@ -1190,7 +1187,7 @@ async addEventListeners() {
                         const contentType = response.headers.get('content-type');
                         
                         // Check if contentType exists before calling includes
-                        if (contentType && (contentType.includes('application/json') || 
+                        if (contentType && (contentType.includes('application/json') || contentType && this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null) ||
                             contentType.includes('application/vnd.api+json') || 
                             (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)))) {
                             return response.json().then((data) => ({ data, contentType }));
@@ -1229,7 +1226,7 @@ async addEventListeners() {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
-                        } else if (contentType && contentType.includes('text/plain') && !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null)) {
+                        } else if (contentType && contentType.includes('text/plain') && !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) {
                             data = this.extractJsonFromJS(data);
                         } else if (contentType && contentType.includes('text/html') && 
                                     (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/plain') || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/html')) {
@@ -1272,7 +1269,7 @@ async addEventListeners() {
 
                         // Update the timestamp to reflect the new data was processed
                         this.lastDataUpdateTime = Date.now();
-                        this.duration = null;
+                        this.currentTrack.duration = null;
 
                     })
                     .catch((error) => {
@@ -1402,6 +1399,20 @@ async addEventListeners() {
         return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
     }      
 
+
+    getLastFmUsername() {
+        const userCookie = Cookies.get("scrobbleradio-lastfm-user");
+        if (!userCookie) return null;
+
+        try {
+            const userData = JSON.parse(userCookie);
+            return userData.username || null;
+        } catch (e) {
+            console.error("Error parsing Last.fm user cookie in radioPlayer.js", e);
+            return null;
+        }
+    }
+
     updateScrobbleData(song, artist, album) {
         if (song && artist && album) {
             const currentScrobble = {
@@ -1465,12 +1476,18 @@ async addEventListeners() {
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData(['[ Air break ]', '', '', this.stationArt, null, null, true]);
+                page.refreshCurrentData(['[ Air break ]', '', '', this.stationArt, null, null, null, true]);
                 return;
             }
 
             this.hasLoadedData = true;
-            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;     
+            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;   
+
+            if (!song) {
+                const page = new Page(this.stationKey, this);
+                page.refreshCurrentData(['No song data found', '', '', this.stationArt, null, null, null, true]);
+                return;
+            } 
 
             // Predefined values
             const timezone = this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null);
@@ -1506,24 +1523,24 @@ async addEventListeners() {
             }
 
             // Format and check stale data in a separate function
-            const { staleData } = this.checkStaleData(timezone, this.currentTrack.timestamp, this.currentTrack.spinUpdated, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)), this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'trackEnd', null)), song);
+            const { staleData } = this.checkStaleData(timezone, this.currentTrack.timestamp, this.currentTrack.spinUpdated, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) || this.currentTrack.duration, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'trackEnd', null)), song);
 
             if ((staleData === "Live365 past" || staleData === "Still future") && (song)) {
                     return;   
             } else if ([this.stationKey] == 'indie1023' && song == "[Air break]") {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData(['[ Air Break ]', '', '', this.stationArt, null, null, true]);
+                page.refreshCurrentData(['[ Air Break ]', '', '', this.stationArt, null, null, null, true]);
                 return;
             } else if (song == "[Air break]" && !staleData ) {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([song, '', '', this.stationArt, null, null, true]);
+                page.refreshCurrentData([song, '', '', this.stationArt, null, null, null, true]);
                 return;
             }
 
             // Handle stale data or invalid song
             if ((staleData) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([(staleData || song), '', '', this.stationArt, null, null, true]);
+                page.refreshCurrentData([(staleData || song), '', '', this.stationArt, null, null, null, true]);
                 return;
             }
 
@@ -1532,7 +1549,7 @@ async addEventListeners() {
                 
                 // First, get the metadata from last.fm
                 this.getLfmMeta(song, artist, album, albumArt, '', '', false).then(lfmValues => {
-                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
+                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
 
                     this.song = lfmSong || this.currentTrack.title;
                     this.artist = lfmArtist || this.currentTrack.artist;
@@ -1543,19 +1560,17 @@ async addEventListeners() {
 
                     this.listeners = lfmListeners || null;
                     this.playcount = lfmPlaycount || null;
+                    this.userPlaycount = lfmUserPlaycount || null;
                     this.lfmMetaChanged = true;
 
                     const page = new Page(this.stationKey, this);
-                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.errorMessage]);
+                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.errorMessage]);
 
                 }).catch(error => {
                     console.error('Error processing data:', error);
                 });
             }
 
-            if ((this.duration + this.lastKnownUpdatedTime) > Date.now()) {
-                this.lastKnownUpdatedTime = this.duration + this.lastKnownUpdatedTime 
-            }
         }
     }
 
@@ -1668,7 +1683,7 @@ async addEventListeners() {
         this.pauseTimeout = setTimeout(() => {
             console.log("the stream should be reloaded");
             const page = new Page(this.stationKey, this);
-            page.refreshCurrentData([`Press reload to refresh feed`, '', '', this.stationArt, null, null, true]);
+            page.refreshCurrentData([`Press reload to refresh feed`, '', '', this.stationArt, null, null, null, true]);
             document.getElementById("playermeta").classList.add("opacity-50");
             if (this.hls) {
                 this.destroyHLSAndResetAudio();
@@ -1722,7 +1737,7 @@ async addEventListeners() {
     reloadStream() {
         this.shouldReloadStream = true;
         console.log('reload working');
-        this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, true]);
+        this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, null, true]);
         this.playButton.lastElementChild.className = "spinner-grow text-light";
 
         // Reset scrobble (assuming scrobbleReset is a method)
@@ -1740,7 +1755,6 @@ async addEventListeners() {
         this.calculateNextAndPreviousIndices();
         const currentStationKey = stationKeys[this.currentIndex];
 
-        console.log('this.currentIndex', this.currentIndex);
         this.handleStationSelect(true, currentStationKey, null, true);
     }
 

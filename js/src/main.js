@@ -44,39 +44,41 @@ stationSelectDiv.addEventListener('click', (event) => handleStationClick(event, 
 
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // Generate the radio buttons first
+    // 1. Generate the radio buttons first
     await generateRadioButtons("all", stations, radioPlayer, stationKeys);
 
-    radioPlayer.jumpToStationFromHash();
+    // 2. DECISION LOGIC: Hash vs Default
+    const hash = window.location.hash;
+    if (hash) {
+        // If there is a hash (e.g. #wfmu), jump to it
+        radioPlayer.jumpToStationFromHash();
+    } else {
+        // If no hash, load the very first station in your list
+        const defaultStation = stationKeys[0];
+        radioPlayer.handleStationSelect(false, defaultStation, null, true);
+    }
 
-    const defaultStation = stationKeys[0];
-    radioPlayer.handleStationSelect(false, defaultStation, null, true);
-
+    // 3. Setup the select element listener (only once)
     const stationSelect = document.getElementById('stationSelect');
     if (stationSelect) {
         stationSelect.addEventListener('change', (event) => {
             const stationKey = event.target.value;
-            const direction = true; 
-            radioPlayer.handleStationSelect(direction, stationKey, null, true);
+            radioPlayer.handleStationSelect(true, stationKey, null, true);
         }, { once: true });
-    } else {
-        console.error('Element with ID "stationSelect" not found.');
     }
 
-    // Detect fullscreen mode (PWA standalone) and apply CSS class
+    // ... (The rest of your PWA/Fullscreen/Scroll logic remains the same)
     if (window.matchMedia('(display-mode: standalone)').matches) {
         document.body.classList.add('fullscreen-mode');
     }
 
-    // Scroll to Panel 2
     const container = document.querySelector('.mobile-swipe');
     const panel2 = document.getElementById('panel2');
     if (container && panel2) {
         container.scrollTo({
             left: panel2.offsetLeft,
-            behavior: 'smooth' // Change to 'auto' if you don't want smooth scrolling
+            behavior: 'smooth'
         });
     }
-
 }, { once: true });
 

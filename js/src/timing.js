@@ -79,6 +79,7 @@ export function checkStaleData(timezone, timestamp, spinUpdated, duration, track
         this.duration = duration;
 
         if (this.duration > 0) {
+            console.log('apiUpdatedData duration is greater than 0', apiUpdatedData , ' + ', this.duration, ' = ', apiUpdatedData + this.duration);
             apiUpdatedData = apiUpdatedData + duration;
         } else {
             // Check if duration is already in epoch format (milliseconds)
@@ -89,9 +90,10 @@ export function checkStaleData(timezone, timestamp, spinUpdated, duration, track
 
             if (duration <= 600) {
                 apiUpdatedData = apiUpdatedData + (duration * 1000);
-               // console.log('apiUpdatedData', apiUpdatedData)
+                console.log('apiUpdatedData duration less than 600', apiUpdatedData);
             } else if (epochDuration > 0) {
                 apiUpdatedData = apiUpdatedData + epochDuration;
+                console.log('apiUpdatedData greater than 0, epochDuration', apiUpdatedData, epochDuration);
             } else {
                 apiUpdatedData = apiUpdatedData + duration; // Get end time of the song
                 console.log('apiUpdatedData else', apiUpdatedData)

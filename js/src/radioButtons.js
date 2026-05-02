@@ -42,6 +42,9 @@ export function generateRadioButtons(tags = ['all'], stations, radioPlayer) {
     filteredStations = allStations.filter(station => 
       tags.every(tag => hasTag(station, tag))
     );
+   } else {
+    // When 'all' is selected (or no tags), exclude any station that has the 'hidden' tag
+    filteredStations = allStations.filter(station => !hasTag(station, 'hidden'));
   }
 
   // Clear the station select div and display a message if no stations match
@@ -75,6 +78,7 @@ export function generateRadioButtons(tags = ['all'], stations, radioPlayer) {
     img.height = '45';
     img.loading = 'lazy';
     img.alt = station.stationDisplayName;
+    img.title = station.stationDisplayName;
 
     button.appendChild(input);
     button.prepend(img);

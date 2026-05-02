@@ -44,7 +44,7 @@ export class Page {
     }
 
     refreshCurrentData(values) {
-        const [song, artist, album, artworkUrl, listeners, playcount, errorMessage] = values;
+        const [song, artist, album, artworkUrl, listeners, playcount, userPlaycount, errorMessage] = values;
         const station = this.radioPlayer.currentStationData; // Now radioPlayer is defined
 
         // Clear any existing scrobble timeout when new data arrives
@@ -68,9 +68,16 @@ export class Page {
         clone.querySelector('#artist').textContent = artist;
         clone.querySelector('#album').textContent = album;
 
-        const listenerText = (listeners !== null && playcount !== null)
-            ? `Listeners: ${this.formatCompactNumber(listeners)} | Plays: ${this.formatCompactNumber(playcount)}`
-            : '';
+        const parts = [];
+        if (listeners !== null && playcount !== null) {
+            parts.push(`Listeners: ${this.formatCompactNumber(listeners)}`, `Plays: ${this.formatCompactNumber(playcount)}`);
+            
+            if (userPlaycount > 0) {
+                parts.push(`User Plays: ${this.formatCompactNumber(userPlaycount)}`);
+            }
+        }
+
+        const listenerText = parts.length > 0 ? parts.join(' | ') : '';
         clone.querySelector('#listeners').textContent = listenerText;
 
         const albumArtEl = clone.querySelector('#albumArt');
@@ -82,6 +89,7 @@ export class Page {
                 this.artworkUrl = artworkUrl;
                 albumArtEl.src = artworkUrl;
                 albumArtEl.alt = `${song} by ${artist}`;
+                albumArtEl.title = `${song} by ${artist}`;
                 document.documentElement.style.setProperty("--albumArt", `url("${effectiveUrl}")`);
             } else if (!this.artworkUrl) {
                 this.artworkUrl = this.stationArt;
