@@ -5,16 +5,28 @@ const SECRET = "d006f6c9ede4f8d566110fdd5369dbe6";
 
 function removeTokenFromUrl() {
     const { history, location } = window;
-    const { search } = location;
+    if (!history || !history.replaceState) return;
 
-    if (search && search.includes('token') && history && history.replaceState) {
-        // Remove token from URL
-        const cleanSearch = search.replace(/(\&|\?)token([_A-Za-z0-9=\.%]+)/g, '').replace(/^&/, '?');
-        
-        // Replace search params with clean params
-        const cleanURL = location.origin + location.pathname + cleanSearch;
-        
-        // Use browser history API to clean the params
+    let cleanPathname = location.pathname;
+    let cleanSearch = location.search;
+
+    // 1. Handle Pathname Token (e.g., / -Cv3_jE3)
+    // This regex looks for:
+    // - A dash: "-"
+    // - Followed by 4 or more characters: "[a-zA-Z0-9._-]{4,}"
+    //   (This includes letters, numbers, dots, underscores, and dashes)
+    // - The 'g' flag ensures it catches it anywhere in the path
+    cleanPathname = cleanPathname.replace(/-[a-zA-Z0-9._-]{4,}/g, "");
+
+    // 2. Handle Query String Token (e.g., ?token=123)
+    if (cleanSearch && cleanSearch.includes('token')) {
+        cleanSearch = cleanSearch.replace(/(\&|\?)token([_A-Za-z0-9=\.%]+)/g, '').replace(/^&/, '?');
+        if (cleanSearch === '?') cleanSearch = '';
+    }
+
+    const cleanURL = location.origin + cleanPathname + cleanSearch;
+
+    if (cleanURL !== location.href) {
         history.replaceState({}, document.title, cleanURL);
     }
 }
