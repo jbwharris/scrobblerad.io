@@ -6,7 +6,7 @@ const stationData = {
     artist2: "tracklist.results.0.song.artistName",
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
-    stationName: "WEXT",
+
     location: "Troy, NY 🇺🇸",
     webUrl: "https://wext.drupal.publicbroadcasting.net/  ",
     streamUrl: "https://wmht.streamguys1.com/wext1",

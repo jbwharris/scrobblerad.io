@@ -1,6 +1,6 @@
 const stationData = {
   kfai: {
-    stationName: "KFAI",
+
     location: "Minneapolis, MN 🇺🇸",
     webUrl: "https://kfai.org",
     streamUrl: "https://kfai.broadcasttool.stream/kfai-1",

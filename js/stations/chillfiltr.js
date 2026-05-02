@@ -1,6 +1,6 @@
 const stationData = {
   chillfiltr: {
-    stationName: "CHILLFILTR",
+
     artist: "current-track.artist",
     song: "current-track.title",
     location: "Ottawa, ON 🇨🇦",

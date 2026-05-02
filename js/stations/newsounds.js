@@ -1,6 +1,6 @@
 const stationData = {
   newsounds: {
-    stationName: "New Sounds",
+
     artist: "q2.current_playlist_item.catalog_entry.composer.name",
     song: "q2.current_playlist_item.catalog_entry.title",
     location: "New York, NY 🇺🇸",

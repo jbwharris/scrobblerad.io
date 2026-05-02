@@ -4,7 +4,6 @@ const stationData = {
     song: "included.1.attributes.name",
     album: "",
     albumArt: "included.1.attributes.image_urls.large",
-    stationName: "Amazing Radio UK",
     location: "Newcastle, UK 🇬🇧",
     webUrl: "https://amazingradio.com",
     streamUrl: "https://stream6.amazingradio.com:8443/stream.mp3?redirected=1",
@@ -12,5 +11,6 @@ const stationData = {
     needPath: true,
     timestamp: "data.0.attributes.aired_at",
     timezone: "UTC",
+    proxyStream: true,
   }
 }

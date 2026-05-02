@@ -1,6 +1,6 @@
 const stationData = {
   kffp: {
-    stationName: "KFFP",
+
     location: "Portland, OR 🇺🇸",
     webUrl: "https://freeformportland.org/",
     streamUrl: "http://listen.freeformportland.org:8000/stream",

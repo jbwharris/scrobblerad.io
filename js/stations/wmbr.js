@@ -1,6 +1,6 @@
 const stationData = {
   wmbr: {
-    stationName: "WMBR",
+
     artist: "0.artist",
     song: "0.title",
     album: "0.album",

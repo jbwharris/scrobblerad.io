@@ -6,7 +6,6 @@ const stationData = {
     artist2: "tracklist.results.0.song.artistName",
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
-    stationName: "KALW",
     location: "San Francisco, CA 🇺🇸",
     webUrl: "https://kalw.org",
     streamUrl: "https://kalw-live.streamguys1.com/kalw.aac?uuid=jfpdzfzx",

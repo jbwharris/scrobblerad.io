@@ -1,6 +1,6 @@
 const stationData = {
   cfny: {
-    stationName: "102.1 The Edge - CFNY",
+
     artist: "artist",
     song: "title",
     album: "album",

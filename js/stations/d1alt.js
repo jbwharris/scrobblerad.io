@@ -1,6 +1,6 @@
 const stationData = {
   d1alt: {
-    stationName: "D1 Alternative",
+
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://d1alternative.com",
     streamUrl: "https://cast1.torontocast.com:2545/stream",

@@ -1,6 +1,6 @@
 const stationData = {
   untidyradio: {
-    stationName: "Untidy Radio",
+
     artist: "current-track.artist",
     song: "current-track.title",
     albumArt: "current-track.art",

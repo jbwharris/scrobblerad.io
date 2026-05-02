@@ -1,6 +1,6 @@
 const stationData = {
   wrfl: {
-    stationName: "WRFL",
+
     artist: "artist",
     song: "track",
     album: "album",
@@ -11,7 +11,7 @@ const stationData = {
     timestamp: "created_at",
     timezone: "America/New_York",
     proxyApi: true,
-    phpString: true,
+    jsonString: true,
     filter: [
       "WRFL",
     ],

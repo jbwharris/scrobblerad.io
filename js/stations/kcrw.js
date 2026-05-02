@@ -3,7 +3,7 @@ const stationData = {
     artist: "artist",
     song: "title",
     album: "album",
-    stationName: "KCRW",
+
     webUrl: "https://www.kcrw.com/",
     location: "Los Angeles, CA 🇺🇸",
     streamUrl: "https://streams.kcrw.com/kcrw_mp3",

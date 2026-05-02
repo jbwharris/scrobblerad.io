@@ -1,6 +1,5 @@
 const stationData = {
   inhailer: {
-    stationName: "Inhailer Radio",
     artist: "data.track_artist",
     song: "data.track_title",
     albumArt: "data.artwork_urls.large",

@@ -8,7 +8,7 @@ const stationData = {
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
     albumArt2: "tracklist.results.0.song.artworkUrl100",
-    stationName: "WUKY",
+
     location: "Lexington, KY 🇺🇸",
     webUrl: "https://wuky.org",
     streamUrl: "https://wuky.streamguys1.com/wuky",

@@ -1,6 +1,6 @@
 const stationData = {
   floodfm: {
-    stationName: "Flood FM",
+
     artist: "current-track.artist",
     song: "current-track.title",
     location: "Online",

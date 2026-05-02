@@ -1,6 +1,6 @@
 const stationData = {
   zeilsteen: {
-    stationName: "Zeilsteen Radio",
+
     location: "Amsterdam, NL 🇳🇱",
     webUrl: "https://zeilsteen.com/",
     streamUrl: "https://sslive.zeilsteen.com/;",

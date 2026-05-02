@@ -1,6 +1,6 @@
 const stationData = {
   ciut: {
-    stationName: "CIUT",
+
     artist: "data.0.artist",
     song: "data.0.title",
     album: "data.0.album",

@@ -1,6 +1,6 @@
 const stationData = {
   noiseboxradio: {
-    stationName: "NoiseboxRadio",
+
     artist: "artist",
     song: "title",
     album: "album",

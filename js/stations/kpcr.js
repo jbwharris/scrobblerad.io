@@ -1,6 +1,6 @@
 const stationData = {
   kpcr: {
-    stationName: "KPCR - Pirate Cat Radio",
+
     location: "Santa Cruz, CA 🇺🇸",
     webUrl: "https://www.kpcr.org/",
     streamUrl: "https://kpcrfm.radioca.st/stream.mp3",

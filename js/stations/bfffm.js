@@ -1,6 +1,5 @@
 const stationData = {
   bfffm: {
-    stationName: "BFF.fm",
     artist: "artist",
     song: "title",
     album: "album",

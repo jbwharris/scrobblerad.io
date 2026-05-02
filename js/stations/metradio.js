@@ -1,6 +1,6 @@
 const stationData = {
   metradio: {
-    stationName: "Met Radio",
+
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://metradio.ca",
     streamUrl: "https://ryerson.out.airtime.pro/ryerson_a",

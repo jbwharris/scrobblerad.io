@@ -1,6 +1,6 @@
 const stationData = {
   radionovanuit: {
-    stationName: "Radio Nova - La Nuit",
+
     artist: "iArtist",
     song: "iName",
     location: "Paris, France 🇫🇷",

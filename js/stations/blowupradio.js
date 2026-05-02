@@ -1,6 +1,5 @@
 const stationData = {
   blowupradio: {
-    stationName: "BlowUpRadio",
     artist: "current-track.artist",
     song: "current-track.title",
     albumArt: "current-track.art",

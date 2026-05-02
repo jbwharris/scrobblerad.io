@@ -1,6 +1,6 @@
 const stationData = {
   xpn2: {
-    stationName: "XPoNential Radio",
+
     location: "Philiadelphia, PA 🇺🇸",
     webUrl: "https://xponentialradio.org",
     streamUrl: "https://xpn2hi.xpn.org/xpn2hi-nopreroll",

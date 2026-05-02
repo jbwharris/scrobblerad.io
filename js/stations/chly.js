@@ -1,6 +1,6 @@
 const stationData = {
   chly: {
-    stationName: "CHLY",
+
     location: "Nanaimo, BC 🇨🇦",
     webUrl: "https://www.chly.ca/",
     streamUrl: "https://stream.statsradio.com:8146/stream",

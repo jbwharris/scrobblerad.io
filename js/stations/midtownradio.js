@@ -1,6 +1,6 @@
 const stationData = {
   midtownradio: {
-    stationName: "Midtown Radio",
+
     artist: "current.metadata.artist_name",
     song: "current.metadata.track_title",
     album: "current.metadata.album_title",

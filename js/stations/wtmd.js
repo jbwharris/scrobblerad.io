@@ -1,6 +1,6 @@
 const stationData = {
   wtmd: {
-    stationName: "WTMD",
+
     location: "Baltimore, MD 🇺🇸",
     webUrl: "https://wtmd.org",
     streamUrl: "https://wtmd-ice.streamguys1.com/wtmd.mp3",

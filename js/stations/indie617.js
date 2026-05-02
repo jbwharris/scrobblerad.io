@@ -1,6 +1,6 @@
 const stationData = {
   indie617: {
-    stationName: "indie617",
+
     albumArt: "data.artwork_urls.large",
     location: "Boston, MA 🇺🇸",
     webUrl: "https://offthedialmedia.com",

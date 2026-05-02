@@ -1,6 +1,6 @@
 const stationData = {
   cjuc: {
-    stationName: "CJUC",
+
     location: "Whitehorse, Yukon 🇨🇦",
     webUrl: "https://cjucfm.com",
     streamUrl: "https://stream.cjucfm.com/cjuc",

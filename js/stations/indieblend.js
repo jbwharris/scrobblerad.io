@@ -1,6 +1,6 @@
 const stationData = {
   indieblend: {
-    stationName: "The Indie Blend",
+
     artist: "current-track.artist",
     song: "current-track.title",
     location: "Washington, DC 🇺🇸",

@@ -3,7 +3,7 @@ const stationData = {
     artist: "0.artist",
     song: "0.song",
     album: "",
-    stationName: "Lightning 100",
+
     location: "Nashville, TN 🇺🇸",
     webUrl: "https://lightning100.com/",
     streamUrl: "https://18543.live.streamtheworld.com/WRLTFMAAC.aac?dist=scrobbleradio",

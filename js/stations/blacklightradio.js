@@ -1,6 +1,5 @@
 const stationData = {
   blacklightradio: {
-    stationName: "Blacklight Radio",
     artist: "current-track.artist",
     song: "current-track.title",
     location: "Tulsa, OK 🇺🇸",

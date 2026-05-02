@@ -1,6 +1,6 @@
 const stationData = {
   megashuffle: {
-    stationName: "MegaShuffle",
+
     location: "Toronto, ON 🇨🇦",
     webUrl: "https://megashuffle.com",
     streamUrl: "https://das-edge13-live365-dal02.cdnstream.com/a18329",

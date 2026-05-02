@@ -1,6 +1,6 @@
 const stationData = {
   kroq: {
-    stationName: "KROQ",
+
     artist: "performances.0.artist",
     song: "performances.0.title",
     albumArt: "performances.largeimage",

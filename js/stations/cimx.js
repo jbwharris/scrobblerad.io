@@ -1,6 +1,6 @@
 const stationData = {
   cimx: {
-    stationName: "89X - CIMX",
+
     artist: "artist",
     song: "title",
     album: "album",

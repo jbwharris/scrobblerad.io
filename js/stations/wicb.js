@@ -1,6 +1,6 @@
 const stationData = {
   wicb: {
-    stationName: "WICB",
+
     artist: "0.artist",
     song: "0.title",
     album: "0.album",

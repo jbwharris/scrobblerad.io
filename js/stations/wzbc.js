@@ -1,6 +1,6 @@
 const stationData = {
   wzbc: {
-    stationName: "WZBC",
+
     location: "Chestnut Hill, MA 🇺🇸",
     webUrl: "https://wzbc.org/",
     streamUrl: "https://stream.wzbc.org/wzbc",

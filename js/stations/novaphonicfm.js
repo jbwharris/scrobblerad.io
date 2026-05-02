@@ -6,7 +6,7 @@ const stationData = {
     artist2: "tracklist.results.0.song.artistName",
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
-    stationName: "Novaphonic.fm",
+
     location: "Dayton, OH 🇺🇸",
     webUrl: "https://www.wyso.org/novaphonic-fm",
     streamUrl:

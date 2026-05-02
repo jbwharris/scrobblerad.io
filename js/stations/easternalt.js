@@ -4,7 +4,7 @@ const stationData = {
     song: "title",
     album: "album",
     albumArt: "cover",
-    stationName: "Eastern Alternative Radio",
+
     location: "East Anglia, UK 🇬🇧",
     webUrl: "https://easternalternativeradio.co.uk/",
     streamUrl: "https://listen.radioking.com/radio/676570/stream/740833",

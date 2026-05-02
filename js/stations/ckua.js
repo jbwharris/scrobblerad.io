@@ -3,7 +3,7 @@ const stationData = {
     artist: "0.TPE1",
     song: "0.TIT2",
     album: "0.TALB",
-    stationName: "CKUA",
+
     location: "Edmonton, AB 🇨🇦",
     webUrl: "https://www.ckua.com",
     streamUrl: "https://ais-sa1.streamon.fm/7000_48k.aac",

@@ -1,6 +1,6 @@
 const stationData = {
   coloradosound: {
-    stationName: "The Colorado Sound",
+
     artist: "0.TPE1",
     song: "0.TIT2",
     album: "0.TALB",

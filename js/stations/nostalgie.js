@@ -1,6 +1,6 @@
 const stationData = {
   nostalgie: {
-    stationName: "Nostalgie",
+
     location: "Antwerpen, BE 🇧🇪",
     webUrl: "https://nl.nostalgie.be/luister/nostalgie",
     streamUrl:

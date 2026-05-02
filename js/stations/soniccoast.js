@@ -1,6 +1,6 @@
 const stationData = {
   soniccoast: {
-    stationName: "The Sonic Coast",
+
     location: "Detroit, MI 🇺🇸",
     webUrl: "https://thesoniccoast.com/",
     streamUrl: "https://das-edge17-live365-dal02.cdnstream.com/a85042?_=823680",

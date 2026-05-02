@@ -2,7 +2,7 @@ const stationData = {
   kdhx: {
     artist: "artistname",
     song: "songtitle",
-    stationName: "KDHX",
+
     location: "St Louis, MO 🇺🇸",
     webUrl: "https://kdhx.org",
     streamUrl: "http://kdhx-ice.streamguys1.com/live",

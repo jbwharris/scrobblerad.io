@@ -1,6 +1,6 @@
 const stationData = {
   kaos: {
-    stationName: "KAOS",
+
     location: "Olympia, WA 🇺🇸",
     webUrl: "https://kaosradio.org/",
     streamUrl: "https://stream.pacificaservice.org:9000/kbcs",

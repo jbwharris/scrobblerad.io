@@ -1,6 +1,6 @@
 const stationData = {
   wyomingsounds: {
-    stationName: "Wyoming Sounds",
+
     location: "Laramie, WY 🇺🇸",
     webUrl: "https://www.wyomingpublicmedia.org",
     streamUrl: "https://wyoming-public-ice.streamguys1.com/WYS128MP3?uuid=qfbe7zumo",

@@ -1,6 +1,6 @@
 const stationData = {
   kusf: {
-    stationName: "KUSF",
+
     artist: "track.song.artist",
     song: "track.song.title",  
     album: "track.song.album",

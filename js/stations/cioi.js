@@ -1,6 +1,6 @@
 const stationData = {
   cioi: {
-    stationName: "INDI 101.5 - CIOI",
+
     artist: "Artist",
     song: "Title",
     album: "Album",

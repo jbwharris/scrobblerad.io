@@ -3,7 +3,7 @@ const stationData = {
     artist: "artist",
     song: "title",
     album: "album",
-    stationName: "Cavern.FM",
+
     location: "Portland, OR 🇺🇸",
     webUrl: "https://www.cavern.fm/",
     streamUrl: "https://stream.radiojar.com/bt6e693868tvv.m4a?1742066166",

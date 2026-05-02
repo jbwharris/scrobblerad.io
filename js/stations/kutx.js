@@ -6,7 +6,7 @@ const stationData = {
     artist2: "tracklist.results.0.song.artistName",
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
-    stationName: "KUTX",
+
     location: "Austin, TX 🇺🇸",
     webUrl: "https://kutx.org",
     streamUrl: "https://streams.kut.org/4428_56?aw_0_1st.playerid=kutx-free",

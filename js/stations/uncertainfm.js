@@ -1,6 +1,6 @@
 const stationData = {
   uncertainfm: {
-    stationName: "UncertainFM",
+
     artist: "current-track.artist",
     song: "current-track.title",
     albumArt: "current-track.art",

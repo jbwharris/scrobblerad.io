@@ -1,6 +1,6 @@
 const stationData = {
   ckut: {
-    stationName: "CKUT",
+
     artist: "segment.artist_html",
     song: "segment.title_html",
     album: "segment.album_html",

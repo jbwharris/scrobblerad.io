@@ -1,6 +1,6 @@
 const stationData = {
   indiegoogleplus: {
-    stationName: "Indie Google+",
+
     artist: "artist",
     song: "title",
     location: "Internet",

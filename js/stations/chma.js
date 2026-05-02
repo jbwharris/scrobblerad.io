@@ -1,6 +1,6 @@
 const stationData = {
   chma: {
-    stationName: "CHMA",
+
     artist: "body.recently_played.0.artist",
     song: "body.recently_played.0.title",
     location: "Sackville, NB 🇨🇦",

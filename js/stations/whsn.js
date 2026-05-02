@@ -1,6 +1,6 @@
 const stationData = {
   whsn: {
-    stationName: "WHSN",
+
     artist: "artist",
     song: "title",
     album: "album",

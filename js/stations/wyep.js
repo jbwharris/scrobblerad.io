@@ -6,7 +6,7 @@ const stationData = {
     artist2: "tracklist.results.0.song.artistName",
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
-    stationName: "WYEP",
+
     location: "Pittsburgh, PA 🇺🇸",
     webUrl: "https://wyep.org/",
     streamUrl: "https://ais-sa3.cdnstream1.com/2557_128.mp3",

@@ -6,7 +6,7 @@ const stationData = {
     artist2: "tracklist.results.0.song.artistName",
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
-    stationName: "WRUR",
+
     location: "Rochester, NY 🇺🇸",
     webUrl: "https://www.wrur.org",
     streamUrl: "https://playerservices.streamtheworld.com/api/livestream-redirect/WRURFM.mp3",

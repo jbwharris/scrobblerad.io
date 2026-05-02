@@ -1,6 +1,6 @@
 const stationData = {
   wfuv: {
-    stationName: "WFUV",
+
     artist: "artist",
     song: "title",
     album: "album",

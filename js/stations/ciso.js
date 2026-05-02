@@ -1,6 +1,6 @@
 const stationData = {
   ciso: {
-    stationName: "89.1 MAX FM - CISO",
+
     location: "Orillia, ON 🇨🇦",
     webUrl: "https://891maxfm.ca",
     streamUrl: "https://bayshore.leanstream.co/CISOFM?",

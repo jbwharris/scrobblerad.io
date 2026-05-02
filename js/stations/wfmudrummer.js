@@ -1,6 +1,6 @@
 const stationData = {
   wfmudrummer: {
-    stationName: "WFMU - Give The Drummer Radio",
+
     location: "Jersey City, NJ 🇺🇸",
     webUrl: "https://wfmu.org/drummer",
     streamUrl: "https://stream0.wfmu.org/drummer",

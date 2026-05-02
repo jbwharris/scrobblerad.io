@@ -1,6 +1,6 @@
 const stationData = {
   wfmusoul: {
-    stationName: "WFMU - Rock'n'Soul Radio",
+
     location: "Jersey City, NJ 🇺🇸",
     webUrl: "https://wfmu.org",
     streamUrl: "https://stream0.wfmu.org/rocknsoul",

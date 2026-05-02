@@ -1,6 +1,6 @@
 const stationData = {
   kqua: {
-    stationName: "KQUA The River",
+
     artist: "current-track.artist",
     song: "current-track.title",
     albumArt: "current-track.art",
@@ -12,6 +12,7 @@ const stationData = {
     duration: "current-track.duration",
     timezone: "America/Los_Angeles",
     isFuture: true,
+    pathRegex: /^(.*) - (.*) - (.+)$/,
     filter: ["Community Calendar"],
   },
 }

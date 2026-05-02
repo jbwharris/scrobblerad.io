@@ -1,6 +1,6 @@
 const stationData = {
   wudr: {
-    stationName: "WUDR - Flyer Radio",
+
     artist: "0.TPE1",
     song: "0.TIT2",
     album: "0.TALB",

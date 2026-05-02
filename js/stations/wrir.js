@@ -1,6 +1,6 @@
 const stationData = {
   wrir: {
-    stationName: "WRIR",
+
     location: "Richmond, VA 🇺🇸",
     webUrl: "https://wrir.org/",
     streamUrl: "https://live.wrir.org/",

@@ -1,6 +1,6 @@
 const stationData = {
   radiolaurier: {
-    stationName: "Radio Laurier",
+
     artist: "current.metadata.artist_name",
     song: "current.metadata.track_title",
     album: "current.metadata.album_title",

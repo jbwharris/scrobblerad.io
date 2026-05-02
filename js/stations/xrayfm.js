@@ -3,7 +3,7 @@ const stationData = {
     artist: "artist",
     song: "title",
     album: "album",
-    stationName: "XRAY.FM",
+
     location: "Portland, OR 🇺🇸",
     webUrl: "https://xray.fm",
     streamUrl: "https://listen.xray.fm/stream",

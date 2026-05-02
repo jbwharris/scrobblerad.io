@@ -1,6 +1,6 @@
 const stationData = {
   lemellotron: {
-    stationName: "Le Mellotron",
+
     artist: "artist",
     song: "title",
     album: "album",

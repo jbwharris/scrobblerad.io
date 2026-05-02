@@ -1,6 +1,6 @@
 const stationData = {
   indie88: {
-    stationName: "Indie88",
+
     artist: "artist_name",
     song: "song_name",
     location: "Toronto, ON 🇨🇦",

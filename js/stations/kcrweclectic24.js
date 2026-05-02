@@ -3,7 +3,7 @@ const stationData = {
     artist: "artist",
     song: "title",
     album: "album",
-    stationName: "KCRW Eclectic 24",
+
     webUrl: "https://www.kcrw.com/shows/eclectic24/latest",
     location: "Los Angeles, CA 🇺🇸",
     streamUrl: "https://streams.kcrw.com/e24_mp3",

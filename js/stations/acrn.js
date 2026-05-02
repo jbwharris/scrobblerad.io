@@ -1,6 +1,5 @@
 const stationData = {
   acrn: {
-    stationName: "ACRN",
     albumArt: "data.artwork_urls.large",
     location: "Athens, OH 🇺🇸",
     webUrl: "https://acrn.com",

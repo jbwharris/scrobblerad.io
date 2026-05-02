@@ -6,7 +6,7 @@ const stationData = {
     artist2: "results.1.artist",
     song2: "results.1.song",
     album2: "results.1.album",
-    stationName: "KEXP",
+
     location: "Seattle, WA 🇺🇸",
     webUrl: "https://kexp.org",
     streamUrl: "https://kexp.streamguys1.com/kexp160.aac",

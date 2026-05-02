@@ -1,6 +1,6 @@
 const stationData = {
   cfrc: {
-    stationName: "CFRC",
+
     location: "Kingston, ON 🇨🇦",
     webUrl: "https://www.cfrc.ca/",
     streamUrl:

@@ -3,7 +3,7 @@ const stationData = {
     artist: "0.artist",
     song: "0.song",
     album: "",
-    stationName: "WNXP",
+
     location: "Nashville, TN 🇺🇸",
     webUrl: "https://wnxp.org",
     streamUrl: "https://wpln.streamguys1.com/wnxpfm.aac",

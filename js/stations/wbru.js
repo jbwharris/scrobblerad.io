@@ -1,6 +1,5 @@
 const stationData = {
   wbru: {
-    stationName: "WBRU",
     location: "Providence, RI 🇺🇸",
     webUrl: "https://wbru.com",
     streamUrl: "https://s3.radio.co/s115121de1/listen",

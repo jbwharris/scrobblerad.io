@@ -1,6 +1,6 @@
 const stationData = {
   radioparadiseglobal: {
-    stationName: "Radio Paradise Global Mix",
+
     location: "Eureka, CA 🇺🇸",
     webUrl: "https://radioparadise.com/",
     streamUrl: "https://stream.radioparadise.com/world-etc-320",

@@ -3,7 +3,7 @@ const stationData = {
     artist: "0.artist",
     song: "0.name",
     albumArt: "0.image_url",
-    stationName: "The Krush",
+
     location: "Santa Rosa, CA 🇺🇸",
     webUrl: "https://www.krsh.com",
     streamUrl: "https://bcradio-live-a.edge.audiocdn.com/10003_64k.aac",
