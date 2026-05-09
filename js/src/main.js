@@ -1,8 +1,10 @@
 import { generateRadioButtons, handleStationClick } from './radioButtons.js';
 import { RadioPlayer } from './radioPlayer.js';
 import stations from './stations-dist.js';
+import { getSelectedTags } from './utils.js';
 
-const stationKeys = Object.keys(stations);
+
+const stationKeys = stations;
 
 const [playButton, skipForward, skipBack, reloadStream] = 
   ["#playButton", "#skipForward", "#skipBack", "#reloadStream"].map(selector => 
@@ -11,20 +13,26 @@ const [playButton, skipForward, skipBack, reloadStream] =
 
 const radioPlayer = new RadioPlayer(playButton, skipForward, skipBack, reloadStream, stationKeys);
 
-// Function to get all selected tags from the select elements
-function getSelectedTags() {
-  const tagCountry = document.getElementById('tagCountry').value;
-  const tagFormat = document.getElementById('tagFormat').value;
-  const tagGenre = document.getElementById('tagGenre').value;
-
-  // Filter out 'all' values and return an array of selected tags
-  return [tagCountry, tagFormat, tagGenre].filter(tag => tag !== 'all');
-}
-
 // Function to handle tag selection and generate radio buttons
 function handleTagSelected() {
   const selectedTags = getSelectedTags();
+
+  // Update URL with current filters
+  const url = new URL(window.location);
+  if (selectedTags.length > 0) {
+    url.searchParams.set('filter', selectedTags.join(','));
+  } else {
+    url.searchParams.delete('filter');
+  }
+  window.history.replaceState({}, '', url);
+
   generateRadioButtons(selectedTags, stations, radioPlayer);
+}
+
+function getFilterFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const filterParam = urlParams.get('filter');
+  return filterParam ? filterParam.split(',') : [];
 }
 
 // Add event listeners to the select elements
@@ -44,8 +52,33 @@ stationSelectDiv.addEventListener('click', (event) => handleStationClick(event, 
 
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // 1. Generate the radio buttons first
-    await generateRadioButtons("all", stations, radioPlayer, stationKeys);
+    // Get filters from URL
+    const urlFilters = getFilterFromUrl();
+
+    // If URL has filters, apply them
+    if (urlFilters.length > 0) {
+        // Set the select elements to match the URL filters
+        const [countrySelect, formatSelect, genreSelect] = [
+            document.getElementById('tagCountry'),
+            document.getElementById('tagFormat'),
+            document.getElementById('tagGenre')
+        ];
+
+        // Simple mapping - you might need to adjust this based on your actual select options
+        urlFilters.forEach(tag => {
+            if (countrySelect.querySelector(`option[value="${tag}"]`)) {
+                countrySelect.value = tag;
+            } else if (formatSelect.querySelector(`option[value="${tag}"]`)) {
+                formatSelect.value = tag;
+            } else if (genreSelect.querySelector(`option[value="${tag}"]`)) {
+                genreSelect.value = tag;
+            }
+        });
+    }
+
+    // Generate radio buttons with current filters
+    const selectedTags = getSelectedTags();
+    generateRadioButtons(selectedTags, stations, radioPlayer);
 
     // 2. DECISION LOGIC: Hash vs Default
     const hash = window.location.hash;

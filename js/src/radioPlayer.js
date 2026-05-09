@@ -1,4 +1,4 @@
-import { debounce, addCacheBuster, hasTag } from './utils.js';
+import { debounce, addCacheBuster, hasTag, upsizeImgUrl, getSelectedTags, flattenStations } from './utils.js';
 import { Page } from './page.js';
 import { handleStationClick, generateRadioButtons } from './radioButtons.js';
 import { urlCoverArt, currentTag } from './constants.js';
@@ -48,6 +48,9 @@ export class RadioPlayer {
         this.radioPlayer = this;
         this.currentTag = currentTag;
         this.handleStationClick = handleStationClick;
+        this.upsizeImgUrl = upsizeImgUrl;
+        this.flattenStations = flattenStations;
+        this.getSelectedTags = getSelectedTags;
 
         // timing 
        this.getTimezoneOffset = getTimezoneOffset; 
@@ -105,7 +108,6 @@ export class RadioPlayer {
         this.getStreamingData = this.getStreamingData.bind(this);
         this.extractSongAndArtist = this.extractSongAndArtist.bind(this);
         this.getPath = this.getPath.bind(this);
-        this.upsizeImgUrl = this.upsizeImgUrl.bind(this);
         this.togglePlay = this.togglePlay.bind(this);
         this.skipForward = this.skipForward.bind(this);
         this.skipBackward = this.skipBackward.bind(this);
@@ -118,7 +120,6 @@ export class RadioPlayer {
         this.playButton.addEventListener("click", this.togglePlay);
         this.skipForwardButton.addEventListener("click", this.skipForward);
         this.skipBackButton.addEventListener("click", this.skipBackward);
-        this.reloadStreamButton.addEventListener("click", this.reloadStream);
 
         // Correctly listen for the change event on the <select> element
         document.getElementById("stationSelect").addEventListener("change", (event) => {
@@ -226,46 +227,38 @@ export class RadioPlayer {
     }
 
     calculateNextAndPreviousIndices(direction) {
-        const allStations = this.stations.map((stationKey) => ({
-            stationKey,
-            stationDisplayName: stationKey,
-            tags: [],
-            group: null,
-        }));
+      // 1. Flatten all stations as before
+      const allStations = this.flattenStations(this.stations);
 
-        let filteredStations = [];
+      // 2. Re-apply your active tag filters to get the CURRENT view's list
+      const activeFilters = this.getSelectedTags(); // returns current selected tags
+      let currentView = allStations;
 
-        if (this.currentTag === "all") {
-            filteredStations = allStations;
-        } else {
-            filteredStations = allStations.filter(station => hasTag(station, this.currentTag));
-            if (filteredStations.length === 0) {
-                filteredStations = allStations;
-            }
-        }
+      if (activeFilters.length > 0) {
+        currentView = allStations.filter(station =>
+          activeFilters.every(filter => filter === 'all' || hasTag(station, filter))
+        );
+      }
 
-        const currentStation = filteredStations.find(station => station.stationKey === this.stationKey);
-        if (!currentStation) {
-            console.log('no currentStation, returning');
-            return;
-        }
+      // 3. Find where the current station sits in this filtered view
+      const currentIndex = currentView.findIndex(s => s.stationKey === this.stationKey);
 
+      // Safety check if station doesn't exist in the current view
+      if (currentIndex === -1) return;
 
-        this.currentIndex = filteredStations.indexOf(currentStation);
-
-        if (direction === 'next') {
-            this.nextIndex = (this.currentIndex + 1) % filteredStations.length;
-            const nextStation = filteredStations[this.nextIndex];
-            this.nextStationKey = nextStation.stationKey;
-            this.nextStationDisplayName = nextStation.stationDisplayName;
-        } else if (direction === 'previous') {
-            this.previousIndex = (this.currentIndex - 1 + filteredStations.length) % filteredStations.length;
-            const previousStation = filteredStations[this.previousIndex];
-            this.previousStationKey = previousStation.stationKey;
-            this.previousStationDisplayName = previousStation.stationDisplayName;
-        }
+      // 4. Calculate the next/previous based on current view indices
+      if (direction === 'next') {
+        const nextIndex = (currentIndex + 1) % currentView.length;
+        const next = currentView[nextIndex];
+        this.nextStationKey = next.stationKey;
+        this.nextStationDisplayName = next.stationDisplayName;
+      } else {
+        const prevIndex = (currentIndex - 1 + currentView.length) % currentView.length;
+        const prev = currentView[prevIndex];
+        this.prevStationKey = prev.stationKey;
+        this.prevStationDisplayName = prev.stationDisplayName;
+      }
     }
-
 
     jumpToStationFromHash() {
         const hash = window.location.hash;
@@ -467,7 +460,7 @@ export class RadioPlayer {
             newAudio.onerror = (error) => {
                 console.warn('Error loading audio:', error);
                 if (this.isPlaying && this.currentPage) {
-                    this.currentPage.refreshCurrentData([`Audio not loading, skipping station`, '', '', this.stationArt, null, null, null, true]);
+                    this.currentPage.refreshCurrentData([`Audio not loading, choose another station`, '', '', this.stationArt, null, null, null, true]);
                    // direction === true ? this.skipBackward() : this.skipForward();
                 }
             };
@@ -674,6 +667,7 @@ export class RadioPlayer {
                 .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '') // Removes a year within a brackets (6 Music Session, March 31 2025)
                 .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
                 .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
+                .replace(/\s*\(.*?\bLOCAL\b.*?\)/gi, '') // Removes "(LOCAL)"
                 .replace(/\s*\(.*?\bsession\b.*?\)/gi, '') // Removes "(909 Session)"
                 .replace(/\s*\(.*?\blive\b.*?\)/gi, '') // Removes "(Live session)"
                 .replace(/\s*\(.*?\bcover\b.*?\)/gi, '') // Removes "(_____ cover)"
@@ -1209,7 +1203,7 @@ export class RadioPlayer {
                         const contentType = response.headers.get('content-type');
                         
                         // Check if contentType exists before calling includes
-                        if (contentType && (contentType.includes('application/json') || contentType && this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null) ||
+                        if (contentType && (contentType.includes('application/json') ||
                             contentType.includes('application/vnd.api+json') || 
                             (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)))) {
                             return response.json().then((data) => ({ data, contentType }));
@@ -1217,6 +1211,7 @@ export class RadioPlayer {
                         } else if (contentType && (contentType.includes('text/html') || 
                             (this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) && contentType.includes('text/plain') ||  
                             contentType.includes('application/javascript'))) {
+                            console.log('jsonString')
                             return response.text().then((data) => ({ data, contentType }));
                         } else if (contentType && (contentType.includes('text/xml'))) {
                             return response.text().then((data) => ({ data, contentType }));
@@ -1248,7 +1243,9 @@ export class RadioPlayer {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
-                        } else if (contentType && contentType.includes('text/plain') && !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) {
+                        } else if (contentType && contentType.includes('text/plain') && !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) {
+                            console.log('extractJsonFromJS')
+
                             data = this.extractJsonFromJS(data);
                         } else if (contentType && contentType.includes('text/html') && 
                                     (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/plain') || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/html')) {
@@ -1624,11 +1621,7 @@ export class RadioPlayer {
             targetElement.innerHTML = '';
         }
     }
-    upsizeImgUrl(url) {
-        if (url) {
-            return url.replace(/\d{3}x\d{3}/g, '500x500');
-        }
-    }
+
 
     getPath(obj, prop) {
         // Ensure obj is an object and prop is a string
@@ -1659,60 +1652,55 @@ export class RadioPlayer {
 
 
 
-    play() {
-        if (!this.audio.src) return;
+play() {
+    if (!this.audio.src) return;
 
-        // Check if the stream should be reloaded based on page visibility
-        if (this.shouldReloadStream) {
-            console.log("the stream is reloading");
-            this.handleStationSelect(null, this.stationKey, this.stationDisplayName, false); // Reload the stream
-            this.shouldReloadStream = false; // Reset the flag
-        } else {
-            // Attempt to play audio
-            this.audio.play().then(() => {
-                this.isPlaying = true;
-                this.playButton.lastElementChild.className = "icon-pause";
-                document.getElementById("metadata").classList.add("playing");
-
-                if (this.pauseTimeout) {
-                    clearTimeout(this.pauseTimeout);
-                    this.pauseTimeout = null;
-                }
-
-            }).catch((error) => {
-                console.error('Error playing audio:', error);
-            });
-
-        }
-    }
-
-    pause() {
-        if (this.playButton.classList.contains("spinner-grow")) {
-            this.audio.play();
-            return;
-        }
-
-        this.audio.pause();
-        this.isPlaying = false;
-        this.playButton.lastElementChild.className = "icon-play";
-        document.getElementById("metadata").classList.remove("playing");
-
-        if (this.pauseTimeout) {
-            clearTimeout(this.pauseTimeout);
-        }
-
-        // Set a timeout to mark stream reload after 30 seconds
-        this.pauseTimeout = setTimeout(() => {
-            console.log("the stream should be reloaded");
-            const page = new Page(this.stationKey, this);
-            page.refreshCurrentData([`Press reload to refresh feed`, '', '', this.stationArt, null, null, null, true]);
-            document.getElementById("playermeta").classList.add("opacity-50");
-            if (this.hls) {
-                this.destroyHLSAndResetAudio();
+    // If stale or about to be stale, reload instead of resuming
+    if (this.shouldReloadStream) {
+        console.log("resuming from stale: reloading");
+        this.handleStationSelect(null, this.stationKey, this.stationDisplayName, false);
+        this.shouldReloadStream = false;
+    } else {
+        this.audio.play().then(() => {
+            this.isPlaying = true;
+            this.playButton.lastElementChild.className = "icon-pause";
+            document.getElementById("metadata").classList.add("playing");
+            
+            // Clear stale timer if we successfully resume
+            if (this.pauseTimeout) {
+                clearTimeout(this.pauseTimeout);
+                this.pauseTimeout = null;
             }
-            this.shouldReloadStream = true;
-        }, 30000);
+        }).catch(err => console.error('Playback failed:', err));
     }
+}
+
+pause() {
+    if (this.playButton.classList.contains("spinner-grow")) return;
+
+    this.audio.pause();
+    this.isPlaying = false;
+    this.playButton.lastElementChild.className = "icon-play";
+    document.getElementById("metadata").classList.remove("playing");
+
+    if (this.pauseTimeout) clearTimeout(this.pauseTimeout);
+
+    // Don't destroy HLS immediately on pause. Just flag it.
+    // This lets resume play work instantly if the user returns within 30s.
+    this.pauseTimeout = setTimeout(() => {
+        console.log("stream stale, will reload on next play");
+        this.shouldReloadStream = true;
+        
+        // Optional: visual indicator only, no aggressive destruction
+        document.getElementById("playermeta").classList.add("opacity-50");
+        
+        // If you want to save bandwidth/memory, destroy HLS here, 
+        // but only AFTER marking shouldReloadStream = true
+        if (this.hls) {
+            this.destroyHLSAndResetAudio();
+        }
+    }, 30000);
+}
 
 
     togglePlay() {
@@ -1729,7 +1717,6 @@ export class RadioPlayer {
     skipForward() {
         this.calculateNextAndPreviousIndices('next');
         const nextStationKey = this.nextStationKey;
-        console.log('this.nextStationKey', this.nextStationKey, this.nextStationDisplayName);
         const nextStationDisplayName = this.nextStationDisplayName;
         this.stationApiUrl = null;
         this.handleStationSelect(null, nextStationKey, nextStationDisplayName, true);
