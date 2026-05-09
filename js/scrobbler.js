@@ -10,21 +10,17 @@ function removeTokenFromUrl() {
     let cleanPathname = location.pathname;
     let cleanSearch = location.search;
 
-    // 1. Handle Pathname Token (e.g., / -Cv3_jE3)
-    // This regex looks for:
-    // - A dash: "-"
-    // - Followed by 4 or more characters: "[a-zA-Z0-9._-]{4,}"
-    //   (This includes letters, numbers, dots, underscores, and dashes)
-    // - The 'g' flag ensures it catches it anywhere in the path
+    // 1. Handle Pathname Token
     cleanPathname = cleanPathname.replace(/-[a-zA-Z0-9._-]{4,}/g, "");
 
-    // 2. Handle Query String Token (e.g., ?token=123)
+    // 2. Handle Query String Token
     if (cleanSearch && cleanSearch.includes('token')) {
         cleanSearch = cleanSearch.replace(/(\&|\?)token([_A-Za-z0-9=\.%]+)/g, '').replace(/^&/, '?');
         if (cleanSearch === '?') cleanSearch = '';
     }
 
-    const cleanURL = location.origin + cleanPathname + cleanSearch;
+    // Include location.hash explicitly
+    const cleanURL = location.origin + cleanPathname + cleanSearch + location.hash;
 
     if (cleanURL !== location.href) {
         history.replaceState({}, document.title, cleanURL);
@@ -205,8 +201,6 @@ async function isAlreadyScrobbledOnServer(username, artist, track) {
         const currentArtistLower = artist.toLowerCase();
         const currentTrackLower = track.toLowerCase();
 
-        console.log('recentTracks', recentTracks, 'recentTracks', currentArtistLower, 'currentTrackLower', currentTrackLower);
-
         return recentTracks.some(t => {
             // Defensive check: Ensure artist and track are valid strings
             if (typeof t.artist !== 'string' || typeof t.track !== 'string') {
@@ -374,8 +368,6 @@ function updateAuthButton() {
 
 // Ensure the token is removed when the page loads if present
 document.addEventListener("DOMContentLoaded", () => {
-    removeTokenFromUrl();
-
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
 
@@ -383,6 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
         authenticateFM(() => {
             updateAuthButton();
         });
+        removeTokenFromUrl();
     } else {
         updateAuthButton();
     }
