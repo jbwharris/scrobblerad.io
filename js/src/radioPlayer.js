@@ -1211,7 +1211,6 @@ export class RadioPlayer {
                         } else if (contentType && (contentType.includes('text/html') || 
                             (this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) && contentType.includes('text/plain') ||  
                             contentType.includes('application/javascript'))) {
-                            console.log('jsonString')
                             return response.text().then((data) => ({ data, contentType }));
                         } else if (contentType && (contentType.includes('text/xml'))) {
                             return response.text().then((data) => ({ data, contentType }));
@@ -1244,8 +1243,6 @@ export class RadioPlayer {
                             const doc = parser.parseFromString(htmlContent, 'text/html');
                             data = this.extractDataFromHTML(doc);
                         } else if (contentType && contentType.includes('text/plain') && !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) {
-                            console.log('extractJsonFromJS')
-
                             data = this.extractJsonFromJS(data);
                         } else if (contentType && contentType.includes('text/html') && 
                                     (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/plain') || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/html')) {
@@ -1502,11 +1499,16 @@ export class RadioPlayer {
             this.hasLoadedData = true;
             const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;   
 
+            const now = Date.now();
+            const isRecentlyUpdated = this.lastKnownUpdatedTime > (now - 5 * 60 * 1000) && 
+                                       this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
+
             if (!song) {
+                const message = isRecentlyUpdated ? '[Air Break]' : 'No song data found';
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData(['No song data found', '', '', this.stationArt, null, null, null, true]);
+                page.refreshCurrentData([message, '', '', this.stationArt, null, null, null, true]);
                 return;
-            } 
+            }
 
             // Predefined values
             const timezone = this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null);
