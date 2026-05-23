@@ -14,38 +14,21 @@
     "display": "minimal-ui",
     "icons": [
     {
-        "src": "/img/icons/icon_48x48.png",
-        "type": "image/png",
-        "sizes": "48x48"
+        "src": "img/icons/favicon.svg",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "any"
     },
     {
-        "src": "/img/icons/icon_72x72.png",
-        "sizes": "72x72",
-        "type": "image/png"
-    },
-    {
-        "src": "/img/icons/icon_96x96.png",
-        "sizes": "96x96",
-        "type": "image/png"
-    },
-    {
-        "src": "/img/icons/icon_144x144.png",
-        "sizes": "144x144",
-        "type": "image/png"
-    },
-    {
-        "src": "/img/icons/icon_168x168.png",
-        "sizes": "168x168",
-        "type": "image/png"
-    },
-    {
-        "src": "/img/icons/icon_192x192.png",
+        "src": "img/icons/icon-192.png",
         "sizes": "192x192",
-        "type": "image/png"
+        "type": "image/png",
+        "purpose": "any maskable"
     },
     {
-        "src": "/img/icons/icon_512x512.png",
+        "src": "img/icons/icon-512.png",
+        "sizes": "512x512",
         "type": "image/png",
-        "sizes": "512x512"
-    }]
+        "purpose": "any maskable"
+    }],
 }
