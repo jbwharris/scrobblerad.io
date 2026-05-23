@@ -7,5 +7,6 @@ const stationData = {
     orbPath: "ca.qcindiecom",
     timestamp: "updated",
     timezone: "America/Winnipeg",
+    filter: ["qcindie"],
   }
 };

@@ -335,6 +335,10 @@ const stations = {
     stationName: "Lightning 100",
     tags: ["us", "aaa", "rock", "top"],
   },
+  mearnsfm: {
+    stationName: "Mearns FM",
+    tags: ["uk", "indie"],
+  },
   megashuffle: {
     stationName: "MegaShuffle",
     tags: ["ca", "variety", "justmusic"],
