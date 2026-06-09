@@ -5,7 +5,7 @@ const stationData = {
     song: "0.title",
     album: "0.album",
     location: "New York, NY 🇺🇸",
-    webUrl: "https://wfuv.org",
+    webUrl: "https://wicb.org",
     streamUrl: "https://icecast.do.zufall.co/wicb_aac_high",
     apiUrl: "https://api-v2.wicb.org/song/history/WICB?limit=1",
     timestamp: "0.timestamp",
