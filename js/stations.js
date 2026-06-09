@@ -123,6 +123,10 @@ const stations = {
     stationName: "CJMP",
     tags: ["ca", "community", "variety"],
   },
+  cjsr: {
+    stationName: "CJSR",
+    tags: ["ca", "community", "alt"],
+  },
   cjsw: {
     stationName: "CJSW",
     tags: ["ca", "community", "alt"],
@@ -310,6 +314,10 @@ const stations = {
   kutx: {
     stationName: "KUTX",
     tags: ["us", "college", "aaa", "top"],
+  },
+  kvsc: {
+    stationName: "KVSC",
+    tags: ["us", "college", "alt"],
   },
   kxll: {
     stationName: "KXLL",
