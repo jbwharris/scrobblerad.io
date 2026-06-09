@@ -6,12 +6,12 @@ import { getSelectedTags } from './utils.js';
 
 const stationKeys = stations;
 
-const [playButton, skipForward, skipBack, reloadStream] = 
-  ["#playButton", "#skipForward", "#skipBack", "#reloadStream"].map(selector => 
+const [playButton, skipForward, skipBack] = 
+  ["#playButton", "#skipForward", "#skipBack"].map(selector => 
     document.querySelector(selector)
   );
 
-const radioPlayer = new RadioPlayer(playButton, skipForward, skipBack, reloadStream, stationKeys);
+const radioPlayer = new RadioPlayer(playButton, skipForward, skipBack, stationKeys);
 
 // Function to handle tag selection and generate radio buttons
 function handleTagSelected() {

@@ -8,7 +8,7 @@ import { MetadataFilter } from './filter.min.js';
 
 
 export class RadioPlayer {
-    constructor(buttonElement, skipForwardButton, skipBackButton, reloadStreamButton, stations) {
+    constructor(buttonElement, skipForwardButton, skipBackButton, stations) {
         // Audio setup
         this.audio = new Audio();
         this.hls = null; // Store HLS instance
@@ -42,7 +42,6 @@ export class RadioPlayer {
         this.playButton = buttonElement;
         this.skipForwardButton = skipForwardButton;
         this.skipBackButton = skipBackButton;
-        this.reloadStreamButton = reloadStreamButton;
         this.urlCoverArt = urlCoverArt;
         this.addCacheBuster = addCacheBuster;
         this.radioPlayer = this;
@@ -1726,8 +1725,8 @@ pause() {
 
     skipBackward() {
         this.calculateNextAndPreviousIndices('previous');
-        const prevStationKey = this.previousStationKey;
-        const prevStationDisplayName = this.previousStationDisplayName;
+        const prevStationKey = this.prevStationKey;
+        const prevStationDisplayName = this.prevStationDisplayName;
         this.stationApiUrl = null;
         this.handleStationSelect(true, prevStationKey, prevStationDisplayName, true);
     }
@@ -1786,7 +1785,6 @@ pause() {
         this.playButton.removeEventListener('click', this.togglePlay);
         this.skipForwardButton.removeEventListener('click', this.skipForward);
         this.skipBackButton.removeEventListener('click', this.skipBackward);
-        this.reloadStreamButton.removeEventListener('click', this.reloadStream);
 
         // Clear intervals and timeouts
         clearInterval(this.streamingInterval);

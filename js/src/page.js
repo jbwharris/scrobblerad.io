@@ -80,6 +80,7 @@ export class Page {
         const listenerText = parts.length > 0 ? parts.join(' | ') : '';
         clone.querySelector('#listeners').textContent = listenerText;
 
+
         const albumArtEl = clone.querySelector('#albumArt');
 
         // Validate and update artwork, then set this.artworkUrl
@@ -87,15 +88,14 @@ export class Page {
             if (isValid) {
                 const effectiveUrl = /^https?:\/\//i.test(artworkUrl) ? artworkUrl : `../${artworkUrl}`;
                 this.artworkUrl = artworkUrl;
-                albumArtEl.src = artworkUrl;
+                albumArtEl.src = this.artworkUrl;
                 albumArtEl.alt = `${song} by ${artist}`;
                 albumArtEl.title = `${song} by ${artist}`;
                 document.documentElement.style.setProperty("--albumArt", `url("${effectiveUrl}")`);
-            } else if (!this.artworkUrl) {
-                this.artworkUrl = this.stationArt;
-                albumArtEl.src = "";
-                albumArtEl.alt = "";
-                document.documentElement.style.setProperty("--albumArt", `url("${this.stationArt}")`);
+            } else {
+                albumArtEl.src = `../img/stations/${this.stationKey}.png`;
+                albumArtEl.alt = `${this.radioPlayer.stationDisplayName}`;
+                albumArtEl.title = `${this.radioPlayer.stationDisplayName}`;
             }
         });
 
@@ -110,7 +110,7 @@ export class Page {
         animateElement(playerMetaElement);
         document.querySelector('#panel2').click();
 
-        this.setupMediaSession(song, artist, artworkUrl, errorMessage);
+       this.setupMediaSession(song, artist, this.artworkUrl, errorMessage);
     }
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
@@ -132,6 +132,8 @@ export class Page {
         if (artworkUrl && (artworkUrl !== urlCoverArt || artworkUrl !== stationArt ) ) {
             stationArt = artworkUrl;
         }
+
+        console.log('artworkUrl', artworkUrl, 'urlCoverArt', urlCoverArt, 'stationArt', stationArt)
 
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
