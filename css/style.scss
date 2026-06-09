@@ -218,8 +218,8 @@ body {
    position: relative;
 
    &.grow {
-      transform: translateX(-20%);
-      width: 100%;
+      position: absolute;
+      width: 100vw;
    }
 
 
@@ -528,7 +528,6 @@ body {
 
 #webamp {
    position: relative;
-   top: -2rem;
    transition: all .3s ease-in;
    max-height: clamp(350px, 64.286px + 89.286vw, 600px);
    max-width: clamp(320px, 240px + 25vw, 600px);
@@ -536,8 +535,8 @@ body {
    background: var(--albumArt) no-repeat 0 0;
    background-size: cover;
    border: .5rem solid #111;
-   height:100%;
-   width:100%;
+   height:auto;
+   width: clamp(320px, 240px + 25vw, 600px);
    aspect-ratio: 1 / 1;
 
 
@@ -549,7 +548,7 @@ body {
    #albumArt {
       transition: all 250ms ease-in-out;
       max-width: clamp(320px, 240px + 25vw, 600px);
-      max-height:clamp(320px, 240px + 25vw, 600px);
+      max-height: clamp(320px, 240px + 25vw, 600px);
       width: 100%;
       height:100%;
       opacity: 1;
@@ -559,21 +558,6 @@ body {
          opacity:0;
       }
    }
-}
-
-@container playermeta (width < 1025px) {
-  .metainfo {
-    width: 100%;
-  }
-
-  .justify-content-between {
-   justify-content: center !important;
-  }
-
-  #webamp, #albumart {
-   max-width: clamp(350px, 178.571px + 53.571vw, 500px);
-   max-height: clamp(350px, 178.571px + 53.571vw, 500px);
-  }
 }
 
 #metadata {
@@ -589,11 +573,52 @@ body {
       height: calc(100dvh - 4rem);
       max-width: 1400px;
       margin: 0 auto;
-      container-type: inline-size;
-      container-name: playermeta;
+      container: player-meta / inline-size;
    }
 
 }
+
+@container player-meta (width < 1025px) {
+  
+   .player-meta-wrapper {
+      display: inline-flex;
+   }
+
+
+  .metainfo {
+    width: 100%;
+  }
+
+  .justify-content-between {
+   justify-content: center !important;
+  }
+
+  #webamp, #albumart {
+   max-width: clamp(350px, 178.571px + 53.571vw, 500px);
+   max-height: clamp(350px, 178.571px + 53.571vw, 500px);
+   margin: 0 auto;
+  }
+}
+
+@container player-meta (width < 1281px) {
+   .player-meta-wrapper {
+      display: inline-flex;
+   }
+}
+
+@container player-meta (width < 685px) {
+   .player-meta-wrapper {
+      display: block;
+   }
+}
+
+
+@container player-meta (width > 1280px) {
+   .player-meta-wrapper {
+      display: contents;
+   }
+}
+
 
 #mytuner-container {opacity: 0;}
 
@@ -602,6 +627,7 @@ body {
    flex-direction: column;
    align-items: center;
    justify-content: center;
+   width: clamp(550px, 941.111px + -30.556vw, 935px);
 
    >* {
       min-height: 1.5rem;

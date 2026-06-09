@@ -184,16 +184,14 @@
             </div>
 
             <div class="col col-xxl-8 col-md-6 panels" id="panel2">
-              <div class="playermeta px-0 row album-controls" id="playermeta">
-                <div class="container-fluid">
-                  <div class="row row justify-content-between">
-                    <div class="col col-md-6 col-sm-5 player px-0 mt-md-2" id="webamp">
-                      <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="600" height="600" alt="ScrobbleRadio - scrobble awesome radio">
-                    </div>
-                    <div class="col col-md-5 col-sm-10 p-2 metainfo">
-                      <p class="fs-3 d-sm-none">Swipe left to pick a station to get started</p>
-                      <p class="fs-3 d-none d-md-block">Pick a station to get started</p>
-                    </div>
+              <div class="playermeta px-0 album-controls" id="playermeta">
+                <div class="player-meta-wrapper">
+                  <div class="player px-0 mt-md-2" id="webamp">
+                    <img id="albumArt" src="img/defaultArt.png" class="img-fluid rounded mx-auto d-block" width="600" height="600" alt="ScrobbleRadio - scrobble awesome radio">
+                  </div>
+                  <div class="metainfo p-2">
+                    <p class="fs-3 d-sm-none">Swipe left to pick a station to get started</p>
+                    <p class="fs-3 d-none d-md-block">Pick a station to get started</p>
                   </div>
                 </div>
               </div>
@@ -305,24 +303,22 @@
   <div id="mytuner-container"></div>
 
   <template id="meta">
-    <div class="container-fluid">
-      <div class="row justify-content-between">
-
-        <div class="col col-md-6 col-sm-5 player px-0 mt-md-2" id="webamp">
-          <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="600" height="600" alt="">
-        </div>
-        <div class="col col-md-5 col-sm-10 p-2 metainfo">
-          <p id="title" class="text-capitalize h3"></p>
-          <p id="artist" class="text-capitalize h4"></p>
-          <p id="album" class="text-capitalize"></p>
-          <p id="listeners" class="text-capitalize"></p>
-          <a href="" id="radioNameLink" class="btn btn-info mb-1" target="_blank">
-            <span id="radioName" class="fs-6"></span>
-            <span id="stationLocation" class="fs-6"></span>
-          </a>
-        </div>
-
+    <div class="player-meta-wrapper">
+      <div class="player px-0 mt-md-2" id="webamp">
+        <img id="albumArt" src="" class="img-fluid rounded mx-auto d-block" width="600" height="600" alt="">
       </div>
+      <div class="metainfo p-2">
+        <p id="title" class="text-capitalize h3"></p>
+        <p id="artist" class="text-capitalize h4"></p>
+        <p id="album" class="text-capitalize"></p>
+        <p id="listeners" class="text-capitalize"></p>
+        <a href="" id="radioNameLink" class="btn btn-info mb-1" target="_blank">
+          <span id="radioName" class="fs-6"></span>
+          <span id="stationLocation" class="fs-6"></span>
+        </a>
+      </div>
+    </div>
+    </div>
     </div>
   </template>
 
