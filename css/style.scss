@@ -493,7 +493,7 @@ body {
    .media-controls-wrapper {
       width: 100%;
       position: absolute;
-      bottom: 0;
+      bottom: -2px;
       left:0;
       left:0;
       background: var(--sidebar-headers);
@@ -627,7 +627,7 @@ body {
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   width: clamp(550px, 941.111px + -30.556vw, 935px);
+   width: clamp(425px, 237.5px + 24.414vw, 550px);
 
    >* {
       min-height: 1.5rem;
@@ -703,6 +703,8 @@ nav.stationNav {
       padding-bottom: .5rem;
       scrollbar-color: rgba(255,255,255,.3) rgba(0,0,0,0);
       scrollbar-width: thin;
+
+      button:last-child {margin-bottom: 1rem;}
    
    button {
       padding: 0 .5rem 0 0;
