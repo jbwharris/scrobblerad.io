@@ -8,7 +8,7 @@ const stationData = {
     webUrl: "https://kusf.org",
     streamUrl: "https://listen.kusf.org/stream", 
     apiUrl: "https://kusf.studio.creek.org/api/current",
-    timestamp: "track.song.updated_at",
+    timestamp: "track.updated_at",
     timezone: "UTC",
   }
 };
