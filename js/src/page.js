@@ -109,8 +109,6 @@ export class Page {
 
         animateElement(playerMetaElement);
         document.querySelector('#panel2').click();
-
-       this.setupMediaSession(song, artist, this.artworkUrl, errorMessage);
     }
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
@@ -132,8 +130,6 @@ export class Page {
         if (artworkUrl && (artworkUrl !== urlCoverArt || artworkUrl !== stationArt ) ) {
             stationArt = artworkUrl;
         }
-
-        console.log('artworkUrl', artworkUrl, 'urlCoverArt', urlCoverArt, 'stationArt', stationArt)
 
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({

@@ -1020,138 +1020,6 @@ export class RadioPlayer {
         });
     }
 
-    async appendMytunerWidget() {
-        try {
-            const response = await fetch('mytuner.html');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const htmlContent = await response.text();
-            const tempContainer = document.createElement('div');
-            tempContainer.innerHTML = htmlContent;
-
-            const widgetDiv = tempContainer.querySelector('.mytuner-widget');
-            if (!widgetDiv) {
-                throw new Error('Widget div not found in mytuner.html');
-            }
-
-            const targetElement = document.getElementById('mytuner-container');
-            if (targetElement) {
-                targetElement.appendChild(widgetDiv);
-            } else {
-                console.error('Target element not found!');
-            }
-
-            // Execute scripts in the widget
-            this.executeScriptsInElement(widgetDiv);
-
-        } catch (error) {
-            console.error('Error appending mytuner.html:', error);
-        }
-    }
-
-    removeMytunerWidget() {
-        if (this.mytunerWidgetRemoved) return; // Exit if already removed
-
-        // 1. Remove the widget and its container
-        const widgetContainerSelectors = ['.mytuner-widget'];
-
-        widgetContainerSelectors.forEach(selector => {
-            const container = document.querySelector(selector);
-            if (container) {
-                container.remove();
-            }
-        });
-
-        // 2. Remove MyTuner scripts from the head
-        const scriptUrlsToRemove = [
-            '/js/widgets/player-v1.js'
-        ];
-
-        const removeScripts = () => {
-            scriptUrlsToRemove.forEach(url => {
-                const scripts = document.querySelectorAll(`script[src="${url}"]`);
-                scripts.forEach(script => script.remove());
-            });
-        };
-
-        removeScripts();
-
-        // 3. Block MyTuner API requests
-        const originalOpen = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function(method, url) {
-            if (url.includes('metadata-api.mytuner.mobi')) {
-                console.log('Blocked MyTuner API request:', url);
-                return;
-            }
-            return originalOpen.apply(this, arguments);
-        };
-
-        const originalFetch = window.fetch;
-        window.fetch = function(resource, options) {
-            let url = '';
-            if (typeof resource === 'string') {
-                url = resource;
-            } else if (resource && typeof resource === 'object' && resource.url) {
-                url = resource.url;
-            }
-
-            if (url && url.includes('metadata-api.mytuner.mobi')) {
-                console.log('Blocked MyTuner API fetch request:', url);
-                return Promise.reject(new Error('Blocked MyTuner API request'));
-            }
-            return originalFetch.apply(this, arguments);
-        };
-
-
-        // 4. Observe the DOM for new scripts or elements
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.addedNodes.length > 0) {
-                    removeScripts();
-                    mutation.addedNodes.forEach(node => {
-                        if (node.tagName === 'SCRIPT' && node.src.includes('mytuner')) {
-                            node.remove();
-                        }
-                    });
-                }
-            });
-        });
-
-        observer.observe(document.head, { childList: true, subtree: true });
-        observer.observe(document.body, { childList: true, subtree: true });
-
-        // 5. Remove inline scripts
-        const removeInlineScripts = () => {
-            const scripts = document.querySelectorAll('script');
-            scripts.forEach(script => {
-                if (script.textContent.includes('mytuner')) {
-                    script.remove();
-                }
-            });
-        };
-
-        removeInlineScripts();
-
-        this.mytunerWidgetRemoved = true; // Mark as removed
-    }
-
-    executeScriptsInElement(element) {
-        const scripts = element.querySelectorAll('script');
-        scripts.forEach(oldScript => {
-            const newScript = document.createElement('script');
-            if (oldScript.src) {
-                newScript.src = oldScript.src;
-                newScript.async = false;
-            } else {
-                newScript.textContent = oldScript.textContent;
-            }
-            document.body.appendChild(newScript);
-        });
-    }
-
-
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
 
@@ -1166,15 +1034,6 @@ export class RadioPlayer {
                 return;
             }
 
-            if (this.stationKey === 'cbcmusic') {
-                if (!document.querySelector('.mytuner-widget')) {
-                        this.appendMytunerWidget();
-                    }
-            } else {
-                // Remove the widget and scripts for non-cbcmusic stations
-                this.removeMytunerWidget();
-            }
-
             if (this.isPlaying && !this.shouldReloadStream) {
 
                 let stationApiUrl;
@@ -1183,8 +1042,6 @@ export class RadioPlayer {
                         stationApiUrl = `https://widgets.spinitron.com/widget/now-playing-v2?callback=_spinitron206170750999458&station=${this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null)}&num=0&sharing=0&player=0&cover=0&merch=0&meta=0`;
                     } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null)) {
                         stationApiUrl = `https://scraper2.onlineradiobox.com/${this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null)}?l=0`;
-
-                        console.log('obPath condition', stationApiUrl, this.stationKey)
                     } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'nprPath', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
                         stationApiUrl = `https://api.composer.nprstations.org/v1/widget/${this.getNestedValue(this.currentStationData, this.stationKey, 'nprPath', null)}/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false`;
                     } else {
@@ -1585,6 +1442,7 @@ export class RadioPlayer {
 
                     const page = new Page(this.stationKey, this);
                     page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.errorMessage]);
+                    page.setupMediaSession(this.song, this.artist, this.artworkUrl, this.errorMessage);
 
                 }).catch(error => {
                     console.error('Error processing data:', error);
