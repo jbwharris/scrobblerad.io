@@ -315,6 +315,10 @@ const stations = {
     stationName: "KUTX",
     tags: ["us", "college", "aaa", "top"],
   },
+  kuvo: {
+    stationName: "KUVO",
+    tags: ["us", "jazz", "public", "blues"],
+  },
   kvsc: {
     stationName: "KVSC",
     tags: ["us", "college", "alt"],
