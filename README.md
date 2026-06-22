@@ -3,7 +3,8 @@ A PWA and website to listen to cool radio stations and easily scrobble to [LastF
 
 [![HTML5](https://img.shields.io/badge/HTML-FF4500?style=for-the-badge&logo=html5&logoColor=white)](#) [![CSS3](https://img.shields.io/badge/CSS-0077B5?&style=for-the-badge&logo=css3&logoColor=white)](#) [![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](#)
 
-<img width="1022" alt="ScrobbleRadio header collage of screenshots" src="https://github.com/user-attachments/assets/3c113a51-57cb-46b1-83ee-a29c1d917199">
+<img width="823" height="806" alt="ScrobbleRadio header collage of screenshots" src="https://github.com/user-attachments/assets/aca45080-da4e-4cc5-85fd-bd628dea2490" />
+
 
 
 ## Features 
