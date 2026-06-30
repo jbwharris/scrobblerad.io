@@ -15,7 +15,7 @@ jobs:
         env:
          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
          ARGS: "-rlgoDzvc -i --delete"
-         REMOTE_HOST: ${{ secrets.CPANEL_HOST }}
+         REMOTE_HOST: ${{ secrets.CPANEL_HOST_URL }}
          REMOTE_USER: ${{ secrets.CPANEL_USERNAME }}
          TARGET: ${{ secrets.CPANEL_REMOTE_PATH }}
       - name: Purge Cloudflare Cache
