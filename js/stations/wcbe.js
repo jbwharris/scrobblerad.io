@@ -7,7 +7,7 @@ const stationData = {
     song2: "tracklist.results.0.song.trackName",
     album2: "tracklist.results.0.song.collectionName",
     location: "Columbus, OH 🇺🇸",
-    webUrl: "https://wcbe.org",
+    webUrl: "https://www.wcbe.org",
     streamUrl: "https://26233.live.streamtheworld.com/WCBEFM.mp3?uuid=v7d1a2tou",
     nprPath: "5187efb6e1c85479698fb0cf",
     timestamp: "onNow.song._end_time",
