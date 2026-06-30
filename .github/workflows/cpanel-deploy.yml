@@ -12,7 +12,7 @@ jobs:
  - name: Checkout code
  uses: actions/checkout@v4
 
- - name: Deploy via Rsync
+ - name: Sync files to cPanel via Rsync
  uses: easingthemes/ssh-deploy@main
  env:
  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
