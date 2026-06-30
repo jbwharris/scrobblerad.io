@@ -14,7 +14,6 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-         SSH_PORT: ${{ secrets.CPANEL_HOST_PORT }}
          ARGS: "-rlgoDzvc -i --delete"
          REMOTE_HOST: ${{ secrets.CPANEL_HOST_URL }}
          REMOTE_USER: ${{ secrets.CPANEL_USERNAME }}
