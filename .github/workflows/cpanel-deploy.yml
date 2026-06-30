@@ -16,7 +16,7 @@ jobs:
          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
          SSH_PORT: ${{ secrets.SSH_PORT }} # This tells the action to use port 22
          ARGS: "-rlgoDzvc -i --delete"
-         remoteHost: ${{ secrets.CPANEL_HOST }}
+         REMOTE_HOST: ${{ secrets.CPANEL_HOSTING_URL }}
          REMOTE_USER: ${{ secrets.CPANEL_USERNAME }}
          TARGET: ${{ secrets.CPANEL_REMOTE_PATH }}
       - name: Purge Cloudflare Cache
