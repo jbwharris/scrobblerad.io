@@ -255,6 +255,10 @@ const stations = {
     stationName: "KALX",
     tags: ["us", "college", "eclectic"],
   },
+  kbem: {
+    stationName: "KBEM - Jazz88",
+    tags: ["us", "community", "public", "jazz"],
+  },
   kboo: {
     stationName: "KBOO",
     tags: ["us", "community", "variety"],
@@ -347,6 +351,28 @@ const stations = {
     stationName: "Lightning 100",
     tags: ["us", "aaa", "rock", "top"],
   },
+ loudspeaker: {
+    cafe80s: {
+      stationName: "Loudspeaker - Cafe 80s",
+      tags: ["us", "80s", "public"],
+    },
+    coloradio: {
+      stationName: "Loudspeaker - Coloradio",
+      tags: ["us", "public", "local", "indie"],
+    },
+    one: {
+      stationName: "Loudspeaker One ",
+      tags: ["us", "eclectic", "rock", "indie"],
+    },
+    rev6: {
+      stationName: "Loudspeaker - Revolution 6",
+      tags: ["us", "60s", "public",],
+    },
+    riot: {
+      stationName: "Loudspeaker - The Riot",
+      tags: ["us", "public", "rock"],
+    },
+  },
   mearnsindie: {
     stationName: "Mearns Indie",
     tags: ["uk", "indie"],
@@ -398,6 +424,10 @@ const stations = {
   thepoint: {
     stationName: "The Point",
     tags: ["us", "aaa", "rock", "top"],
+  },
+  popcanindie: {
+    stationName: "PopCanIndie",
+    tags: ["ca", "indie", "rock"],
   },
   prpfm: {
     stationName: "Portland Radio Project",
@@ -456,6 +486,10 @@ const stations = {
       stationName: "Radio Paradise - RockIt",
       tags: ["us", "online", "rock", "justmusic"],
     },
+  },
+  radiorobotic: {
+    stationName: "Radio Robotic",
+    tags: ["nz", "indie", "alt"],
   },
   radiosydney: {
     stationName: "Radio Sydney",
@@ -582,6 +616,10 @@ const stations = {
   wfuv: {
     stationName: "WFUV",
     tags: ["us", "public", "aaa"],
+  },
+  whrb: {
+    stationName: "WHRB",
+    tags: ["us", "college", "public", "jazz", "classical"],
   },
   whsn: {
     stationName: "WHSN",
