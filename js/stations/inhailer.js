@@ -58,6 +58,9 @@ const stationData = {
       "Jae Forman",
       "Planet of Sound",
       "Riverfront Live",
+      "Cincy",
+      "513",
+      "Fountain Square"
     ],
   },
 }
