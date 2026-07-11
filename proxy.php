@@ -1,0 +1,1 @@
+<?php // Placeholder for server-side proxy
