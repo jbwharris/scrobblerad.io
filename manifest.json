@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "scrobblerad.io",
+    "name": "ScrobbleRadio",
     "short_name": "scrobblerad.io",
     "start_url": "index.html",
     "id": "App",
@@ -8,7 +8,7 @@
     "description": "Awesome radio, everyday",
     "lang": "en",
     "categories": "entertainment,music",
-    "background_color": "#fdfdfd",
+    "background_color": "#D0871A",
     "theme_color": "#111111",
     "orientation": "natural",
     "display": "minimal-ui",
@@ -20,15 +20,134 @@
         "purpose": "any"
     },
     {
-        "src": "img/icons/icon-192.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "any maskable"
+        "src": "img/icons/icon-48x48.png",
+        "sizes": "48x48",
+        "type": "image/png"
     },
     {
-        "src": "img/icons/icon-512.png",
+        "src": "img/icons/icon-72x72.png",
+        "sizes": "72x72",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-96x96.png",
+        "sizes": "96x96",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-144x144.png",
+        "sizes": "144x144",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-512x512.png",
         "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "any maskable"
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-180x180.png",
+        "sizes": "180x180",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-167x167.png",
+        "sizes": "167x167",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-152x152.png",
+        "sizes": "152x152",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-120x120.png",
+        "sizes": "120x120",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-76x76.png",
+        "sizes": "76x76",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-70x70.png",
+        "sizes": "70x70",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-150x150.png",
+        "sizes": "150x150",
+        "type": "image/png"
+    },
+    {
+        "src": "img/icons/icon-310x310.png",
+        "sizes": "310x310",
+        "type": "image/png"
+    }],
+    "splash_screens": [
+    {
+        "src": "img/splash/splash-1125x2436.png",
+        "sizes": "1125x2436",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-750x1334.png",
+        "sizes": "750x1334",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-1242x2208.png",
+        "sizes": "1242x2208",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-1668x2224.png",
+        "sizes": "1668x2224",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-2048x2732.png",
+        "sizes": "2048x2732",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-1536x2048.png",
+        "sizes": "1536x2048",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-320x426.png",
+        "sizes": "320x426",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-320x470.png",
+        "sizes": "320x470",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-480x640.png",
+        "sizes": "480x640",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-720x960.png",
+        "sizes": "720x960",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-960x1280.png",
+        "sizes": "960x1280",
+        "type": "image/png"
+    },
+    {
+        "src": "img/splash/splash-1280x1920.png",
+        "sizes": "1280x1920",
+        "type": "image/png"
     }],
 }
