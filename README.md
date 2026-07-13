@@ -8,7 +8,7 @@ A PWA and website to listen to cool radio stations and easily scrobble to [LastF
 
 
 ## Features 
-- A diverse set of over 90 different online radio stations from around the world. Featuring [KEXP](https://kexp.org), [BBC6](https://www.bbc.co.uk/sounds/play/live:bbc_6music), various NPR stations and many more...
+- A diverse set of over 170 different online radio stations from around the world. Featuring [KEXP](https://kexp.org), [BBC6](https://www.bbc.co.uk/sounds/play/live:bbc_6music), various NPR stations and many more...
 - MediaSession controls, so you can easily switch between stations using the media controls on your keyboard
 - Song and artist data filtered using Web Scrobbler's [Metadata Filter](https://github.com/web-scrobbler/metadata-filter)
 - Additional filtering to ensure the best possible scrobble data to submit
