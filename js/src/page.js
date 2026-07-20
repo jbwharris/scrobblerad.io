@@ -44,7 +44,7 @@ export class Page {
     }
 
     refreshCurrentData(values) {
-        const [song, artist, album, artworkUrl, listeners, playcount, userPlaycount, errorMessage] = values;
+        const [song, artist, album, artworkUrl, listeners, playcount, userPlaycount, lfmTrackUrl, errorMessage] = values;
         const station = this.radioPlayer.currentStationData; // Now radioPlayer is defined
 
         // Clear any existing scrobble timeout when new data arrives

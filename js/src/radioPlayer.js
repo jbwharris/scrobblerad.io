@@ -19,6 +19,7 @@ export class RadioPlayer {
         this.stationDisplayName = null;
         this.nextStationDisplayName = null;
         this.prevStationDisplayName = null;
+        this.isLoadingStation = false;
 
         // Station info
         this.stationKey = "";
@@ -36,7 +37,6 @@ export class RadioPlayer {
         this.lastDataUpdateTime = null;
         this.lastKnownUpdatedTime = null;
         this.errorMessage = false;
-        this.mytunerWidgetRemoved = false;
 
         // UI & Event Handling
         this.playButton = buttonElement;
@@ -316,7 +316,8 @@ export class RadioPlayer {
     }
 
     async handleStationSelect(direction, stationKey, stationDisplayName, firstRun) {
-        if (!stationKey || direction === false) return;
+        if (this.isLoadingStation && this.stationKey === stationKey) return;
+        this.isLoadingStation = true;
 
         this.stationKey = stationKey;
         this.firstRun = firstRun;
@@ -720,8 +721,9 @@ export class RadioPlayer {
                 title: data[0] || '',
                 artist: data[1] || '',
                 album: data[2] || '',
-                albumArt: data[3] || '',
+                albumArt: '',
                 spinUpdated: data[4] || '',
+                timestamp: data[3] || '',
             }
         }
 
@@ -816,7 +818,7 @@ export class RadioPlayer {
         // If albumArt is empty, assign the fallback URL
         this.currentTrack.albumArt = this.currentTrack.albumArt || urlCoverArt;
 
-        return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated, '', false];
+        return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated, this.lastFmUrl || '', '', false];
     }
 
     async getLfmMeta(currentSong, currentArtist, currentAlbum, currentArt, queryType) {
@@ -876,7 +878,8 @@ export class RadioPlayer {
                     lfmData.track.playcount || null,
                     lfmData.track.album?.artist || '',
                     lfmData.track?.duration || null,
-                    lfmData.track.userplaycount || null
+                    lfmData.track.userplaycount || null,
+                    lfmData.track?.url || null,
                 ];
             } else if (lfmData.error !== 6  && (queryType == 'album')) {
                 lfmResult = [
@@ -886,13 +889,15 @@ export class RadioPlayer {
                     this.applyFilters('artist', lfmData.album?.artist) || currentArtist,
                     lfmData.album?.listeners || null,
                     lfmData.album?.playcount || null,
-                    lfmData.album?.userplaycount || null
+                    lfmData.album?.userplaycount || null,
+                    lfmData.album?.url || null
                 ];
             }
             const isLfmArtMissing = Array.isArray(lfmResult) ? !lfmResult[0] : true;
             const lfmListeners = Array.isArray(lfmResult) ? lfmResult[4] || null : null;
             const lfmPlaycount = Array.isArray(lfmResult) ? lfmResult[5] || null : null;
             const lfmUserPlaycount = Array.isArray(lfmResult) ? lfmResult[8] || null : null;
+            const lfmTrackUrl = Array.isArray(lfmResult) ? lfmResult[9] || null : null;
 
             if (mbData.releases?.length && (lfmData.error === 6 || isLfmArtMissing || lfmResult?.[7] == 'Various Artists')) {
                 mbResult = [
@@ -939,10 +944,10 @@ export class RadioPlayer {
                     this.currentTrack.duration = Number(lfmResult[7]);
                     console.log('this.currentTrack.duration', this.currentTrack.duration)
                 } 
-                return [finalAlbumArt, lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null, lfmResult[8] || null];
+                return [finalAlbumArt, lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null, lfmResult[8] || null, lfmResult[9] || null];
             } else {
                 // return album art, album, song, artist, lfm listeners & playcount
-                return [finalAlbumArt, currentAlbum || '', currentSong, currentArtist, null, null];
+                return [finalAlbumArt, currentAlbum || '', currentSong, currentArtist, null, null, null];
             }
             
 
@@ -1116,6 +1121,7 @@ export class RadioPlayer {
 
                         // Your existing logic to check if the data is the same
                         if (this.isDataSameAsPrevious(data)) {
+
                             // Check if it's been more than 900 seconds since the last update
                             if (this.lastDataUpdateTime && (Date.now() - this.lastDataUpdateTime) > 900000) {
                                 console.log("Data is the same, but it's now stale");
@@ -1123,8 +1129,15 @@ export class RadioPlayer {
                                 this.previousDataResponse = data; // Update even if we skip processing
                                 this.processData(data);
                             }
-                            
-                            // console.log("Same data");
+
+
+                            if (navigator.mediaSession.metadata.title == this.stationDisplayName && (this.song && this.artist)) {
+                                console.log('this.song', 'this.artist', this.artist)
+                                const page = new Page(this.stationKey, this);
+                                page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.lfmTrackUrl, this.errorMessage]);
+                                return;
+                            }
+
                             return; // If data is the same and not stale, exit
                         } 
 
@@ -1264,12 +1277,35 @@ export class RadioPlayer {
     }
 
 
-
-   // Function to compare the current data response with the previous one
     isDataSameAsPrevious(data) {
-        // Compare data with previousDataResponse and return true if they are the same, false otherwise
-        return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
-    }      
+        const deepEqual = (obj1, obj2) => {
+        // If they are the exact same reference or primitive value
+        if (obj1 === obj2) return true;
+
+        // If one is not an object or is null, they aren't equal
+        if (typeof obj1!== 'object' || obj1 === null || typeof obj2!== 'object' || obj2 === null) {
+        return false;
+        }
+
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+
+        if (keys1.length!== keys2.length) return false;
+
+        for (const key of keys1) {
+        // Check if the key exists in both and recurse
+        if (!Object.prototype.hasOwnProperty.call(obj2, key) ||!deepEqual(obj1[key], obj2[key])) {
+        return false;
+        }
+        }
+
+        return true;
+        };
+
+        console.log('deepEqual(data, this.previousDataResponse)', deepEqual(data, this.previousDataResponse))
+
+        return deepEqual(data, this.previousDataResponse);
+    }    
 
 
     getLastFmUsername() {
@@ -1338,7 +1374,7 @@ export class RadioPlayer {
             const extractedData = this.extractSongAndArtist(data, this.stationKey);
 
              // Compare the extractedData response with the previous one
-            if ((JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) && navigator.mediaSession.metadata.title !== 'Station data loading') {
+            if ((JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) && navigator.mediaSession.metadata.title !== 'Station Data Loading') {
                 console.log('extracted data the same, returning')
                 return;
             } else {
@@ -1348,12 +1384,14 @@ export class RadioPlayer {
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData(['[ Air break ]', '', '', this.stationArt, null, null, null, true]);
+                page.refreshCurrentData(['[ Air break ]', '', '', this.stationArt, null, null, null, null, true]);
                 return;
             }
 
             this.hasLoadedData = true;
-            const [song, artist, album, albumArt, spinUpdated, queryType, errorMsg] = extractedData;   
+            const [song, artist, album, albumArt, spinUpdated, url, queryType, errorMsg] = extractedData;   
+
+            const safeAlbumArt = (typeof albumArt === 'string')? albumArt : this.artworkUrl;
 
             const now = Date.now();
             const isRecentlyUpdated = this.lastKnownUpdatedTime > (now - 5 * 60 * 1000) && 
@@ -1362,7 +1400,7 @@ export class RadioPlayer {
             if (!song) {
                 const message = isRecentlyUpdated ? '[Air Break]' : 'No song data found';
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([message, '', '', this.stationArt, null, null, null, true]);
+                page.refreshCurrentData([message, '', '', this.stationArt, null, null, null, null, true]);
                 return;
             }
 
@@ -1406,34 +1444,39 @@ export class RadioPlayer {
                     return;   
             } else if ([this.stationKey] == 'indie1023' && song == "[Air break]") {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData(['[ Air Break ]', '', '', this.stationArt, null, null, null, true]);
+                page.refreshCurrentData(['[ Air Break ]', '', '', this.stationArt, null, null, null, null, true]);
                 return;
             } else if (song == "[Air break]" && !staleData ) {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([song, '', '', this.stationArt, null, null, null, true]);
+                page.refreshCurrentData([song, '', '', this.stationArt, null, null, null, null, true]);
                 return;
             }
 
             // Handle stale data or invalid song
             if ((staleData) || song === 'No streaming data currently available' || errorMsg) {
                 const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([(staleData || song), '', '', this.stationArt, null, null, null, true]);
+                page.refreshCurrentData([(staleData || song), '', '', this.stationArt, null, null, null, null, true]);
                 return;
             }
+
+            console.log('this.lfmMetaChanged', this.lfmMetaChanged,  'song', song, 'this.song', this.song);
 
             // Ensure this code doesn't run unless there's new data to process
             if (!this.lfmMetaChanged || (song.toLowerCase() !== this.song.toLowerCase())) {
                 
                 // First, get the metadata from last.fm
                 this.getLfmMeta(song, artist, album, albumArt, '', '', false).then(lfmValues => {
-                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
+                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount, lfmTrackUrl] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
 
                     this.song = lfmSong || this.currentTrack.title;
                     this.artist = lfmArtist || this.currentTrack.artist;
                     this.album = lfmAlbum || this.currentTrack.album || lfmSong;
                     this.artworkUrl = lfmArt || this.currentTrack.albumArt || urlCoverArt;
+                    this.lfmTrackUrl = lfmTrackUrl || null; 
 
-                    this.updateScrobbleData(this.song, this.artist, this.album);
+                    console.log('this.lfmTrackUrl', this.lfmTrackUrl)
+
+                    this.updateScrobbleData(this.song, this.artist, this.album, this.artworkUrl, this.lfmTrackUrl);
 
                     this.listeners = lfmListeners || null;
                     this.playcount = lfmPlaycount || null;
@@ -1441,7 +1484,7 @@ export class RadioPlayer {
                     this.lfmMetaChanged = true;
 
                     const page = new Page(this.stationKey, this);
-                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.errorMessage]);
+                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.lfmTrackUrl, this.errorMessage]);
                     page.setupMediaSession(this.song, this.artist, this.artworkUrl, this.errorMessage);
 
                 }).catch(error => {
@@ -1497,9 +1540,6 @@ export class RadioPlayer {
             const part = parts[i];
 
             if (!current || !Object.prototype.hasOwnProperty.call(current, part)) {
-              
-                //Figure out how to get this to show when there genuinely is missing data and not all the time
-              //  this.currentPage.refreshCurrentData([`No station data found`, '', '', this.stationArt, null, null, true]);
                 return undefined;
             }
 
@@ -1632,6 +1672,7 @@ pause() {
             this.currentPage.scrobbleTimeout = null;
         }
     }
+
 
     destroy() {
         if (this.fetchAbortController) {
