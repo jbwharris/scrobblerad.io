@@ -1,6 +1,5 @@
 const stationData = {
   cioi: {
-
     artist: "Artist",
     song: "Title",
     album: "Album",
@@ -11,7 +10,6 @@ const stationData = {
     duration: "Duration",
     timestamp: "StartTime",
     timezone: "America/New_York",
-    proxyApi: true,
     xmlString: "Entry",
     filter: ["AD", "MOHAWK", "PSA", "LEGAL ID", "INDI", "WAR AMPS", "101-5", "tutoring"],
   }
