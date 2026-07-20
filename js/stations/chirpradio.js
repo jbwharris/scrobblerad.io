@@ -9,7 +9,6 @@ const stationData = {
     streamUrl: "https://chirpradio1.streamguys1.com/live",
     apiUrl:
       "https://chirpng-prod-cms.chirpradio.org/api/tracks-played?sort=-playedAt&limit=1&page=1",
-    proxyApi: true,
     timestamp: "docs.0.playedAt",
     timezone: "UTC",
   }
