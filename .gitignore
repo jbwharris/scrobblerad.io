@@ -5,7 +5,6 @@ prepros.config
 js/stations/demostation.js
 js/stations/retired
 demostation.json
-proxy.php
 api_keys.php
 config.php
 .htaccess
