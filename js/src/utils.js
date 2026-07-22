@@ -33,7 +33,7 @@ export function formatCompactNumber(number) {
 
 export function addCacheBuster(url) {
     const timestamp = Date.now();
-    const skipCacheBuster = ['radiowestern', 'kexp', 'wrir', 'wprb', 'krcl', 'cbcmusic', 'indie1023', 'wusc'];
+    const skipCacheBuster = ['radiowestern', 'kexp', 'wrir', 'wprb', 'krcl', 'cbcmusic', 'indie1023', 'wusc', 'cioi'];
     if (skipCacheBuster.includes(this.stationKey) ) {
         return url;
     }
