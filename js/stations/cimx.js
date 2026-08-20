@@ -1,6 +1,5 @@
 const stationData = {
   cimx: {
-
     artist: "artist",
     song: "title",
     album: "album",
@@ -10,6 +9,6 @@ const stationData = {
     apiUrl: "https://ca.api.iheart.com/api/v3/live-meta/stream/8800/currentTrackMeta",
     duration: "trackDuration",
     timestamp: "startTime",
-    timezone: "America/New_York",
+    timezone: "UTC",
   }
 };

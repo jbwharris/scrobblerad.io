@@ -1,4 +1,16 @@
 const stations = {
+  "88Nine": {
+    stationName: "88Nine - Radio Milwaukee",
+    tags: ["us", "npr", "aaa", "top"],
+  },
+  "8radio": {
+    stationName: "8Radio",
+    tags: ["ie", "indie", "eclectic"],
+  },
+  "96xmemphis": {
+    stationName: "96X Memphis",
+    tags: ["us", "independent", "indie", "alt"],
+  },
   abc: {
     doublej: {
       stationName: "ABC - Double J",
@@ -46,6 +58,10 @@ const stations = {
       stationName: "BBC Radio 6 Music",
       tags: ["uk", "public", "alt", "eclectic", "top"],
     },
+    indieforever: {
+      stationName: "BBC 6 Indie Forever",
+      tags: ["uk", "hidden"],
+    }
   },
   bfffm: {
     stationName: "BFF.fm",
@@ -53,7 +69,7 @@ const stations = {
   },
   birchstreet: {
     stationName: "Birch Street Radio",
-    tags: ["ca", "indie", "folk"],
+    tags: ["ca", "indie", "folk", "justmusic"],
   },
   blacklightradio: {
     stationName: "Blacklight Radio",
@@ -186,14 +202,6 @@ const stations = {
   eastvillageradio: {
     stationName: "East Village Radio",
     tags: ["us", "community", "eclectic"],
-  },
-  eightradio: {
-    stationName: "8Radio",
-    tags: ["ie", "indie", "eclectic"],
-  },
-  wyms: {
-    stationName: "88Nine - Radio Milwaukee",
-    tags: ["us", "npr", "aaa", "top"],
   },
   flashAlt: {
     stationName: "Flashback Alternatives",
@@ -351,7 +359,7 @@ const stations = {
     stationName: "Lightning 100",
     tags: ["us", "aaa", "rock", "top"],
   },
- loudspeaker: {
+  loudspeaker: {
     cafe80s: {
       stationName: "Loudspeaker - Cafe 80s",
       tags: ["us", "80s", "public"],
@@ -366,7 +374,7 @@ const stations = {
     },
     rev6: {
       stationName: "Loudspeaker - Revolution 6",
-      tags: ["us", "60s", "public",],
+      tags: ["us", "60s", "public", ],
     },
     riot: {
       stationName: "Loudspeaker - The Riot",
@@ -474,7 +482,7 @@ const stations = {
       stationName: "Radio Paradise - Beyond",
       tags: ["us", "online", "eclectic", "justmusic"],
     },
-      global: {
+    global: {
       stationName: "Radio Paradise - The Globe",
       tags: ["us", "online", "global", "justmusic"],
     },
@@ -482,14 +490,14 @@ const stations = {
       stationName: "Radio Paradise - Main Mix",
       tags: ["us", "online", "rock", "top", "justmusic"],
     },
-      rock: {
+    rock: {
       stationName: "Radio Paradise - RockIt",
       tags: ["us", "online", "rock", "justmusic"],
     },
   },
   radiorobotic: {
     stationName: "Radio Robotic",
-    tags: ["nz", "indie", "alt"],
+    tags: ["nz", "indie", "alt", "justmusic"],
   },
   radiosydney: {
     stationName: "Radio Sydney",
@@ -693,6 +701,10 @@ const stations = {
     stationName: "WTMD",
     tags: ["us", "public", "npr", "aaa"],
   },
+  wtsq: {
+    stationName: "WTSQ - The Status Quo",
+    tags: ["us", "public", "independent", "indie"],
+  },
   wudr: {
     stationName: "WUDR - Flyer Radio",
     tags: ["us", "college", "indie", "top"],
@@ -721,6 +733,10 @@ const stations = {
     stationName: "X92.9",
     tags: ["ca", "corp", "alt"],
   },
+  xcsb: {
+    stationName: "XCSB",
+    tags: ["us", "public", "college", "indie"],
+  },
   xpn: {
     stationName: "XPN",
     tags: ["us", "npr", "aaa", "top"],
@@ -742,5 +758,4 @@ const stations = {
     tags: ["nl", "pop", "rock"],
   },
 };
-
 export default stations;

@@ -1,6 +1,5 @@
 const stationData = {
-  eightradio: {
-
+  "8radio": {
     location: "Dublin, IE 🇮🇪",
     webUrl: "https://8radio.com",
     streamUrl: "https://edge4.audioxi.com/8RADIOAAC",

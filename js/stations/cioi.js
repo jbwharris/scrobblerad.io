@@ -6,7 +6,7 @@ const stationData = {
     location: "Hamilton, Ontario 🇨🇦",
     webUrl: "https://indi1015.ca/",
     streamUrl: "https://hawkstream.mohawkcollege.ca/1/",
-    apiUrl: "https://cioiarchive.mohawkcollege.ca/INDI_FM.xml",
+    apiUrl: "https://cioiarchive.mohawkcollege.ca/tta.html",
     duration: "Duration",
     timestamp: "StartTime",
     timezone: "America/New_York",

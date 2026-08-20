@@ -1,4 +1,4 @@
-const SCROBBLERADIO_CACHE = "app-v4.27243";  // Updated cache version
+const SCROBBLERADIO_CACHE = "app-v4.272435"; // Updated cache version
 const staticPlayer = SCROBBLERADIO_CACHE;
 const assets = [
   "/",
@@ -18,7 +18,6 @@ const assets = [
   "/js/external/bootstrap.min.js",
   "/js/external/player-v1.js"
 ];
-
 // Function to check for updates
 function checkForUpdates() {
   caches.open(staticPlayer).then((cache) => {
@@ -29,7 +28,6 @@ function checkForUpdates() {
     });
   });
 }
-
 // Install event: Cache the assets
 self.addEventListener("install", (installEvent) => {
   installEvent.waitUntil(
@@ -38,9 +36,8 @@ self.addEventListener("install", (installEvent) => {
       return cache.addAll(assets);
     })
   );
-  self.skipWaiting();  // Forces the new SW to activate immediately
+  self.skipWaiting(); // Forces the new SW to activate immediately
 });
-
 // Activate event: Clean up old caches and notify clients of updates
 self.addEventListener("activate", (activateEvent) => {
   activateEvent.waitUntil(
@@ -64,19 +61,16 @@ self.addEventListener("activate", (activateEvent) => {
       })
     ])
   );
-  self.clients.claim();  // Immediately start controlling any open pages
+  self.clients.claim(); // Immediately start controlling any open pages
 });
-
 // Fetch event: Cache-first strategy with network fallback
 self.addEventListener("fetch", (fetchEvent) => {
   const request = fetchEvent.request;
   const url = new URL(request.url);
-
   // Bypass service worker for non-GET requests and external resources
   if (request.method !== "GET" || !url.origin.startsWith(self.location.origin)) {
     return fetch(request);
   }
-
   fetchEvent.respondWith(
     caches.match(request).then((cachedResponse) => {
       // Return cached response if available, otherwise fetch from network
@@ -92,12 +86,10 @@ self.addEventListener("fetch", (fetchEvent) => {
         // Fallback to cached response if network fails
         return cachedResponse;
       });
-
       return cachedResponse ? cachedResponse : fetchPromise;
     })
   );
 });
-
 // Optional: Handle update notifications in the main app
 if (typeof window !== 'undefined') {
   navigator.serviceWorker.addEventListener("message", (event) => {
@@ -105,7 +97,6 @@ if (typeof window !== 'undefined') {
       alert("A new version of the app is available. Please refresh to update.");
     }
   });
-
   // Check for updates every 24 hours
   setInterval(checkForUpdates, 24 * 60 * 60 * 1000);
 }
