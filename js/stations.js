@@ -1,5 +1,5 @@
 const stations = {
-  "88Nine": {
+  "88nine": {
     stationName: "88Nine - Radio Milwaukee",
     tags: ["us", "npr", "aaa", "top"],
   },
