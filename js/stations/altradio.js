@@ -6,5 +6,6 @@ const stationData = {
     timestamp: "updated",
     orbPath: "us.whrvhd2",
     timezone: "America/New_York",
+    filter: ["AltRadio", " ID"],
   },
 }
