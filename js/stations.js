@@ -60,7 +60,7 @@ const stations = {
     },
     indieforever: {
       stationName: "BBC 6 Indie Forever",
-      tags: ["uk", "hidden"],
+      tags: ["hidden"],
     }
   },
   bfffm: {
@@ -166,6 +166,10 @@ const stations = {
   coloradosound: {
     stationName: "The Colorado Sound",
     tags: ["us", "indie", "aaa"],
+  },
+  crstl: {
+    stationName: "Community Radio St. Louis",
+    tags: ["us", "indie", "blues", "community", "aaa"],
   },
   thecurrent: {
     stationName: "The Current",
@@ -290,6 +294,10 @@ const stations = {
   kfjc: {
     stationName: "KFJC",
     tags: ["us", "college", "eclectic"],
+  },
+  kosu: {
+    stationName: "KOSU - The Spy",
+    tags: ["us", "community", "npr"],
   },
   kpcr: {
     stationName: "KPCR - Pirate Cat Radio",
@@ -705,6 +713,10 @@ const stations = {
     stationName: "WTSQ - The Status Quo",
     tags: ["us", "public", "independent", "indie"],
   },
+  wtsr: {
+    stationName: "WTSR",
+    tags: ["us", "college", "independent", "indie"],
+  },
   wudr: {
     stationName: "WUDR - Flyer Radio",
     tags: ["us", "college", "indie", "top"],
@@ -735,7 +747,7 @@ const stations = {
   },
   xcsb: {
     stationName: "XCSB",
-    tags: ["us", "public", "college", "indie"],
+    tags: ["hidden"],
   },
   xpn: {
     stationName: "XPN",
