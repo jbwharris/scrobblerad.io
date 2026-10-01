@@ -1,4 +1,4 @@
-const SCROBBLERADIO_CACHE = "app-v4.272437"; // Updated cache version
+const SCROBBLERADIO_CACHE = "app-v4.5"; // Updated cache version
 const staticPlayer = SCROBBLERADIO_CACHE;
 const assets = [
   "/",
@@ -6,17 +6,22 @@ const assets = [
   "/js/src/main.js",
   "/js/src/constants.js",
   "/js/src/filter.min.js",
+  "/js/src/filterData.js",
+  "/js/src/history.js",
+  "/js/src/main.js",
   "/js/src/page.js",
+  "/js/src/populateSelects.js",
   "/js/src/radioButtons.js",
   "/js/src/radioPlayer.js",
+  "/js/src/scrobbler.js",
+  "/js/src/settings.js",
   "/js/src/timing.js",
   "/js/src/utils.js",
+  "/js/src/welcomeModal.js",
   "/js/src/stations-dist.js",
-  "/js/scrobbler.js",
   "/img/defaultArt.png",
   "/css/external/bootstrap.min.css",
-  "/js/external/bootstrap.min.js",
-  "/js/external/player-v1.js"
+  "/js/external/bootstrap.min.js"
 ];
 // Function to check for updates
 function checkForUpdates() {
