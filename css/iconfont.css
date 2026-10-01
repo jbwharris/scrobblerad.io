@@ -1,97 +1,115 @@
 @font-face {
   font-family: 'iconfont';
   src:
-    url('../fonts/iconfont.ttf?4bbqfh') format('truetype'),
-    url('../fonts/iconfont.woff?4bbqfh') format('woff'),
-    url('../fonts/iconfont.svg?4bbqfh#iconfont') format('svg');
+    url('../fonts/iconfont.ttf?nmvh3x') format('truetype'),
+    url('../fonts/iconfont.woff?nmvh3x') format('woff'),
+    url('../fonts/iconfont.svg?nmvh3x#iconfont') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
 }
 
 [class^="icon-"], [class*=" icon-"] {
-  /* Use !important to prevent extensions from overriding this font. */
-  font-family: "iconfont" !important;
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'iconfont' !important;
+  speak: never;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
   text-transform: none;
   line-height: 1;
 
-  /* Enable Ligatures ================ */
-  letter-spacing: 0;
-  -webkit-font-feature-settings: "liga";
-  -moz-font-feature-settings: "liga=1";
-  -moz-font-feature-settings: "liga";
-  -ms-font-feature-settings: "liga"1;
-  font-feature-settings: "liga";
-  -webkit-font-variant-ligatures: discretionary-ligatures;
-  font-variant-ligatures: discretionary-ligatures;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'iconfont' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
 
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-show-panels:before {
-  content: "\e90f";
-}
-.icon-hide-panels:before {
-  content: "\e911";
-}
-.icon-bluesky:before {
-  content: "\e913";
-}
-.icon-chevron-down:before {
-  content: "\e912";
-}
-.icon-github:before {
-  content: "\e90e";
-}
-.icon-radio-station:before {
-  content: "\e90d";
-}
-.icon-reload:before {
+.icon-tealfm:before {
   content: "\e900";
 }
-.icon-shuffle:before {
+.icon-reload:before {
   content: "\e901";
 }
-.icon-mastodon:before {
+.icon-shuffle:before {
   content: "\e902";
 }
-.icon-station-location:before {
+.icon-mastodon:before {
   content: "\e903";
 }
-.icon-song:before {
+.icon-station-location:before {
   content: "\e904";
 }
-.icon-backward:before {
+.icon-song:before {
   content: "\e905";
 }
-.icon-forward:before {
+.icon-backward:before {
   content: "\e906";
 }
-.icon-play:before {
+.icon-forward:before {
   content: "\e907";
 }
-.icon-pause:before {
+.icon-play:before {
   content: "\e908";
 }
-.icon-apple:before {
+.icon-pause:before {
   content: "\e909";
 }
-.icon-lastfm:before {
+.icon-apple:before {
   content: "\e90a";
 }
-.icon-artist:before {
+.icon-lastfm:before {
   content: "\e90b";
 }
-.icon-album:before {
+.icon-artist:before {
   content: "\e90c";
 }
-.icon-headphones:before {
+.icon-album:before {
+  content: "\e90d";
+}
+.icon-radio-station:before {
+  content: "\e90e";
+}
+.icon-github:before {
+  content: "\e90f";
+}
+.icon-show-panels:before {
   content: "\e910";
+}
+.icon-headphones:before {
+  content: "\e911";
+}
+.icon-hide-panels:before {
+  content: "\e912";
+}
+.icon-chevron-down:before {
+  content: "\e913";
+}
+.icon-bluesky:before {
+  content: "\e914";
+}
+.icon-listenbrainz:before {
+  content: "\e915";
+}
+.icon-cog:before {
+  content: "\e916";
+}
+.icon-enter:before {
+  content: "\ea13";
 }
 .icon-spotify:before {
   content: "\ea94";
