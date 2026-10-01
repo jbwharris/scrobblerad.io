@@ -2,6 +2,16 @@ import { generateRadioButtons, handleStationClick } from './radioButtons.js';
 import { RadioPlayer } from './radioPlayer.js';
 import stations from './stations-dist.js';
 import { getSelectedTags } from './utils.js';
+import { initSettingsUI } from './settings.js';
+import { updateAuthButton } from './scrobbler.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+ initSettingsUI();
+ updateAuthButton();
+});
+
+import { init as populateSelectsInit } from './populateSelects.js';
+import { init as welcomeModalInit } from './welcomeModal.js';
 
 
 const stationKeys = stations;
@@ -114,4 +124,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 }, { once: true });
+
+populateSelectsInit();
+welcomeModalInit();
+
+document.addEventListener('scrobblerad:playStation', function (e) {
+ var stationId = e.detail.station;
+ if (stationId && radioPlayer && typeof radioPlayer.jumpToStationFromHash === 'function') {
+ radioPlayer.jumpToStationFromHash();
+ }
+});
 

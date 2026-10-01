@@ -2,10 +2,11 @@ import { debounce, addCacheBuster, hasTag, upsizeImgUrl, getSelectedTags, flatte
 import { Page } from './page.js';
 import { handleStationClick, generateRadioButtons } from './radioButtons.js';
 import { urlCoverArt, currentTag } from './constants.js';
-import { getTimezoneOffset, checkStaleData, convertDurationToMilliseconds, convertTimestamp, formatTimeInTimezone  } from './timing.js';
+import { getTimezoneOffset, checkStaleData, convertDurationToMilliseconds, convertTimestamp, formatTimeInTimezone } from './timing.js';
 import { MetadataFilter } from './filter.min.js';
-
-
+import { updateNowPlaying, scrobbleIt } from './scrobbler.js';
+import { renderScrobbleHistory } from './history.js';
+import { getSettings } from './settings.js';
 
 export class RadioPlayer {
     constructor(buttonElement, skipForwardButton, skipBackButton, stations) {
@@ -20,7 +21,6 @@ export class RadioPlayer {
         this.nextStationDisplayName = null;
         this.prevStationDisplayName = null;
         this.isLoadingStation = false;
-
         // Station info
         this.stationKey = "";
         this.currentStationData = null;
@@ -31,13 +31,11 @@ export class RadioPlayer {
         this.streamUrl = null;
         this.streamApiUrl = null;
         this.stations = stations;
-
         // Metadata handling
         this.songMetadataChanged = false;
         this.lastDataUpdateTime = null;
         this.lastKnownUpdatedTime = null;
         this.errorMessage = false;
-
         // UI & Event Handling
         this.playButton = buttonElement;
         this.skipForwardButton = skipForwardButton;
@@ -50,14 +48,12 @@ export class RadioPlayer {
         this.upsizeImgUrl = upsizeImgUrl;
         this.flattenStations = flattenStations;
         this.getSelectedTags = getSelectedTags;
-
         // timing 
-       this.getTimezoneOffset = getTimezoneOffset; 
-       this.checkStaleData = checkStaleData; 
-       this.convertDurationToMilliseconds = convertDurationToMilliseconds; 
-       this.convertTimestamp = convertTimestamp; 
-       this.formatTimeInTimezone = formatTimeInTimezone;
-
+        this.getTimezoneOffset = getTimezoneOffset;
+        this.checkStaleData = checkStaleData;
+        this.convertDurationToMilliseconds = convertDurationToMilliseconds;
+        this.convertTimestamp = convertTimestamp;
+        this.formatTimeInTimezone = formatTimeInTimezone;
         // Misc
         this.firstRun = true;
         this.debounce = debounce;
@@ -65,41 +61,32 @@ export class RadioPlayer {
         this.songStartTime = null; // Timestamp when the current song started
         this.scrobbleTimeout = null; // Timeout ID for the 60-second timer     
         this.currentTrack = {
-          title: null,
-          artist: null,
-          album: null,
-          albumArt: null,
-          spinUpdated: null,
-          timestamp: null,
-          duration: null
+            title: null,
+            artist: null,
+            album: null,
+            albumArt: null,
+            spinUpdated: null,
+            timestamp: null,
+            duration: null
         };
         this.currentScrobble;
-        this.lastfmUsername = this.getLastFmUsername(); 
-
+        this.lastfmUsername = this.getLastFmUsername();
         this.streamingInterval = null;
-
         // Debounce the audio playback
         this.debouncedPlayAudio = this.debounce((newAudio) => {
-          if (this.audio) {
-            this.audio.pause();
-            this.audio = null;
-          }
-
-          this.audio = newAudio;
-          this.getStreamingData();
-          this.play();
-          this.isPlaying = true;
+            if (this.audio) {
+                this.audio.pause();
+                this.audio = null;
+            }
+            this.audio = newAudio;
+            this.getStreamingData();
+            this.play();
+            this.isPlaying = true;
         }, 1500);
-
-
         this.bindMethods();
         this.addEventListeners();
-
         this.init();
     }
-
-
-
     bindMethods() {
         this.handleStationSelect = this.handleStationSelect.bind(this);
         this.initializePage = this.initializePage.bind(this);
@@ -114,19 +101,16 @@ export class RadioPlayer {
         this.getNestedValue = this.getNestedValue.bind(this);
         this.getLastFmUsername = this.getLastFmUsername.bind(this);
     }
-
     async addEventListeners() {
         this.playButton.addEventListener("click", this.togglePlay);
         this.skipForwardButton.addEventListener("click", this.skipForward);
         this.skipBackButton.addEventListener("click", this.skipBackward);
-
         // Correctly listen for the change event on the <select> element
         document.getElementById("stationSelect").addEventListener("change", (event) => {
             const selectedStationKey = event.target.value;
             const selectedStationDisplayName = event.target.options[event.target.selectedIndex].text;
             this.handleStationSelect(null, selectedStationKey, selectedStationDisplayName, true);
         });
-
         // Offcanvas Panels Toggle
         const toggleBtn = document.getElementById("togglePanels");
         if (toggleBtn) {
@@ -135,11 +119,9 @@ export class RadioPlayer {
                 const centrePanel = document.getElementById("panel2");
                 const rightPanel = document.getElementById("panel3");
                 const iconElement = document.querySelector("#togglePanels .icon-hide-panels, #togglePanels .icon-show-panels");
-
                 leftPanel.classList.toggle("show");
                 centrePanel.classList.toggle("grow");
                 rightPanel.classList.toggle("show");
-
                 if (iconElement) {
                     if (iconElement.classList.contains("icon-hide-panels")) {
                         iconElement.classList.remove("icon-hide-panels");
@@ -152,8 +134,6 @@ export class RadioPlayer {
             });
         }
     }
-
-
     init() {
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker
@@ -164,11 +144,9 @@ export class RadioPlayer {
                         // If there's a waiting SW, prompt the user or refresh
                         console.log("Service worker is waiting to activate");
                     }
-
                     registration.onupdatefound = () => {
                         console.log("New service worker update found!");
                         const newWorker = registration.installing;
-
                         newWorker.onstatechange = () => {
                             if (newWorker.state === "installed") {
                                 if (navigator.serviceWorker.controller) {
@@ -184,125 +162,112 @@ export class RadioPlayer {
                 })
                 .catch((err) => console.log("Service worker not registered", err));
         }
-    }
+        const saved = this.loadState();
+ const settings = getSettings();
 
+ // Only auto-resume if the setting isn't explicitly false
+ if (saved.stationKey && settings.resumeStation!== false) {
+ this.handleStationSelect(null, saved.stationKey, null, true);
+ }
+
+ if (saved.tag) {
+ this.onTagSelected(saved.tag);
+ }
+    }
     initializePage(stationKey) {
         if (this.currentPage) {
-          this.currentPage.destroy(); // Cleanup previous instance
+            this.currentPage.destroy(); // Cleanup previous instance
         }
         this.currentPage = new Page(stationKey, this.radioPlayer); // Pass radioPlayer instance
-      }
-
+    }
     getNestedValue(obj, keyPath, targetProperty, defaultValue = undefined) {
-        if (!obj || !keyPath || !targetProperty) return defaultValue;
+ if (!obj ||!keyPath ||!targetProperty) return defaultValue;
 
-        // If keyPath doesn't contain '.', it's a top-level property
-        if (!keyPath.includes('.')) {
-            return obj[keyPath]?.[targetProperty] ?? defaultValue;
-        }
+ if (!keyPath.includes('.')) {
+ return obj[keyPath]?.[targetProperty]?? defaultValue;
+ }
 
-        // Split the keyPath by '.' into an array of keys
-        const keys = keyPath.split('.');
-        let current = obj;
-        let result = undefined;
+ const keys = keyPath.split('.');
+ let current = obj;
+ let result = undefined;
 
-        // Traverse the nested path and check for targetProperty at each level
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            if (current && typeof current === 'object' && key in current) {
-                current = current[key];
+ for (let i = 0; i < keys.length; i++) {
+ const key = keys[i];
+ if (current && typeof current === 'object' && key in current) {
+ current = current[key];
+ if (current!= null && current[targetProperty]!== undefined) {
+ result = current[targetProperty];
+ }
+ } else {
+ return defaultValue;
+ }
+ }
 
-                // Check if targetProperty exists at the current level
-                if (current?.[targetProperty]) {
-                    result = current[targetProperty]; // Store the result but continue traversing
-                }
-            } else {
-                return defaultValue;
-            }
-        }
-
-        // After traversing the nested path, return the most specific result or defaultValue
-        return result ?? defaultValue;
-    }
-
+ return result?? defaultValue;
+}
     calculateNextAndPreviousIndices(direction) {
-      // 1. Flatten all stations as before
-      const allStations = this.flattenStations(this.stations);
-
-      // 2. Re-apply your active tag filters to get the CURRENT view's list
-      const activeFilters = this.getSelectedTags(); // returns current selected tags
-      let currentView = allStations;
-
-      if (activeFilters.length > 0) {
-        currentView = allStations.filter(station =>
-          activeFilters.every(filter => filter === 'all' || hasTag(station, filter))
-        );
-      }
-
-      // 3. Find where the current station sits in this filtered view
-      const currentIndex = currentView.findIndex(s => s.stationKey === this.stationKey);
-
-      // Safety check if station doesn't exist in the current view
-      if (currentIndex === -1) return;
-
-      // 4. Calculate the next/previous based on current view indices
-      if (direction === 'next') {
-        const nextIndex = (currentIndex + 1) % currentView.length;
-        const next = currentView[nextIndex];
-        this.nextStationKey = next.stationKey;
-        this.nextStationDisplayName = next.stationDisplayName;
-      } else {
-        const prevIndex = (currentIndex - 1 + currentView.length) % currentView.length;
-        const prev = currentView[prevIndex];
-        this.prevStationKey = prev.stationKey;
-        this.prevStationDisplayName = prev.stationDisplayName;
-      }
+        // 1. Flatten all stations as before
+        const allStations = this.flattenStations(this.stations);
+        // 2. Re-apply your active tag filters to get the CURRENT view's list
+        const activeFilters = this.getSelectedTags(); // returns current selected tags
+        let currentView = allStations;
+        if (activeFilters.length > 0) {
+            currentView = allStations.filter(station =>
+                activeFilters.every(filter => filter === 'all' || hasTag(station, filter))
+            );
+        }
+        // 3. Find where the current station sits in this filtered view
+        const currentIndex = currentView.findIndex(s => s.stationKey === this.stationKey);
+        // Safety check if station doesn't exist in the current view
+        if (currentIndex === -1) return;
+        // 4. Calculate the next/previous based on current view indices
+        if (direction === 'next') {
+            const nextIndex = (currentIndex + 1) % currentView.length;
+            const next = currentView[nextIndex];
+            this.nextStationKey = next.stationKey;
+            this.nextStationDisplayName = next.stationDisplayName;
+        } else {
+            const prevIndex = (currentIndex - 1 + currentView.length) % currentView.length;
+            const prev = currentView[prevIndex];
+            this.prevStationKey = prev.stationKey;
+            this.prevStationDisplayName = prev.stationDisplayName;
+        }
     }
-
     jumpToStationFromHash() {
         const hash = window.location.hash;
-
         if (hash) {
             const stationKey = hash.substring(1); // Remove the '#' character
             const button = document.querySelector(`button[name='${stationKey}']`);
-
             if (button) {
                 // Extract the station display name from the button's text content
                 const stationDisplayName = button.textContent.trim();
-
                 // Scroll the button into view
                 button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
                 // Pass both stationKey and stationDisplayName to handleStationSelect
                 this.handleStationSelect(null, stationKey, stationDisplayName, true);
             }
         }
     }
-
-
     async loadStationData(stationKey) {
-      let url;
-      if (stationKey.includes('.')) {
-        // If there's an underscore, load the parent station file (e.g., abc.js for abc_doublej)
-        const parentStation = stationKey.split('.')[0]; // Extract parent station name (e.g., abc from abc_doublej)
-        url = `/js/stations/${parentStation}.js`;
-      } else {
-        // Otherwise, load the specific station file (e.g., wfmu.js)
-        url = `/js/stations/${stationKey}.js`;
-      }
-
-      try {
-        const response = await fetch(url);
-        const scriptContent = await response.text();
-        const script = new Function(scriptContent + "; return stationData;");
-        return script();
-      } catch (err) {
-        console.error(`Error loading station data for ${stationKey}:`, err);
-        return null;
-      }
+        let url;
+        if (stationKey.includes('.')) {
+            // If there's an underscore, load the parent station file (e.g., abc.js for abc_doublej)
+            const parentStation = stationKey.split('.')[0]; // Extract parent station name (e.g., abc from abc_doublej)
+            url = `/js/stations/${parentStation}.js`;
+        } else {
+            // Otherwise, load the specific station file (e.g., wfmu.js)
+            url = `/js/stations/${stationKey}.js`;
+        }
+        try {
+            const response = await fetch(url);
+            const scriptContent = await response.text();
+            const script = new Function(scriptContent + "; return stationData;");
+            return script();
+        } catch (err) {
+            console.error(`Error loading station data for ${stationKey}:`, err);
+            return null;
+        }
     }
-
-
     // Method to destroy HLS instance and reset audio
     destroyHLSAndResetAudio() {
         if (this.hls) {
@@ -314,21 +279,18 @@ export class RadioPlayer {
             this.audio.load();
         }
     }
-
     async handleStationSelect(direction, stationKey, stationDisplayName, firstRun) {
         if (this.isLoadingStation && this.stationKey === stationKey) return;
         this.isLoadingStation = true;
-
         this.stationKey = stationKey;
         this.firstRun = firstRun;
-
+        this.saveState();
         // Clear existing scrobble timeout
         if (this.currentPage && this.currentPage.scrobbleTimeout) {
             clearTimeout(this.currentPage.scrobbleTimeout);
             console.log("Scrobble timeout cleared due to station switch.");
             this.currentPage.scrobbleTimeout = null;
         }
-
         if (this.shouldReloadStream) {
             document.getElementById("playermeta").classList.remove("opacity-50");
             this.audio.load();
@@ -338,44 +300,39 @@ export class RadioPlayer {
             this.shouldReloadStream = false;
             return;
         }
-
         // Destroy the previous Page instance if it exists
         if (this.currentPage) {
             this.currentPage.destroy();
             this.currentPage = null;
         }
-
         document.getElementById("playermeta").classList.add("opacity-50");
-
         if (firstRun == true && !this.shouldReloadStream) {
             this.currentStationData = await this.loadStationData(this.stationKey);
-
             if (!this.currentStationData) return;
-
             if (!stationDisplayName) {
-                this.stationDisplayName = this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null);
-            } else if (stationDisplayName) {
-                this.stationDisplayName = stationDisplayName;
+             this.stationDisplayName =
+             this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null) ||
+             this.getNestedValue(this.currentStationData, this.stationKey, 'name', null) ||
+             this.getNestedValue(this.currentStationData, this.stationKey, 'displayName', null) ||
+             this.stationKey;
+            } else {
+             this.stationDisplayName = stationDisplayName;
             }
-
             this.streamUrl = this.getNestedValue(this.currentStationData, stationKey, 'streamUrl', null);
-
-
             // Initialize the new Page instance
             this.initializePage(stationKey);
-
             // Clear any existing streaming intervals
             if (this.streamingInterval) {
                 clearInterval(this.streamingInterval);
                 this.streamingInterval = null;
             }
-
             this.stationKey = stationKey;
             this.stationArt = `../img/stations/${this.stationKey}.png`;
             document.documentElement.style.setProperty("--albumArt", `url("../${this.stationArt}")`);
             document.documentElement.style.setProperty("--stationArt", `url("../${this.stationArt}")`);
             this.currentPage.setupMediaSession(this.stationDisplayName, 'currently loading', this.stationArt, false);
             this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, null, true]);
+            document.querySelector('.animated-gradient')?.remove();
             this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false;
             console.log(stationKey);
@@ -387,51 +344,37 @@ export class RadioPlayer {
             this.firstRun = false;
             firstRun = false;
         }
-
         const debouncedSetupAudio = debounce(() => {
             if (!this.isPlaying) return;
-
-
             if (!this.currentStationData) {
                 console.error("currentStationData is undefined or null");
                 return;
             }
-
             if (this.hls) {
                 this.destroyHLSAndResetAudio();
             }
-
             const newAudio = new Audio(); // Create new Audio element
             newAudio.crossOrigin = 'anonymous';
-
             const isHlsStream = this.streamUrl.endsWith('.m3u8');
-
             if (isHlsStream) {
                 this.hlsStreamLoad(this.streamUrl, newAudio); // No need to assign return value
             } else {
-
                 if (this.getNestedValue(this.currentStationData, this.stationKey, 'proxyStream', null)) {
-                        newAudio.src = this.addCacheBuster(`https://scrobblerad.io/proxy.php?url=${this.streamUrl}`);
+                    newAudio.src = this.addCacheBuster(`https://scrobblerad.io/proxy.php?url=${this.streamUrl}`);
                 } else {
                     newAudio.src = this.addCacheBuster(this.streamUrl);
                 }
-
                 newAudio.load();
             }
-
             // If the stream is marked as quiet, boost it
             if (this.getNestedValue(this.currentStationData, this.stationKey, 'quietStream', null)) {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const audioContext = new(window.AudioContext || window.webkitAudioContext)();
                 const source = audioContext.createMediaElementSource(newAudio);
                 const gainNode = audioContext.createGain();
-
                 gainNode.gain.value = this.getNestedValue(this.currentStationData, this.stationKey, 'gainBoost', null) || 2;
-
                 console.log('station audio boosted');
-
                 source.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-
                 // Resume context if needed
                 if (audioContext.state === 'suspended') {
                     const resumeContext = () => {
@@ -440,43 +383,31 @@ export class RadioPlayer {
                     };
                     window.addEventListener('click', resumeContext);
                 }
-
                 // IMPORTANT: Save the context + node if needed later
                 this.audioContext = audioContext;
                 this.audioGainNode = gainNode;
             }
-
-
-
             newAudio.onloadedmetadata = () => {
                 this.lfmMetaChanged = false;
                 this.debouncedPlayAudio(newAudio);
-
                 this.streamingInterval = setInterval(() => {
                     this.getStreamingData();
                 }, 25000);
             };
-
             newAudio.onerror = (error) => {
-                console.warn('Error loading audio:', error);
-                if (this.isPlaying && this.currentPage) {
-                    this.currentPage.refreshCurrentData([`Audio not loading, choose another station`, '', '', this.stationArt, null, null, null, true]);
-                   // direction === true ? this.skipBackward() : this.skipForward();
-                }
+             console.warn('Error loading audio:', error);
+             if (this.isPlaying && this.currentPage) {
+             this.currentPage.showStateMessage('Audio not loading, choose another station');
+             }
             };
-
             newAudio.load();
-
             const radioInput = document.querySelector(`input[name='station'][value='${this.stationKey}']`);
             if (radioInput) radioInput.checked = true;
-
             window.location.hash = `#${this.stationKey}`;
         }, 250);
-
         debouncedSetupAudio();
     }
-
-     hlsStreamLoad(streamUrl, audioElement) {
+    hlsStreamLoad(streamUrl, audioElement) {
         // Check for native HLS support (Safari)
         if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
             audioElement.src = streamUrl;
@@ -515,17 +446,13 @@ export class RadioPlayer {
             console.error('HLS is not supported in this browser and cannot be played.');
         }
     }
-
     cleanupArtist(artist) {
         // Define patterns to find additional artists or features.
         const patterns = [/ x .*/, / feat\..*/];
-
         let cleanedArtist = artist;
-
         patterns.forEach((pattern) => {
             cleanedArtist = cleanedArtist.replace(pattern, '');
         });
-
         // New check for artist format "Last, First" or "Band, The"
         if (cleanedArtist.includes(', ')) {
             const parts = cleanedArtist.split(', ').map(part => part.trim());
@@ -535,10 +462,8 @@ export class RadioPlayer {
                 cleanedArtist = `${parts.slice(-1)[0]} ${parts.slice(0, -1).join(' ')}`; // Handle "Band, The" to "The Band"
             }
         }
-
         return cleanedArtist.trim();
     }
-
     getFilterSet() {
         return {
             artist: [MetadataFilter.normalizeFeature],
@@ -546,49 +471,39 @@ export class RadioPlayer {
             album: [MetadataFilter.removeRemastered, MetadataFilter.removeFeature, MetadataFilter.removeLive, MetadataFilter.removeCleanExplicit, MetadataFilter.removeVersion],
         };
     }
-
     applyFilters(filterField, value) {
         const validFields = ['track', 'artist', 'album'];
-        
         // Check if filterField is valid
         if (!validFields.includes(filterField)) {
             console.error(`Invalid filter field: ${filterField}`);
-            return value;  // Return the original value if invalid field
+            return value; // Return the original value if invalid field
         }
-
         // Proceed with applying the filter (your existing logic here)
         return value; // Assuming you have filtering logic here
     }
-
     getDataAtPath(path, data) {
         const pathParts = path.split('.');
         let currentData = data;
-
         for (let part of pathParts) {
             if (currentData && currentData.hasOwnProperty(part)) {
                 currentData = currentData[part];
             } else {
-                return undefined;  // Return undefined if path doesn't exist
+                return undefined; // Return undefined if path doesn't exist
             }
         }
-
         return currentData;
     }
-
     getLastJsonPath(path, data) {
         if (typeof path !== "string" || !path) {
             console.error("Invalid path passed to getLastJsonPath:", path);
             return path; // Return the input unchanged if it's invalid
         }
-
         const pathParts = path.split('.');
-
         // Check if path points to an array (e.g., 'tracks.0.artist')
         for (let i = 0; i < pathParts.length; i++) {
-            if (/^\d+$/.test(pathParts[i])) {  // If part is a number (i.e., array index)
+            if (/^\d+$/.test(pathParts[i])) { // If part is a number (i.e., array index)
                 const arrayName = pathParts.slice(0, i).join('.');
-                const array = this.getDataAtPath(arrayName, data);  // Use getDataAtPath to access the data
-
+                const array = this.getDataAtPath(arrayName, data); // Use getDataAtPath to access the data
                 if (Array.isArray(array)) {
                     // Replace the index with 'last'
                     pathParts[i] = (array.length - 1).toString(); // Get last index
@@ -596,68 +511,63 @@ export class RadioPlayer {
                 break; // Stop once we replace the index
             }
         }
-
         return pathParts.join('.');
     }
-
     extractSongAndArtist(data, stationKey) {
         const replaceSpecialCharacters = str => {
-        if (str == null) return ''; // Handle null or undefined
-        const strValue = String(str); // Ensure it's a string
-        return strValue
-        .replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")
-        .replace(/–|—/g, "-")
-        .replace(/[“”„]/g, '"')
-        .replace(/…/g, "...")
-        .replace(/\u00A0/g, " ")
-        .replace(/[\t\n\r]/g, '')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/\s*\[.*?\]/g, '')
-        .replace(/[*/|\\]/g, '')
-        .replace(/--/g, '-')
-        .replace(/\s*\(Current Track\)\s*/gi, '')
-        .replace(/\s-\s.*single.*$/i, '')
-        .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs')
-        .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, match => {
-            const replacements = {
-                Lets: "Let's",
-                Its: "It's",
-                Ive: "I've",
-                Dont: "Don't",
-                Cant: "Can't",
-                Wont: "Won't",
-                Aint: "Ain't",
-                Youve: "You've"
-            };
-            return replacements[match] || match;
-        })
-        .replace(/\b(Somethin|Nothin)\b/gi, match => {
-            const replacements = {
-                Somethin: "Somethin'",
-                Nothin: "Nothin'"
-            };
-            return replacements[match] || match;
-        })
-            .trim() || '';
+            if (str == null) return ''; // Handle null or undefined
+            const strValue = String(str); // Ensure it's a string
+            return strValue
+                .replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")
+                .replace(/–|—/g, "-")
+                .replace(/[“”„]/g, '"')
+                .replace(/…/g, "...")
+                .replace(/\u00A0/g, " ")
+                .replace(/[\t\n\r]/g, '')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/\s*\[.*?\]/g, '')
+                .replace(/[*/|\\]/g, '')
+                .replace(/--/g, '-')
+                .replace(/\s*\(Current Track\)\s*/gi, '')
+                .replace(/\s-\s.*single.*$/i, '')
+                .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs')
+                .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, match => {
+                    const replacements = {
+                        Lets: "Let's",
+                        Its: "It's",
+                        Ive: "I've",
+                        Dont: "Don't",
+                        Cant: "Can't",
+                        Wont: "Won't",
+                        Aint: "Ain't",
+                        Youve: "You've"
+                    };
+                    return replacements[match] || match;
+                })
+                .replace(/\b(Somethin|Nothin)\b/gi, match => {
+                    const replacements = {
+                        Somethin: "Somethin'",
+                        Nothin: "Nothin'"
+                    };
+                    return replacements[match] || match;
+                })
+                .trim() || '';
         };
-
-
         const filterSongDetails = song => {
             if (!song) return ''; // Return an empty string if song is undefined
             return song
                 .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
-                .replace(/\s-\s.*version.*$/i, '')    // Removes " - Radio Version" or similar
-                .replace(/\s-\s.*kqua.*$/i, '')    // Removes " - kqua
-                .replace(/\s-\s.*mix.*$/i, '')    // Removes " - Something Mix" or similar
+                .replace(/\s-\s.*version.*$/i, '') // Removes " - Radio Version" or similar
+                .replace(/\s-\s.*kqua.*$/i, '') // Removes " - kqua
+                .replace(/\s-\s.*mix.*$/i, '') // Removes " - Something Mix" or similar
                 .replace(/\s*-\s*\([^)]*\)/g, '') // Removes " - (Anything in brackets)"
-                .replace(/\s*\(.*?edit.*?\)/gi, '')   // Removes text in brackets containing "edit"
+                .replace(/\s*\(.*?edit.*?\)/gi, '') // Removes text in brackets containing "edit"
                 .replace(/\s*\(\s*(feat\.?|ft\.?|featuring).*?\)|\s+(feat\.?|ft\.?|featuring)\s.*$/gi, '') // Removes text in brackets containing "Feat." or "Song Feat. Other Artist"
-                .replace(/\s+(feat\.?|ft\.?|featuring)\s.*$/i, '')   // Removes text to the end of the string containing "Feat." or "Song Feat. Other Artist"
-
-                .replace(/\s*\(.*?clean.*?\)/gi, '')   // Removes text in brackets containing "edit"
-                .replace(/\s-\s.*edit.*$/i, '')       // Removes " - Radio Edit" or similar
+                .replace(/\s+(feat\.?|ft\.?|featuring)\s.*$/i, '') // Removes text to the end of the string containing "Feat." or "Song Feat. Other Artist"
+                .replace(/\s*\(.*?clean.*?\)/gi, '') // Removes text in brackets containing "edit"
+                .replace(/\s-\s.*edit.*$/i, '') // Removes " - Radio Edit" or similar
                 .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
                 .replace(/\s*\(\d{4}\s*-\s*Remaster(ed)?\)/gi, '') // Removes "(1992 - Remaster)" or "(1992 - Remastered)"
                 .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
@@ -671,17 +581,14 @@ export class RadioPlayer {
                 .replace(/\s*\(.*?\bsession\b.*?\)/gi, '') // Removes "(909 Session)"
                 .replace(/\s*\(.*?\blive\b.*?\)/gi, '') // Removes "(Live session)"
                 .replace(/\s*\(.*?\bcover\b.*?\)/gi, '') // Removes "(_____ cover)"
-                .replace(/\s-\s.*single.*$/i, '')    // Removes " - Single" or similar
+                .replace(/\s-\s.*single.*$/i, '') // Removes " - Single" or similar
                 .replace(/\s*\([^)]*$/gi, '') // remove truncated brackets
                 .trim();
         };
-
         const regexPattern = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex', null) || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
         const regexPattern2 = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex2', null);
         const match = regexPattern.exec(replaceSpecialCharacters(data));
-
         let dataPath = data.title;
-
         this.currentTrack = {
             ...this.currentTrack,
             title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song', null)),
@@ -690,7 +597,6 @@ export class RadioPlayer {
             albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, '', null)),
             spinUpdated: ''
         }
-
         // CFMU inputs its latest songs at the end of the tracks object, so it needs to figure out what the last item in the array is, then output that
         if (this.getNestedValue(this.currentStationData, this.stationKey, 'reverseArray', null)) {
             this.currentTrack = {
@@ -700,21 +606,17 @@ export class RadioPlayer {
                 album: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].album, data)),
             }
         }
-
         // some APIs have instances where there's a second place you should look for info if the first item is empty
         if (this.getNestedValue(this.currentStationData, this.stationKey, 'altpath', null) && !this.currentTrack.title) {
-            
             this.currentTrack = {
                 ...this.currentTrack,
-            title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null)),
-            artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null)),
-            album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album2', null)),
-            albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'albumArt2', null)),
-            spinUpdated: ''
+                title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null)),
+                artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null)),
+                album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album2', null)),
+                albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'albumArt2', null)),
+                spinUpdated: ''
             }
-            
         }
-
         if (this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null)) {
             this.currentTrack = {
                 ...this.currentTrack,
@@ -726,18 +628,14 @@ export class RadioPlayer {
                 timestamp: data[3] || '',
             }
         }
-
         if (this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
-
             //radio.co apis that have a string "song - artist" piggybacking on the orbPath function
             if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null) == true) {
                 dataPath = data.data.title;
             } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
                 dataPath = data[`${[this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)]}`];
             }
-
             const match = regexPattern.exec(dataPath);
-
             if (match) {
                 [this.currentTrack.artist, this.currentTrack.title, this.currentTrack.album] = match.slice(1, 4).map((str) => str?.trim());
             } else if (!match && regexPattern2) {
@@ -747,53 +645,44 @@ export class RadioPlayer {
                 console.log('No match found', match);
             }
         }
-
         if ((this.getNestedValue(this.currentStationData, this.stationKey, 'stringPath', null))) {
             if (match) {
                 this.currentTrack.title = match[1]?.trim() || '';
                 this.currentTrack.artist = match[2]?.trim() || '';
-
                 if (this.stationKey !== 'cbcmusic') {
                     this.currentTrack = {
                         ...this.currentTrack,
                         album: match[3]?.trim() || '',
-                        albumArt: match[4]?.trim() || urlCoverArt,
+                        albumArt: match[4]?.trim() || this.stationArt,
                         spinUpdated: new Date(Number(match[5]?.trim() || '')).getTime()
                     }
                 }
-                    
-                } else { // if it is cbcmusic
-                    this.currentTrack.spinUpdated = Number(match[3]?.trim()) || '';
-                }
-            } else {
-                console.log('No match found');
+            } else { // if it is cbcmusic
+                this.currentTrack.spinUpdated = Number(match[3]?.trim()) || '';
             }
-        
+        } else {
+            console.log('No match found');
+        }
         // Helper function to check if a string contains any of the filtered values (case-insensitive)
         const containsFilteredValue = (text, values) => {
             if (!text) return false; // Ensure text is defined and not null/undefined
             const lowerCaseText = text.toLowerCase();
-            return values.some(value => 
+            return values.some(value =>
                 value && lowerCaseText.includes(value.toLowerCase()) // Ensure value is also defined
             );
         };
-
         // Helper function to check if any of the provided texts contain invalid content
         const checkAnyInvalidContent = (...texts) => {
             const filteredValues = this.getNestedValue(this.currentStationData, this.stationKey, 'filter', null) || [];
             const stationKeyValue = this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null);
             const allValuesToCheck = [...filteredValues, stationKeyValue].filter(Boolean); // Remove falsy values
-
-            return texts.some(text => 
+            return texts.some(text =>
                 text && containsFilteredValue(text, allValuesToCheck)
             );
         };
-
-
         if (this.getNestedValue(this.currentStationData, this.stationKey, 'flipMeta', null)) {
             [this.currentTrack.title, this.currentTrack.artist] = [this.currentTrack.artist, this.currentTrack.title];
         }
-
         // Check the song, artist, and album values for invalid content
         if (checkAnyInvalidContent(this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album)) {
             // Returning the message indicating the station may be taking a break
@@ -802,72 +691,57 @@ export class RadioPlayer {
             // Returning the message indicating missing data
             return ['[Air break]', null, null, this.stationArt, '', '', true];
         }
-
         // filter the values after they've been defined above
         this.currentTrack.title = filterSongDetails(this.currentTrack.title);
-       if (this.currentTrack.artist) {
+        if (this.currentTrack.artist) {
             this.currentTrack.artist = this.applyFilters('artist', this.cleanupArtist(this.currentTrack.artist));
         }
         this.currentTrack.album = this.applyFilters('album', this.currentTrack.album) || '';
-
         // If the album is labeled as "single," set the album to the song title
         if (/single/i.exec(this.currentTrack.album) || (this.currentTrack.album.toLowerCase().includes('single'))) {
             this.currentTrack.album = filterSongDetails(this.currentTrack.title);
         }
-
         // If albumArt is empty, assign the fallback URL
-        this.currentTrack.albumArt = this.currentTrack.albumArt || urlCoverArt;
-
+        this.currentTrack.albumArt = this.currentTrack.albumArt || this.stationArt;
         return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated, this.lastFmUrl || '', '', false];
     }
-
     async getLfmMeta(currentSong, currentArtist, currentAlbum, currentArt, queryType) {
         try {
             if (!currentSong || !currentArtist) return null;
-
             // Fetch data from both sources
             const metadata = await this.fetchLfmOrMusicBrainzData(currentSong, currentArtist, currentAlbum, currentArt, queryType);
             return metadata;
-
         } catch (error) {
             console.error("Error fetching Last.fm metadata:", error);
             return null;
         }
     }
-
     async fetchLfmOrMusicBrainzData(currentSong, currentArtist, currentAlbum, currentArt, queryType) {
-
-       // Abort any previous fetch
+        // Abort any previous fetch
         if (this.fetchAbortController) {
             this.fetchAbortController.abort();
         }
         // New controller for this request
         this.fetchAbortController = new AbortController();
-
         const signal = this.fetchAbortController.signal;
         const [lfmQueryUrl, mbQueryUrl] = this.constructQueryParams(currentSong, currentArtist, currentAlbum, queryType);
-
         try {
             const [lfmResponse, mbResponse] = await Promise.all([
-                fetch(lfmQueryUrl, { signal }),  // Pass controller’s signal
+                fetch(lfmQueryUrl, { signal }), // Pass controller’s signal
                 fetch(mbQueryUrl, { signal }),
             ]);
-
             // Check for successful responses
-            if (!lfmResponse.ok || !mbResponse.ok) {
+            if (!lfmResponse.ok && !mbResponse.ok) {
                 console.error(`API request failed. LFM: ${lfmResponse.status}, MB: ${mbResponse.status}`);
                 return null;
             }
-
             // Parse responses
             const lfmData = await lfmResponse.json();
             const mbData = await mbResponse.json();
-
             // Process the LFM and MB data
             let lfmResult = null;
-            let mbResult = null;
-
-              // Handle LFM data
+            let mbResult = [];
+            // Handle LFM data
             if (lfmData.error !== 6 && (queryType === 'track' || !queryType)) {
                 lfmResult = [
                     lfmData.track.album?.image?.[3]?.['#text'] || '',
@@ -881,9 +755,9 @@ export class RadioPlayer {
                     lfmData.track.userplaycount || null,
                     lfmData.track?.url || null,
                 ];
-            } else if (lfmData.error !== 6  && (queryType == 'album')) {
+            } else if (lfmData.error !== 6 && (queryType == 'album')) {
                 lfmResult = [
-                    lfmData.album?.image[3]["#text"] || urlCoverArt,
+                    lfmData.album?.image[3]["#text"] || this.stationArt,
                     this.applyFilters('album', lfmData.album?.name) || currentAlbum || currentSong,
                     currentSong || 'No streaming data available',
                     this.applyFilters('artist', lfmData.album?.artist) || currentArtist,
@@ -898,28 +772,42 @@ export class RadioPlayer {
             const lfmPlaycount = Array.isArray(lfmResult) ? lfmResult[5] || null : null;
             const lfmUserPlaycount = Array.isArray(lfmResult) ? lfmResult[8] || null : null;
             const lfmTrackUrl = Array.isArray(lfmResult) ? lfmResult[9] || null : null;
+            const hasLfmArt = Array.isArray(lfmResult) &&!!lfmResult[0];
 
-            if (mbData.releases?.length && (lfmData.error === 6 || isLfmArtMissing || lfmResult?.[7] == 'Various Artists')) {
-                mbResult = [
-                        `https://coverartarchive.org/release/${mbData.releases[0]?.id}/front-500`,
-                        this.applyFilters('album', mbData.releases[0]['release-group']?.title) || currentAlbum,
-                        this.applyFilters('track', mbData.releases[0]?.title) || currentSong,
-                        mbData.releases[0]['artist-credit'][0]?.name || currentArtist
-                ];
+            // Only try MusicBrainz when Last.fm didn't provide album art
+            if (!hasLfmArt && mbData.releases?.length) {
+             const mbRelease = mbData.releases[0];
+             const mbArtCandidate = `https://coverartarchive.org/release/${mbRelease.id}/front-500`;
 
-                if ((mbResult[3] != currentArtist ) || (mbResult[2] != currentSong)) {
+             // Confirm the art actually exists before using it
+             const mbArt = await this.validateArtworkUrl(mbArtCandidate);
 
-                    // check if the result is close enough, but not the same as the existing result. Sometimes MB will find a completely new artist or song, which isn't what we want
-                    if ((s => s >= 0.6 && s !== 1)(this.jaccardSimilarity(mbResult[3], currentArtist))) {
-                        console.log('this.jaccardSimilarity(mbResult[3], currentArtist)', this.jaccardSimilarity(mbResult[3], currentArtist), mbResult[3], currentArtist);
-                        this.songMetadataChanged = true;  // Flag the change
-                        //if the result is similar enough to the currentArtist, rerun the function
-                        return this.getLfmMeta(mbResult[2], mbResult[3], mbResult[1], mbResult[0], 'song');
-                    }
-                }
+             if (mbArt) {
+             mbResult = [
+             mbArt,
+             this.applyFilters('album', mbRelease['release-group']?.title) || currentAlbum,
+             this.applyFilters('track', mbRelease?.title) || currentSong,
+             mbRelease['artist-credit'][0]?.name || currentArtist
+             ];
 
+             if ((mbResult[3]!= currentArtist) || (mbResult[2]!= currentSong)) {
+             if ((s => s >= 0.6 && s!== 1)(this.jaccardSimilarity(mbResult[3], currentArtist))) {
+             console.log('this.jaccardSimilarity(mbResult[3], currentArtist)', this.jaccardSimilarity(mbResult[3], currentArtist), mbResult[3], currentArtist);
+             this.songMetadataChanged = true;
+             return this.getLfmMeta(mbResult[2], mbResult[3], mbResult[1], mbResult[0], 'song');
+             }
+             }
+
+             if ((mbResult[0]!== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >=.9) && (!currentArt ||!hasLfmArt)) {
+             if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
+             return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount, lfmUserPlaycount];
+             } else {
+             return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount];
+             }
+             }
+             }
+            }
                 if ((mbResult[0] !== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >= .9) && (!currentArt || isLfmArtMissing)) {
-
                     if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
                         // return album art, album, song, artist, lfm listeners & playcount
                         return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount, lfmUserPlaycount];
@@ -928,29 +816,24 @@ export class RadioPlayer {
                         return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount];
                     }
                 }
-            }
-
+            
             const finalAlbumArt = await this.upsizeImgUrl(
-                currentArt && 
-                !['mzstatic.com', 'blankart.jpg', '623304f1', 'b4df49b51c57', urlCoverArt].some(pattern => currentArt.includes(pattern)) 
-                    ? currentArt 
-                    : (lfmResult?.[0] || mbResult?.[0] || urlCoverArt)
+             currentArt &&
+            ![this.stationArt, 'mzstatic.com', 'blankart.jpg', '623304f1', 'b4df49b51c57', '22f378f76b85', urlCoverArt].some(pattern => currentArt.includes(pattern))?
+             currentArt :
+             (lfmResult?.[0] || mbResult?.[0] || this.stationArt)
             );
-
-            if (lfmData.error !== 6 ) {
-
+            if (lfmData.error !== 6) {
                 // return album art, album, song, artist, lfm listeners & playcount
-                if (lfmResult[7] && !this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) {
+                if (lfmResult?.[7] &&!this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) {
                     this.currentTrack.duration = Number(lfmResult[7]);
                     console.log('this.currentTrack.duration', this.currentTrack.duration)
-                } 
+                }
                 return [finalAlbumArt, lfmResult[1] || currentAlbum || '', lfmResult[2] || currentSong, lfmResult[3] || currentArtist, lfmResult[4] || null, lfmResult[5] || null, lfmResult[8] || null, lfmResult[9] || null];
             } else {
                 // return album art, album, song, artist, lfm listeners & playcount
                 return [finalAlbumArt, currentAlbum || '', currentSong, currentArtist, null, null, null];
             }
-            
-
         } catch (error) {
             if (error.name === 'AbortError') {
                 // Handle fetch abort (optional: just quietly ignore)
@@ -962,8 +845,6 @@ export class RadioPlayer {
             return null;
         }
     }
-
-
     // Construct query URLs for both LFM and MB
     constructQueryParams(currentSong, currentArtist, currentAlbum, queryType) {
         let lfmMethod = '';
@@ -971,7 +852,6 @@ export class RadioPlayer {
         let queryDataField = '';
         let lfmQueryUrl;
         let mbQueryUrl;
-
         // Determine query parameters for LFM
         if ((queryType === 'song') || (queryType === false)) {
             lfmMethod = 'track.getInfo';
@@ -982,54 +862,42 @@ export class RadioPlayer {
             lfmQueryField = 'track';
             queryDataField = currentSong;
         }
-
         // Construct the LFM query URL
         lfmQueryUrl = `https://ws.audioscrobbler.com/2.0/?method=${lfmMethod}&artist=${encodeURIComponent(this.applyFilters('artist', currentArtist))}&${lfmQueryField}=${encodeURIComponent(this.applyFilters(lfmQueryField, queryDataField))}&api_key=09498b5daf0eceeacbcdc8c6a4c01ccb&autocorrect=1&format=json&limit=1`;
-
         if (this.lastfmUsername) {
             lfmQueryUrl += `&username=${encodeURIComponent(this.lastfmUsername)}`;
         }
-
         // Construct the MusicBrainz query URL
         mbQueryUrl = `https://musicbrainz.org/ws/2/release?fmt=json&query=title:+"${encodeURIComponent(this.applyFilters('track', currentSong))}"^3%20${encodeURIComponent(currentSong)}%20artistname:+"${encodeURIComponent(this.applyFilters('artist', currentArtist))}"^4${encodeURIComponent(this.applyFilters('artist', currentArtist))}%20artistname:+"-Various Artists"^4-various artists%20format:+"cd"^4cd&limit=3`;
-
         return [lfmQueryUrl, mbQueryUrl];
     }
-
     jaccardSimilarity(str1, str2) {
-        const set1 = new Set(str1.toLowerCase().split(" "));
-        const set2 = new Set(str2.toLowerCase().split(" "));
-        const intersection = new Set([...set1].filter(word => set2.has(word)));
-        const union = new Set([...set1, ...set2]);
-        return intersection.size / union.size;
+     if (!str1 ||!str2) return 0;
+     const set1 = new Set(str1.toLowerCase().split(" "));
+     const set2 = new Set(str2.toLowerCase().split(" "));
+     const intersection = new Set([...set1].filter(word => set2.has(word)));
+     const union = new Set([...set1,...set2]);
+     return intersection.size / union.size;
     }
-
     validateArtworkUrl(artworkUrl) {
         const isAbsoluteUrl = (url) => {
             return /^https?:\/\//i.test(url);
         };
-
         const effectiveUrl = isAbsoluteUrl(artworkUrl) ? artworkUrl : `../${artworkUrl}`;
-
         return new Promise((resolve) => {
             const img = new Image();
             img.src = effectiveUrl;
-
             img.onload = () => {
                 resolve(effectiveUrl);
             };
-
             img.onerror = () => {
                 resolve(null);
             };
         });
     }
-
     getStreamingData() {
         if (this.isPlaying || this.isPlaying == null) {
-
             if (!this.stationKey) return;
-
             // check if the last time it updated is still in the future
             if (((this.lastKnownUpdatedTime - Date.now()) < 35000) && ((this.lastKnownUpdatedTime - Date.now()) > 70000) && !this.shouldReloadStream) {
                 // check again, since that's a long time to go in a song
@@ -1038,9 +906,7 @@ export class RadioPlayer {
                 console.log('this.lastKnownUpdatedTime > Date.now', (this.lastKnownUpdatedTime - Date.now()) / 1000);
                 return;
             }
-
             if (this.isPlaying && !this.shouldReloadStream) {
-
                 let stationApiUrl;
                 if (!this.stationApiUrl) {
                     if (this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null)) {
@@ -1058,20 +924,17 @@ export class RadioPlayer {
                     }
                     this.stationApiUrl = stationApiUrl;
                 }
-
                 fetch(this.addCacheBuster(this.stationApiUrl))
                     .then((response) => {
                         const contentType = response.headers.get('content-type');
-                        
                         // Check if contentType exists before calling includes
                         if (contentType && (contentType.includes('application/json') ||
-                            contentType.includes('application/vnd.api+json') || 
-                            (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)))) {
+                                contentType.includes('application/vnd.api+json') ||
+                                (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)))) {
                             return response.json().then((data) => ({ data, contentType }));
-                            
-                        } else if (contentType && (contentType.includes('text/html') || 
-                            (this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) && contentType.includes('text/plain') ||  
-                            contentType.includes('application/javascript'))) {
+                        } else if (contentType && (contentType.includes('text/html') ||
+                                (this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) && contentType.includes('text/plain') ||
+                                contentType.includes('application/javascript'))) {
                             return response.text().then((data) => ({ data, contentType }));
                         } else if (contentType && (contentType.includes('text/xml'))) {
                             return response.text().then((data) => ({ data, contentType }));
@@ -1081,17 +944,14 @@ export class RadioPlayer {
                         }
                     })
                     .then(({ data, contentType }) => {
-                        if (contentType && contentType.includes('text/html') && 
+                        if (contentType && contentType.includes('text/html') &&
                             !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && this.stationKey !== 'cbcmusic') {
-                            
                             // Parse the HTML response
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(data, 'text/html');
-                            data = this.extractDataFromHTML(doc);  
+                            data = this.extractDataFromHTML(doc);
                         } else if (contentType && contentType.includes('text/html') && this.stationKey == 'cbcmusic' && window.mytuner_scripts.mytunerMeta !== '') {
-
                             console.log("window.mytuner_scripts.mytunerMeta", window.mytuner_scripts.mytunerMeta)
-
                             if (window.mytuner_scripts.mytunerMeta !== null) {
                                 data = window.mytuner_scripts.mytunerMeta;
                             } else {
@@ -1105,23 +965,20 @@ export class RadioPlayer {
                             data = this.extractDataFromHTML(doc);
                         } else if (contentType && contentType.includes('text/plain') && !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) {
                             data = this.extractJsonFromJS(data);
-                        } else if (contentType && contentType.includes('text/html') && 
-                                    (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/plain') || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/html')) {
+                        } else if (contentType && contentType.includes('text/html') &&
+                            (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/plain') || this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && contentType.includes('text/html')) {
                             data = String(data);
-                        } else if (contentType && contentType.includes('text/html') && 
-                                   this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) {
+                        } else if (contentType && contentType.includes('text/html') &&
+                            this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) {
                             const htmlContent = data;
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(htmlContent, 'text/html');
-
                             data = this.extractDataFromHTML(doc);
                         } else if (contentType && contentType.includes('text/xml')) {
-                            data = this.extractDataFromXML(data);  
-                        }            
-
+                            data = this.extractDataFromXML(data);
+                        }
                         // Your existing logic to check if the data is the same
                         if (this.isDataSameAsPrevious(data)) {
-
                             // Check if it's been more than 900 seconds since the last update
                             if (this.lastDataUpdateTime && (Date.now() - this.lastDataUpdateTime) > 900000) {
                                 console.log("Data is the same, but it's now stale");
@@ -1129,33 +986,20 @@ export class RadioPlayer {
                                 this.previousDataResponse = data; // Update even if we skip processing
                                 this.processData(data);
                             }
-
-
-                            if (navigator.mediaSession.metadata.title == this.stationDisplayName && (this.song && this.artist)) {
-                                console.log('this.song', 'this.artist', this.artist)
-                                const page = new Page(this.stationKey, this);
-                                page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.lfmTrackUrl, this.errorMessage]);
-                                return;
-                            }
-
+                            // console.log("Same data");
                             return; // If data is the same and not stale, exit
-                        } 
-
-                        if (this.songMetadataChanged) {
-                                console.log("Skipping update: song metadata was altered externally.");
-                                this.songMetadataChanged = false; // Reset flag
-                                return; // Stop further processing
                         }
-
+                        if (this.songMetadataChanged) {
+                            console.log("Skipping update: song metadata was altered externally.");
+                            this.songMetadataChanged = false; // Reset flag
+                            return; // Stop further processing
+                        }
                         // Process the new data response
                         this.previousDataResponse = data; // Update even if we skip processing
-
                         this.processData(data);
-
                         // Update the timestamp to reflect the new data was processed
                         this.lastDataUpdateTime = Date.now();
                         this.currentTrack.duration = null;
-
                     })
                     .catch((error) => {
                         console.error('Error fetching streaming data:', error);
@@ -1163,8 +1007,6 @@ export class RadioPlayer {
             }
         }
     }
-
-
     // Helper function to extract HTML content from a JavaScript response
     extractHTMLFromJS(js) {
         const match = js.match(/_spinitron\d+\("(.+)"\);/s);
@@ -1174,7 +1016,6 @@ export class RadioPlayer {
             throw new Error('Unable to extract HTML content from JavaScript response');
         }
     }
-
     extractJsonFromJS(js) {
         // Match the JSON payload inside the jsonpcallback function
         const match = js.match(/jsonpcallback\((.*)\);/);
@@ -1190,15 +1031,11 @@ export class RadioPlayer {
             throw new Error('Unable to extract JSON content from the response');
         }
     }
-
-
     // Helper function to extract necessary data from HTML response
     extractDataFromHTML(doc) {
         const replaceEnDashWithEmDash = str => str.replace(/—/g, '—');
         const replaceHyphenWithEmDash = str => str.replace(/—/g, '—');
-
-        let targetSelector; 
-
+        let targetSelector;
         if (this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) {
             targetSelector = ['div.song-details:first-child', '.radio-song-title', ' p:first-child', ' .album-title', ' .album-art', ' p:last-child']
         } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null)) {
@@ -1206,7 +1043,6 @@ export class RadioPlayer {
         } else {
             targetSelector = ['', '.song', '.artist', '.release', 'img', '.spin-time a']
         }
-
         this.currentTrack = {
             ...this.currentTrack,
             title: replaceEnDashWithEmDash(doc.querySelector(`${targetSelector[0]}${targetSelector[1]}`)?.textContent.trim() || 'No streaming data currently available'),
@@ -1215,39 +1051,29 @@ export class RadioPlayer {
             albumArt: doc.querySelector(`${targetSelector[4]}`)?.src || '',
             spinUpdated: doc.querySelector(`${targetSelector[0]}${targetSelector[5]}`)?.textContent.trim() || '',
         }
-
         // Return the extracted data in the format expected by processData
         return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated];
     }
-
     // Helper function to extract necessary data from HTML response
     extractDataFromXML(doc) {
-
         const removeAsterisk = str => str.replace(/\*/g, '');
         let entries;
-
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(doc, "text/xml");
-
         // Determine the correct tag name for entries
         const entryTagName = this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null) || "Entry";
         entries = xmlDoc.getElementsByTagName(entryTagName);
-
         if (entries.length === 0) {
             console.log("No entries found in the XML.");
             return { song: 'No streaming data currently available', artist: '', album: '', albumArt: '', spinUpdated: '' };
         }
-
         // Check if the first entry has attributes (second XML format)
         const isAttributeBased = entries[0].attributes && entries[0].attributes.Title;
-
         // Extract data based on the format
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i];
-
             if (isAttributeBased) {
                 // Attribute-based XML format
-
                 this.currentTrack = {
                     ...this.currentTrack,
                     title: removeAsterisk(entry.attributes.Title ? entry.attributes.Title.value : 'No streaming data currently available'),
@@ -1255,63 +1081,31 @@ export class RadioPlayer {
                     album: entry.attributes.Album ? entry.attributes.Album.value : '',
                     timestamp: entry.attributes.StartTime ? entry.attributes.StartTime.value : '',
                 }
-
                 console.log('isAttributeBased')
             } else {
                 // Tag-based XML format
                 this.currentTrack = {
                     ...this.currentTrack,
-                title: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'song', null)) || {}).textContent || 'No streaming data currently available',
-                artist: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null)) || {}).textContent || '',
-                album: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'album', null)) || {}).textContent || '',
-                timestamp: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null)) || entry.attributes[this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null)] || {}).textContent || '',
+                    title: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'song', null)) || {}).textContent || 'No streaming data currently available',
+                    artist: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null)) || {}).textContent || '',
+                    album: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'album', null)) || {}).textContent || '',
+                    timestamp: (entry.querySelector(this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null)) || entry.attributes[this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null)] || {}).textContent || '',
                 }
             }
-
             // Return the extracted data for the first entry
             return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.timestamp];
         }
-
         // Return a default value if no entries are found (though we already checked for this)
         return { song: 'No streaming data currently available', artist: '', album: '', albumArt: '', spinUpdated: '' };
     }
-
-
+    // Function to compare the current data response with the previous one
     isDataSameAsPrevious(data) {
-        const deepEqual = (obj1, obj2) => {
-        // If they are the exact same reference or primitive value
-        if (obj1 === obj2) return true;
-
-        // If one is not an object or is null, they aren't equal
-        if (typeof obj1!== 'object' || obj1 === null || typeof obj2!== 'object' || obj2 === null) {
-        return false;
-        }
-
-        const keys1 = Object.keys(obj1);
-        const keys2 = Object.keys(obj2);
-
-        if (keys1.length!== keys2.length) return false;
-
-        for (const key of keys1) {
-        // Check if the key exists in both and recurse
-        if (!Object.prototype.hasOwnProperty.call(obj2, key) ||!deepEqual(obj1[key], obj2[key])) {
-        return false;
-        }
-        }
-
-        return true;
-        };
-
-        console.log('deepEqual(data, this.previousDataResponse)', deepEqual(data, this.previousDataResponse))
-
-        return deepEqual(data, this.previousDataResponse);
-    }    
-
-
+        // Compare data with previousDataResponse and return true if they are the same, false otherwise
+        return JSON.stringify(data) === JSON.stringify(this.previousDataResponse);
+    }
     getLastFmUsername() {
         const userCookie = Cookies.get("scrobbleradio-lastfm-user");
         if (!userCookie) return null;
-
         try {
             const userData = JSON.parse(userCookie);
             return userData.username || null;
@@ -1320,35 +1114,32 @@ export class RadioPlayer {
             return null;
         }
     }
-
-    updateScrobbleData(song, artist, album) {
+    updateScrobbleData(song, artist, album, albumArt, lfmUrl) {
         if (song && artist && album) {
             const currentScrobble = {
-              trackTitle: song,
-              trackArtist: artist,
-              trackAlbum: album,
-              trackTimestamp: Math.floor(Date.now() / 1000) // ✅ timestamp in seconds
+                trackTitle: song,
+                trackArtist: artist,
+                trackAlbum: album,
+                trackAlbumArt: albumArt, // Receives safeAlbumArt
+                trackLastFmUrl: lfmUrl, // Receives this.lfmTrackUrl
+                trackTimestamp: Math.floor(Date.now() / 1000)
             };
-
             updateNowPlaying(currentScrobble);
-
+            renderScrobbleHistory(currentScrobble);
             if (this.currentScrobble !== currentScrobble || !this.currentScrobble) {
-                if (this.currentScrobble && this.currentScrobble !== currentScrobble) { // Song has changed
+                if (this.currentScrobble && this.currentScrobble !== currentScrobble) {
+                    // Song has changed, handle cleanup
                     if (this.scrobbleTimeout) {
-                        clearTimeout(this.scrobbleTimeout); // Clear existing timeout
+                        clearTimeout(this.scrobbleTimeout);
                         this.scrobbleTimeout = null;
                     }
-
                     if (this.songStartTime && (Date.now() - this.songStartTime >= 60000)) {
-                        scrobbleIt(this.currentScrobble); // Scrobble the previous song
+                        scrobbleIt(this.currentScrobble);
                     }
-
-                    this.songStartTime = null; // Reset song start time
+                    this.songStartTime = null;
                 }
-
                 this.currentScrobble = currentScrobble;
-
-                // Set a new 60-second timer for the current song
+                // Set the 60-second timer for the new song
                 if (this.currentScrobble && !this.songStartTime) {
                     this.songStartTime = Date.now();
                     this.scrobbleTimeout = setTimeout(() => {
@@ -1356,71 +1147,58 @@ export class RadioPlayer {
                             scrobbleIt(this.currentScrobble);
                         }
                     }, 60000);
-                } 
+                }
             }
-        }    
-    }                          
-
+        }
+    }
     processData(data) {
         // Check if data and stationKey are available
-        if (data && this.stationKey ) {
-
+        if (data && this.stationKey) {
             if ((this.lastKnownUpdatedTime > Date.now())) {
                 console.log("this.lastKnownUpdatedTime is greater", this.lastKnownUpdatedTime, Date.now())
             } else {
                 console.log("this.lastKnownUpdatedTime is less", this.lastKnownUpdatedTime, Date.now())
             }
-
             const extractedData = this.extractSongAndArtist(data, this.stationKey);
-
-             // Compare the extractedData response with the previous one
-            if ((JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) && navigator.mediaSession.metadata.title !== 'Station Data Loading') {
+            const shouldUpdateNow = this.calculateShouldUpdateNow();
+            // Compare the extractedData response with the previous one
+            if ((JSON.stringify(this.prevExtractedData) === JSON.stringify(extractedData)) && navigator.mediaSession.metadata.title !== 'Station data loading') {
                 console.log('extracted data the same, returning')
                 return;
             } else {
                 this.prevExtractedData = extractedData;
             }
-
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
-                const page = new Page(this.stationKey, this);
-                page.refreshCurrentData(['[ Air break ]', '', '', this.stationArt, null, null, null, null, true]);
-                return;
+                 this.currentPage.showStateMessage('[ Air break ]');
+                 return;
             }
-
             this.hasLoadedData = true;
-            const [song, artist, album, albumArt, spinUpdated, url, queryType, errorMsg] = extractedData;   
-
-            const safeAlbumArt = (typeof albumArt === 'string')? albumArt : this.artworkUrl;
-
+            const [song, artist, album, albumArt, spinUpdated, url, queryType, errorMsg] = extractedData;
+            const safeAlbumArt = (typeof albumArt === 'string') ? albumArt : this.artworkUrl;
             const now = Date.now();
-            const isRecentlyUpdated = this.lastKnownUpdatedTime > (now - 5 * 60 * 1000) && 
-                                       this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
-
+            const isRecentlyUpdated = this.lastKnownUpdatedTime > (now - 5 * 60 * 1000) &&
+                this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
             if (!song) {
-                const message = isRecentlyUpdated ? '[Air Break]' : 'No song data found';
-                const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([message, '', '', this.stationArt, null, null, null, null, true]);
-                return;
+                 const message = isRecentlyUpdated? '[Air Break]' : 'No song data found';
+                 this.currentPage.showStateMessage(message);
+                 return;
             }
-
             // Predefined values
             const timezone = this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null);
-
             if ([this.stationKey] == 'indie1023') {
                 this.currentTrack.timestamp = `${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[0]', null))} ${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[1]', null))} GMT-06:00`;
-                    console.log('102.3 timestamp', this.currentTrack.timestamp);
+                console.log('102.3 timestamp', this.currentTrack.timestamp);
             } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'reverseArray', null)) {
-                this.currentTrack.timestamp = this.getPath(data, this.getLastJsonPath(this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null), data)); 
+                this.currentTrack.timestamp = this.getPath(data, this.getLastJsonPath(this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null), data));
                 console.log('timestamp reverse array', this.currentTrack.timestamp);
             } else {
                 this.currentTrack.timestamp = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null));
-
                 if (this.currentTrack.timestamp == 0 || this.currentTrack.timestamp == '') {
                     this.currentTrack.timestamp = undefined;
                 }
             }
-
+            this.lastKnownUpdatedTime = this.currentTrack.timestamp;
             if (this.getNestedValue(this.currentStationData, this.stationKey, 'altPath', null) && (!this.currentTrack.title || !this.currentTrack.timestamp)) {
                 if ([this.stationKey] == 'indie1023') {
                     this.currentTrack.timestamp = `${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[2]', null))} ${this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp[3]', null))}`;
@@ -1431,79 +1209,75 @@ export class RadioPlayer {
                     console.log('altpath timestamp', this.currentTrack.timestamp);
                 }
             } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'altPath', null) && this.currentTrack.timestamp) {
-
                 if (this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp2', null)) > this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'timestamp', null))) {
                     console.log("timestamp2 is greater than timestamp");
                 }
             }
-
             // Format and check stale data in a separate function
             const { staleData } = this.checkStaleData(timezone, this.currentTrack.timestamp, this.currentTrack.spinUpdated, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) || this.currentTrack.duration, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'trackEnd', null)), song);
-
             if ((staleData === "Live365 past" || staleData === "Still future") && (song)) {
-                    return;   
-            } else if ([this.stationKey] == 'indie1023' && song == "[Air break]") {
-                const page = new Page(this.stationKey, this);
-                page.refreshCurrentData(['[ Air Break ]', '', '', this.stationArt, null, null, null, null, true]);
                 return;
-            } else if (song == "[Air break]" && !staleData ) {
-                const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([song, '', '', this.stationArt, null, null, null, null, true]);
+            } else if ([this.stationKey] == 'indie1023' && song == "[Air break]") {
+                 this.currentPage.showStateMessage('[ Air Break ]');
+                 return;
+            } else if (song == "[Air break]" && !staleData) {
+                this.currentPage.showStateMessage('[ Air Break ]');
                 return;
             }
-
             // Handle stale data or invalid song
             if ((staleData) || song === 'No streaming data currently available' || errorMsg) {
-                const page = new Page(this.stationKey, this);
-                page.refreshCurrentData([(staleData || song), '', '', this.stationArt, null, null, null, null, true]);
+                this.currentPage.showStateMessage(staleData || song);
                 return;
             }
-
-            console.log('this.lfmMetaChanged', this.lfmMetaChanged,  'song', song, 'this.song', this.song);
-
+            if (this.hasDurationData && !shouldUpdateNow) {
+                console.log(`Holding update - waiting until ${(this.nextUpdateTime?.toLocaleTimeString() || 'unknown')}`);
+                return;
+            }
             // Ensure this code doesn't run unless there's new data to process
             if (!this.lfmMetaChanged || (song.toLowerCase() !== this.song.toLowerCase())) {
-                
                 // First, get the metadata from last.fm
                 this.getLfmMeta(song, artist, album, albumArt, '', '', false).then(lfmValues => {
-                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount, lfmTrackUrl] = lfmValues || [urlCoverArt, '', song, artist, '', ''];
 
+                    const lfmValuesOrDefault = lfmValues || [this.currentTrack.albumArt || this.stationArt, '', song, artist, '', ''];
+                    const [lfmArt, lfmAlbum, lfmSong, lfmArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount, lfmTrackUrl] = lfmValuesOrDefault;
                     this.song = lfmSong || this.currentTrack.title;
                     this.artist = lfmArtist || this.currentTrack.artist;
                     this.album = lfmAlbum || this.currentTrack.album || lfmSong;
                     this.artworkUrl = lfmArt || this.currentTrack.albumArt || urlCoverArt;
-                    this.lfmTrackUrl = lfmTrackUrl || null; 
-
-                    console.log('this.lfmTrackUrl', this.lfmTrackUrl)
-
+                    this.lfmTrackUrl = lfmTrackUrl || null;
                     this.updateScrobbleData(this.song, this.artist, this.album, this.artworkUrl, this.lfmTrackUrl);
-
                     this.listeners = lfmListeners || null;
                     this.playcount = lfmPlaycount || null;
                     this.userPlaycount = lfmUserPlaycount || null;
                     this.lfmMetaChanged = true;
-
-                    const page = new Page(this.stationKey, this);
-                    page.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.lfmTrackUrl, this.errorMessage]);
-                    page.setupMediaSession(this.song, this.artist, this.artworkUrl, this.errorMessage);
-
-                }).catch(error => {
+                    if (!this.currentPage) this.initializePage(this.stationKey);
+                    this.currentPage.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.lfmTrackUrl, this.errorMessage]);
+                    this.currentPage.setupMediaSession(this.song, this.artist, this.artworkUrl, this.errorMessage);                }).catch(error => {
                     console.error('Error processing data:', error);
                 });
             }
-
         }
     }
-
+    calculateShouldUpdateNow() {
+        // If we don't have duration data, always return true (use fallback timing)
+        if (!this.hasDurationData) return true;
+        // If we have both timestamp and duration, calculate if we're in update window
+        if (this.currentTrack.timestamp && this.currentTrack.duration) {
+            const songEndTime = this.currentTrack.timestamp + (this.currentTrack.duration * 1000);
+            const timeUntilEnd = songEndTime - Date.now();
+            // Update if within 30s of song end
+            return timeUntilEnd <= 30000;
+        }
+        // Default to true if we can't calculate (shouldn't happen if hasDurationData is set correctly)
+        return true;
+    }
     loadHTMLContent(condition, url, targetElementId) {
         const targetElement = document.getElementById(targetElementId);
-
         // Check if the target element exists
         if (!targetElement) {
             console.error(`Element with ID "${targetElementId}" not found in the DOM.`);
             return; // Exit the function early
         }
-
         if (condition) {
             fetch(url)
                 .then(response => {
@@ -1523,85 +1297,65 @@ export class RadioPlayer {
             targetElement.innerHTML = '';
         }
     }
-
-
     getPath(obj, prop) {
         // Ensure obj is an object and prop is a string
         if (!obj || typeof obj !== 'object' || typeof prop !== 'string' || !prop.trim()) {
             return undefined;
         }
-
         // Split the property path by "." for multi-layer paths
         const parts = prop.split(".");
         let current = obj;
-
         // Traverse the object for each part of the path
         for (let i = 0; i < parts.length; i++) {
             const part = parts[i];
-
             if (!current || !Object.prototype.hasOwnProperty.call(current, part)) {
                 return undefined;
             }
-
             current = current[part]; // Drill down into the object
         }
-
         return current; // Return the final value
     }
-
-
-
-play() {
-    if (!this.audio.src) return;
-
-    // If stale or about to be stale, reload instead of resuming
-    if (this.shouldReloadStream) {
-        console.log("resuming from stale: reloading");
-        this.handleStationSelect(null, this.stationKey, this.stationDisplayName, false);
-        this.shouldReloadStream = false;
-    } else {
-        this.audio.play().then(() => {
-            this.isPlaying = true;
-            this.playButton.lastElementChild.className = "icon-pause";
-            document.getElementById("metadata").classList.add("playing");
-            
-            // Clear stale timer if we successfully resume
-            if (this.pauseTimeout) {
-                clearTimeout(this.pauseTimeout);
-                this.pauseTimeout = null;
-            }
-        }).catch(err => console.error('Playback failed:', err));
-    }
-}
-
-pause() {
-    if (this.playButton.classList.contains("spinner-grow")) return;
-
-    this.audio.pause();
-    this.isPlaying = false;
-    this.playButton.lastElementChild.className = "icon-play";
-    document.getElementById("metadata").classList.remove("playing");
-
-    if (this.pauseTimeout) clearTimeout(this.pauseTimeout);
-
-    // Don't destroy HLS immediately on pause. Just flag it.
-    // This lets resume play work instantly if the user returns within 30s.
-    this.pauseTimeout = setTimeout(() => {
-        console.log("stream stale, will reload on next play");
-        this.shouldReloadStream = true;
-        
-        // Optional: visual indicator only, no aggressive destruction
-        document.getElementById("playermeta").classList.add("opacity-50");
-        
-        // If you want to save bandwidth/memory, destroy HLS here, 
-        // but only AFTER marking shouldReloadStream = true
-        if (this.hls) {
-            this.destroyHLSAndResetAudio();
+    play() {
+        if (!this.audio.src) return;
+        // If stale or about to be stale, reload instead of resuming
+        if (this.shouldReloadStream) {
+            console.log("resuming from stale: reloading");
+            this.handleStationSelect(null, this.stationKey, this.stationDisplayName, false);
+            this.shouldReloadStream = false;
+        } else {
+            this.audio.play().then(() => {
+                this.isPlaying = true;
+                this.playButton.lastElementChild.className = "icon-pause";
+                document.getElementById("metadata").classList.add("playing");
+                // Clear stale timer if we successfully resume
+                if (this.pauseTimeout) {
+                    clearTimeout(this.pauseTimeout);
+                    this.pauseTimeout = null;
+                }
+            }).catch(err => console.error('Playback failed:', err));
         }
-    }, 30000);
-}
-
-
+    }
+    pause() {
+        if (this.playButton.classList.contains("spinner-grow")) return;
+        this.audio.pause();
+        this.isPlaying = false;
+        this.playButton.lastElementChild.className = "icon-play";
+        document.getElementById("metadata").classList.remove("playing");
+        if (this.pauseTimeout) clearTimeout(this.pauseTimeout);
+        // Don't destroy HLS immediately on pause. Just flag it.
+        // This lets resume play work instantly if the user returns within 30s.
+        this.pauseTimeout = setTimeout(() => {
+            console.log("stream stale, will reload on next play");
+            this.shouldReloadStream = true;
+            // Optional: visual indicator only, no aggressive destruction
+            document.getElementById("playermeta").classList.add("opacity-50");
+            // If you want to save bandwidth/memory, destroy HLS here, 
+            // but only AFTER marking shouldReloadStream = true
+            if (this.hls) {
+                this.destroyHLSAndResetAudio();
+            }
+        }, 30000);
+    }
     togglePlay() {
         // Clear scrobble timeout when playback stops
         if (this.currentPage && this.currentPage.scrobbleTimeout) {
@@ -1609,10 +1363,8 @@ pause() {
             console.log("Scrobble timeout cleared due to playback stop.");
             this.currentPage.scrobbleTimeout = null;
         }
-
         this.isPlaying ? this.pause() : this.play();
     }
-
     skipForward() {
         this.calculateNextAndPreviousIndices('next');
         const nextStationKey = this.nextStationKey;
@@ -1620,7 +1372,6 @@ pause() {
         this.stationApiUrl = null;
         this.handleStationSelect(null, nextStationKey, nextStationDisplayName, true);
     }
-
     skipBackward() {
         this.calculateNextAndPreviousIndices('previous');
         const prevStationKey = this.prevStationKey;
@@ -1628,75 +1379,69 @@ pause() {
         this.stationApiUrl = null;
         this.handleStationSelect(true, prevStationKey, prevStationDisplayName, true);
     }
-
-
-
     onTagSelected(tag) {
         this.currentTag = tag;
         generateRadioButtons(this.currentTag);
+        this.saveState();
     }
-
-
     onAllTagsSelected() {
         this.currentTag = "all";
         generateRadioButtons("all");
     }
-
     reloadStream() {
         this.shouldReloadStream = true;
         console.log('reload working');
         this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, null, true]);
         this.playButton.lastElementChild.className = "spinner-grow text-light";
-
         // Reset scrobble (assuming scrobbleReset is a method)
         if (typeof this.scrobbleReset === 'function') {
             this.scrobbleReset();
         }
-
         // Destroy existing instances before reloading
         if (this.currentPage) {
             this.currentPage.destroy();
             this.currentPage = null;
         }
-
         // Reload the current station
         this.calculateNextAndPreviousIndices();
         const currentStationKey = stationKeys[this.currentIndex];
-
         this.handleStationSelect(true, currentStationKey, null, true);
     }
-
     scrobbleReset() {
         if (this.currentPage && this.currentPage.scrobbleTimeout) {
             clearTimeout(this.currentPage.scrobbleTimeout);
             this.currentPage.scrobbleTimeout = null;
         }
     }
-
-
+    saveState() {
+        localStorage.setItem('scrobblerad_station', this.stationKey);
+        localStorage.setItem('scrobblerad_tag', this.currentTag);
+    }
+    loadState() {
+        return {
+            stationKey: localStorage.getItem('scrobblerad_station'),
+            tag: localStorage.getItem('scrobblerad_tag')
+        };
+    }
     destroy() {
         if (this.fetchAbortController) {
             this.fetchAbortController.abort();
             this.fetchAbortController = null;
         }
-
         // Remove event listeners
         this.playButton.removeEventListener('click', this.togglePlay);
         this.skipForwardButton.removeEventListener('click', this.skipForward);
         this.skipBackButton.removeEventListener('click', this.skipBackward);
-
         // Clear intervals and timeouts
         clearInterval(this.streamingInterval);
         clearTimeout(this.debounceTimeout);
         clearTimeout(this.pauseTimeout);
         clearTimeout(this.scrobbleTimeout);
-
         // Destroy class instances
         if (this.currentPage) {
-        this.currentPage.destroy();
-        this.currentPage = null;
+            this.currentPage.destroy();
+            this.currentPage = null;
         }
-
         // Clear DOM references
         this.audio = null;
         this.hls = null;

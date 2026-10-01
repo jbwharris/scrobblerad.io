@@ -100,7 +100,8 @@ export class Page {
         });
 
         clone.querySelector('#radioNameLink').href = this.radioPlayer.getNestedValue(this.radioPlayer.currentStationData, this.stationKey, 'webUrl', null);
-        clone.querySelector('#radioName').textContent = this.radioPlayer.stationDisplayName;
+
+       clone.querySelector('#radioName').textContent = this.radioPlayer.stationDisplayName || this.stationKey;
        clone.querySelector('#stationLocation').textContent = this.radioPlayer.getNestedValue(this.radioPlayer.currentStationData, this.stationKey, 
         'location', null); 
 
@@ -109,57 +110,87 @@ export class Page {
 
         animateElement(playerMetaElement);
         document.querySelector('#panel2').click();
+
+const panel = document.querySelector('#panel2');
+const splash = document.querySelector('.animated-gradient');
+if (!splash ||!panel) return;
+
+let removed = false;
+const removeSplash = () => {
+ if (removed) return;
+ removed = true;
+ splash.remove();
+};
+
+// Remove once the slide transition completes
+panel.addEventListener('transitionend', (e) => {
+ if (e.target === panel) removeSplash();
+});
+
+// Fallback in case transitionend never fires
+setTimeout(removeSplash, 1200);
     }
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
-        if (!song || song.includes("<br/>")) {
-            return;
-        }
+         const stationName = this.radioPlayer.stationDisplayName || this.radioPlayer.stationKey || 'Unknown station';
 
-        let albumDisplay = '';
-        if (errorMessage) {
-            albumDisplay = '';
-        } else if (artist === 'currently loading') {
-            albumDisplay = '';
-        } else if ((song && artist) && artist !== 'currently loading') {
-            albumDisplay = `Now playing on ${this.radioPlayer.stationDisplayName}`;
-        }
+         // Early return if we have nothing meaningful to display
+         if (!song &&!stationName) return;
 
-        // Ensure stationArt always has a valid value
-        let stationArt = `../img/stations/${this.stationKey}.png`; // Default to stationArt
-        if (artworkUrl && (artworkUrl !== urlCoverArt || artworkUrl !== stationArt ) ) {
-            stationArt = artworkUrl;
-        }
+         let title = (song || stationName).replace(/<br\/>/gi, ' ');
+         let artistLine = '';
+         let albumDisplay = '';
 
-        if ("mediaSession" in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: song,
-                artist: artist || '',
-                album: albumDisplay || '',
-                duration: Infinity,
-                startTime: 0,
-                artwork: [{ src: stationArt }], // Ensure src is always valid
-            });
+         if (errorMessage) {
+         artistLine = stationName || '';
+         } else if (artist === 'currently loading') {
+         title = stationName || 'Loading';
+         artistLine = 'currently loading';
+         } else {
+         artistLine = artist || '';
+         albumDisplay = `Now playing on ${stationName}`;
+         }
 
-            // Update document title
-            if (!song && !artist || artist === 'currently loading') {
-                document.title = '';
-                return;
-            } else if (song && artist || !errorMessage) {
-                document.title = `${song} - ${artist} | ${this.radioPlayer.stationDisplayName} on scrobblerad.io`;
-            }
+     // Fix: original OR condition was always true — switched to AND
+     let stationArt = `../img/stations/${this.stationKey}.png`;
+     if (artworkUrl && artworkUrl!== urlCoverArt && artworkUrl!== stationArt) {
+     stationArt = artworkUrl;
+     }
 
-            const actionHandlers = {
-                nexttrack: () => this.radioPlayer.skipForward(),
-                previoustrack: () => this.radioPlayer.skipBackward(),
-                play: () => this.radioPlayer.togglePlay(),
-                pause: () => this.radioPlayer.togglePlay(),
-            };
+     if ("mediaSession" in navigator) {
+     navigator.mediaSession.metadata = new MediaMetadata({
+     title: title,
+     artist: artistLine,
+     album: albumDisplay,
+     duration: Infinity,
+     startTime: 0,
+     artwork: [{ src: stationArt }],
+     });
 
-            for (const [action, handler] of Object.entries(actionHandlers)) {
-                navigator.mediaSession.setActionHandler(action, handler);
-            }
-        }
+     if (errorMessage) {
+     document.title = `title | {stationName} on scrobblerad.io`;
+     } else if (song && artist && artist!== 'currently loading') {
+     document.title = `song - {artist} | ${stationName} on scrobblerad.io`;
+     } else {
+     document.title = `${stationName} on scrobblerad.io`;
+     }
+
+     const actionHandlers = {
+     nexttrack: () => this.radioPlayer.skipForward(),
+     previoustrack: () => this.radioPlayer.skipBackward(),
+     play: () => this.radioPlayer.togglePlay(),
+     pause: () => this.radioPlayer.togglePlay(),
+     };
+
+     for (const [action, handler] of Object.entries(actionHandlers)) {
+     navigator.mediaSession.setActionHandler(action, handler);
+     }
+     }
+    }
+
+    showStateMessage(message) {
+     this.refreshCurrentData([message, '', '', this.radioPlayer.stationArt, null, null, null, null, true]);
+     this.setupMediaSession(message, this.radioPlayer.stationDisplayName, this.radioPlayer.stationArt, true);
     }
 
     destroy() {

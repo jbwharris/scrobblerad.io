@@ -161,7 +161,7 @@ export function convertDurationToMilliseconds(durationStr) {
 export function convertTimestamp(timestamp, timezone, spinUpdated) {
 
     const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
-    const isEpoch = /^\d{10,13}$/.test(timestamp); // Check for 10 or 13 digits
+    const isEpoch = /^\d{10,13}(?:\.\d+)?$/.test(timestamp); // Check for 10 or 13 digits
     const isUTC = typeof timestamp === 'string' && timestamp.trim().endsWith('Z');
     const dateWithoutTimezoneRegex = /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}$/;
     const mmddyyyyRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/; // MM-DD-YYYY HH:mm:ss
@@ -203,9 +203,7 @@ export function convertTimestamp(timestamp, timezone, spinUpdated) {
     }
 
     if (isEpoch) {
-
-     //   console.log('is epoch')
-        const epoch = Number(timestamp);
+        const epoch = Number(Math.floor(timestamp));
         return epoch < 1e12 ? epoch * 1000 : epoch; // ⬅️ Epoch in ms
     }
 
