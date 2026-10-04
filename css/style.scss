@@ -270,6 +270,7 @@ img {
 
 #panel2 {
    position: relative;
+   height: 100dvh;
    &.grow {
       position: absolute;
       width: 100vw;
@@ -277,11 +278,12 @@ img {
 }
 
 .project-info {
-   height: calc(100dvh - 3rem);
+   height: 100dvh;
    position: relative;
    overflow-y: scroll;
    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0);
    scrollbar-width: thin;
+   padding-bottom: 2rem !important;
    opacity: 1;
    left: -1rem;
    transition: all 0.3s ease-in-out;
