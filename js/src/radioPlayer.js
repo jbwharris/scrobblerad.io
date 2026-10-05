@@ -332,7 +332,6 @@ export class RadioPlayer {
             document.documentElement.style.setProperty("--stationArt", `url("../${this.stationArt}")`);
             this.currentPage.setupMediaSession(this.stationDisplayName, 'currently loading', this.stationArt, false);
             this.currentPage.refreshCurrentData([`Station data loading`, '', '', this.stationArt, null, null, null, true]);
-            document.querySelector('.animated-gradient')?.remove();
             this.playButton.lastElementChild.className = "spinner-grow text-light";
             this.lfmMetaChanged = false;
             console.log(stationKey);

@@ -1,6 +1,12 @@
 import { animateElement, formatCompactNumber } from './utils.js';
 import { urlCoverArt } from './constants.js';
 
+
+document.addEventListener('scrobblerad:splashDismiss', function () {
+ var splash = document.querySelector('.animated-gradient');
+ if (splash) splash.remove();
+});
+
 export class Page {
     constructor(stationKey, radioPlayer, handleStationClick) {
         this.stationKey = stationKey;
