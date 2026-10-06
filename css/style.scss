@@ -800,11 +800,8 @@ input[type='checkbox']:checked~.menuIconToggle {
          align-content: unset;
       }
    }
-   .avatar-menu {
+   .avatar-menu, #settings-gear-btn {
       right: 0 !important;
-   }
-   #settings-gear-btn {
-      right: 0;
    }
    #panel2 {
       height: calc(100dvh - 3rem);

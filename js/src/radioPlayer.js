@@ -219,8 +219,11 @@ history.replaceState(null, '', newUrl);
         const saved = this.loadState();
         const settings = getSettings();
 
-        if (saved.stationKey && settings.resumeStation!== false) {
-        this.handleStationSelect(null, saved.stationKey, null, true);
+        if (saved.stationKey && saved.stationKey!== 'undefined' && settings.resumeStation!== false) {
+         this.handleStationSelect(null, saved.stationKey, null, true);
+         } else {
+            setTimeout(() => {
+            document.dispatchEvent(new CustomEvent('scrobblerad:splashDismiss'));}, 700);
         }
 
         if (urlFilter) {
@@ -338,6 +341,7 @@ history.replaceState(null, '', newUrl);
         }
     }
     async handleStationSelect(direction, stationKey, stationDisplayName, firstRun) {
+        if (!stationKey || stationKey === 'undefined') return;
         if (this.isLoadingStation && this.stationKey === stationKey) return;
         this.isLoadingStation = true;
         this.stationKey = stationKey;

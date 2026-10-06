@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     const selectedTags = getSelectedTags();
     generateRadioButtons(selectedTags, stations, radioPlayer);
 
-    // 2. DECISION LOGIC: Hash vs Default
     const hash = window.location.hash;
     if (hash) {
         // If there is a hash (e.g. #wfmu), jump to it
@@ -101,14 +100,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         radioPlayer.handleStationSelect(false, defaultStation, null, true);
     }
 
-    // 3. Setup the select element listener (only once)
     const stationSelect = document.getElementById('stationSelect');
-    if (stationSelect) {
-        stationSelect.addEventListener('change', (event) => {
-            const stationKey = event.target.value;
-            radioPlayer.handleStationSelect(true, stationKey, null, true);
-        }, { once: true });
-    }
+    stationSelect.addEventListener('change', (event) => {
+     const stationKey = event.target.value;
+     if (!stationKey) return;
+     radioPlayer.handleStationSelect(true, stationKey, null, true);
+    });
 
     // ... (The rest of your PWA/Fullscreen/Scroll logic remains the same)
     if (window.matchMedia('(display-mode: standalone)').matches) {
