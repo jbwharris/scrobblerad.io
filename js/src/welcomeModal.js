@@ -1,5 +1,6 @@
 import { filters, popularStations } from './filterData.js';
 import stations from './stations-dist.js';
+import { openSettingsModal } from './settings.js';
 
 const KEYS = {
  VISITED: 'scrobblerad_visited',
@@ -31,7 +32,7 @@ function populatePopular() {
  if (!station) return;
 
  var a = document.createElement('a');
- a.href = '#';
+a.href = '#' + key;
  a.className = 'wm-station-card';
  a.setAttribute('data-station', key);
 
@@ -197,6 +198,11 @@ function handleCta() {
  detail: filtersObj
  }));
 }
+
+document.getElementById('intro-login-link')?.addEventListener('click', (e) => {
+ e.preventDefault();
+ openSettingsModal();
+});
 
 function init() {
  modal = document.getElementById('welcomeModal');

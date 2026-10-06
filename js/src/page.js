@@ -51,7 +51,7 @@ export class Page {
 
     refreshCurrentData(values) {
         const [song, artist, album, artworkUrl, listeners, playcount, userPlaycount, lfmTrackUrl, errorMessage] = values;
-        const station = this.radioPlayer.currentStationData; // Now radioPlayer is defined
+        const station = this.radioPlayer.currentStationData; 
 
         // Clear any existing scrobble timeout when new data arrives
         if (this.scrobbleTimeout) {
@@ -116,28 +116,12 @@ export class Page {
 
         animateElement(playerMetaElement);
         document.querySelector('#panel2').click();
-
-const panel = document.querySelector('#panel2');
 const splash = document.querySelector('.animated-gradient');
-if (!splash ||!panel) return;
-
-let removed = false;
-const removeSplash = () => {
- if (removed) return;
- removed = true;
- splash.remove();
-};
-
-// Remove once the slide transition completes
-panel.addEventListener('transitionend', (e) => {
- if (e.target === panel) removeSplash();
-});
-
-// Fallback in case transitionend never fires
-setTimeout(removeSplash, 1200);
-    }
+if (splash) setTimeout(() => splash.remove(), 700);
+}
 
     setupMediaSession(song, artist, artworkUrl, errorMessage) {
+
          const stationName = this.radioPlayer.stationDisplayName || this.radioPlayer.stationKey || 'Unknown station';
 
          // Early return if we have nothing meaningful to display
@@ -174,9 +158,9 @@ setTimeout(removeSplash, 1200);
      });
 
      if (errorMessage) {
-     document.title = `title | {stationName} on scrobblerad.io`;
+     document.title = `${title} | ${stationName} on scrobblerad.io`;
      } else if (song && artist && artist!== 'currently loading') {
-     document.title = `song - {artist} | ${stationName} on scrobblerad.io`;
+     document.title = `${song} - ${artist} | ${stationName} on scrobblerad.io`;
      } else {
      document.title = `${stationName} on scrobblerad.io`;
      }

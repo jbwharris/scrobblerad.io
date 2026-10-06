@@ -128,10 +128,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 populateSelectsInit();
 welcomeModalInit();
 
-document.addEventListener('scrobblerad:playStation', function (e) {
- var stationId = e.detail.station;
- if (stationId && radioPlayer && typeof radioPlayer.jumpToStationFromHash === 'function') {
- radioPlayer.jumpToStationFromHash();
- }
+document.addEventListener('scrobblerad:playStation', (e) => {
+ const { station } = e.detail;
+ radioPlayer.handleStationSelect(null, station, null, true);
 });
 

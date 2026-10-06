@@ -1,12 +1,42 @@
-import { debounce, addCacheBuster, hasTag, upsizeImgUrl, getSelectedTags, flattenStations } from './utils.js';
-import { Page } from './page.js';
-import { handleStationClick, generateRadioButtons } from './radioButtons.js';
-import { urlCoverArt, currentTag } from './constants.js';
-import { getTimezoneOffset, checkStaleData, convertDurationToMilliseconds, convertTimestamp, formatTimeInTimezone } from './timing.js';
-import { MetadataFilter } from './filter.min.js';
-import { updateNowPlaying, scrobbleIt } from './scrobbler.js';
-import { renderScrobbleHistory } from './history.js';
-import { getSettings } from './settings.js';
+import {
+    debounce,
+    addCacheBuster,
+    hasTag,
+    upsizeImgUrl,
+    getSelectedTags,
+    flattenStations
+} from './utils.js';
+import {
+    Page
+} from './page.js';
+import {
+    handleStationClick,
+    generateRadioButtons
+} from './radioButtons.js';
+import {
+    urlCoverArt,
+    currentTag
+} from './constants.js';
+import {
+    getTimezoneOffset,
+    checkStaleData,
+    convertDurationToMilliseconds,
+    convertTimestamp,
+    formatTimeInTimezone
+} from './timing.js';
+import {
+    MetadataFilter
+} from './filter.min.js';
+import {
+    updateNowPlaying,
+    scrobbleIt
+} from './scrobbler.js';
+import {
+    renderScrobbleHistory
+} from './history.js';
+import {
+    getSettings
+} from './settings.js';
 
 export class RadioPlayer {
     constructor(buttonElement, skipForwardButton, skipBackButton, stations) {
@@ -133,6 +163,27 @@ export class RadioPlayer {
                 }
             });
         }
+
+        document.addEventListener('scrobblerad:applyFilters', (e) => {
+ const { country, format, genre } = e.detail;
+ const tags = [...(country || []),...(format || []),...(genre || [])];
+
+ const params = new URLSearchParams(window.location.search);
+ if (tags.length > 0) {
+ params.set('filter', tags.join(','));
+ } else {
+ params.delete('filter');
+ }
+const queryString = params.toString().replace(/%2C/g, ',');
+const newUrl = `${window.location.pathname}${queryString? '?' + queryString : ''}${window.location.hash}`;
+history.replaceState(null, '', newUrl);
+
+ if (tags.length > 0) {
+ this.onTagsSelected(tags);
+ } else {
+ this.onAllTagsSelected();
+ }
+});
     }
     init() {
         if ("serviceWorker" in navigator) {
@@ -162,17 +213,21 @@ export class RadioPlayer {
                 })
                 .catch((err) => console.log("Service worker not registered", err));
         }
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlFilter = urlParams.get('filter');
+
         const saved = this.loadState();
- const settings = getSettings();
+        const settings = getSettings();
 
- // Only auto-resume if the setting isn't explicitly false
- if (saved.stationKey && settings.resumeStation!== false) {
- this.handleStationSelect(null, saved.stationKey, null, true);
- }
+        if (saved.stationKey && settings.resumeStation!== false) {
+        this.handleStationSelect(null, saved.stationKey, null, true);
+        }
 
- if (saved.tag) {
- this.onTagSelected(saved.tag);
- }
+        if (urlFilter) {
+         this.onTagsSelected(urlFilter.split(','));
+        } else if (saved.tag) {
+         this.onTagsSelected(saved.tag);
+        }
     }
     initializePage(stationKey) {
         if (this.currentPage) {
@@ -181,30 +236,30 @@ export class RadioPlayer {
         this.currentPage = new Page(stationKey, this.radioPlayer); // Pass radioPlayer instance
     }
     getNestedValue(obj, keyPath, targetProperty, defaultValue = undefined) {
- if (!obj ||!keyPath ||!targetProperty) return defaultValue;
+        if (!obj || !keyPath || !targetProperty) return defaultValue;
 
- if (!keyPath.includes('.')) {
- return obj[keyPath]?.[targetProperty]?? defaultValue;
- }
+        if (!keyPath.includes('.')) {
+            return obj[keyPath]?.[targetProperty] ?? defaultValue;
+        }
 
- const keys = keyPath.split('.');
- let current = obj;
- let result = undefined;
+        const keys = keyPath.split('.');
+        let current = obj;
+        let result = undefined;
 
- for (let i = 0; i < keys.length; i++) {
- const key = keys[i];
- if (current && typeof current === 'object' && key in current) {
- current = current[key];
- if (current!= null && current[targetProperty]!== undefined) {
- result = current[targetProperty];
- }
- } else {
- return defaultValue;
- }
- }
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            if (current && typeof current === 'object' && key in current) {
+                current = current[key];
+                if (current != null && current[targetProperty] !== undefined) {
+                    result = current[targetProperty];
+                }
+            } else {
+                return defaultValue;
+            }
+        }
 
- return result?? defaultValue;
-}
+        return result ?? defaultValue;
+    }
     calculateNextAndPreviousIndices(direction) {
         // 1. Flatten all stations as before
         const allStations = this.flattenStations(this.stations);
@@ -242,7 +297,10 @@ export class RadioPlayer {
                 // Extract the station display name from the button's text content
                 const stationDisplayName = button.textContent.trim();
                 // Scroll the button into view
-                button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                button.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
                 // Pass both stationKey and stationDisplayName to handleStationSelect
                 this.handleStationSelect(null, stationKey, stationDisplayName, true);
             }
@@ -291,14 +349,14 @@ export class RadioPlayer {
             console.log("Scrobble timeout cleared due to station switch.");
             this.currentPage.scrobbleTimeout = null;
         }
-        if (this.shouldReloadStream) {
-            document.getElementById("playermeta").classList.remove("opacity-50");
-            this.audio.load();
-            if (this.hls) {
-                this.destroyHLSAndResetAudio();
-            }
-            this.shouldReloadStream = false;
-            return;
+        if (this.shouldReloadStream && this.stationKey === stationKey) {
+         document.getElementById("playermeta").classList.remove("opacity-50");
+         this.audio.load();
+         if (this.hls) {
+         this.destroyHLSAndResetAudio();
+         }
+         this.shouldReloadStream = false;
+         return;
         }
         // Destroy the previous Page instance if it exists
         if (this.currentPage) {
@@ -310,14 +368,15 @@ export class RadioPlayer {
             this.currentStationData = await this.loadStationData(this.stationKey);
             if (!this.currentStationData) return;
             if (!stationDisplayName) {
-             this.stationDisplayName =
-             this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null) ||
-             this.getNestedValue(this.currentStationData, this.stationKey, 'name', null) ||
-             this.getNestedValue(this.currentStationData, this.stationKey, 'displayName', null) ||
-             this.stationKey;
+                this.stationDisplayName =
+                    this.getNestedValue(this.stations, this.stationKey, 'stationName', null) ||
+                    this.getNestedValue(this.currentStationData, this.stationKey, 'name', null) ||
+                    this.getNestedValue(this.currentStationData, this.stationKey, 'displayName', null) ||
+                    this.stationKey;
             } else {
-             this.stationDisplayName = stationDisplayName;
+                this.stationDisplayName = stationDisplayName;
             }
+
             this.streamUrl = this.getNestedValue(this.currentStationData, stationKey, 'streamUrl', null);
             // Initialize the new Page instance
             this.initializePage(stationKey);
@@ -343,8 +402,12 @@ export class RadioPlayer {
             this.firstRun = false;
             firstRun = false;
         }
+        const expectedStationKey = stationKey;
+
         const debouncedSetupAudio = debounce(() => {
+            if (this.stationKey!== expectedStationKey) return; 
             if (!this.isPlaying) return;
+
             if (!this.currentStationData) {
                 console.error("currentStationData is undefined or null");
                 return;
@@ -394,15 +457,17 @@ export class RadioPlayer {
                 }, 25000);
             };
             newAudio.onerror = (error) => {
-             console.warn('Error loading audio:', error);
-             if (this.isPlaying && this.currentPage) {
-             this.currentPage.showStateMessage('Audio not loading, choose another station');
-             }
+                console.warn('Error loading audio:', error);
+                if (this.isPlaying && this.currentPage) {
+                    this.currentPage.showStateMessage('Audio not loading, choose another station');
+                }
             };
             newAudio.load();
             const radioInput = document.querySelector(`input[name='station'][value='${this.stationKey}']`);
             if (radioInput) radioInput.checked = true;
             window.location.hash = `#${this.stationKey}`;
+
+            this.isLoadingStation = false;
         }, 250);
         debouncedSetupAudio();
     }
@@ -726,8 +791,12 @@ export class RadioPlayer {
         const [lfmQueryUrl, mbQueryUrl] = this.constructQueryParams(currentSong, currentArtist, currentAlbum, queryType);
         try {
             const [lfmResponse, mbResponse] = await Promise.all([
-                fetch(lfmQueryUrl, { signal }), // Pass controller’s signal
-                fetch(mbQueryUrl, { signal }),
+                fetch(lfmQueryUrl, {
+                    signal
+                }), // Pass controller’s signal
+                fetch(mbQueryUrl, {
+                    signal
+                }),
             ]);
             // Check for successful responses
             if (!lfmResponse.ok && !mbResponse.ok) {
@@ -771,60 +840,60 @@ export class RadioPlayer {
             const lfmPlaycount = Array.isArray(lfmResult) ? lfmResult[5] || null : null;
             const lfmUserPlaycount = Array.isArray(lfmResult) ? lfmResult[8] || null : null;
             const lfmTrackUrl = Array.isArray(lfmResult) ? lfmResult[9] || null : null;
-            const hasLfmArt = Array.isArray(lfmResult) &&!!lfmResult[0];
+            const hasLfmArt = Array.isArray(lfmResult) && !!lfmResult[0];
 
             // Only try MusicBrainz when Last.fm didn't provide album art
             if (!hasLfmArt && mbData.releases?.length) {
-             const mbRelease = mbData.releases[0];
-             const mbArtCandidate = `https://coverartarchive.org/release/${mbRelease.id}/front-500`;
+                const mbRelease = mbData.releases[0];
+                const mbArtCandidate = `https://coverartarchive.org/release/${mbRelease.id}/front-500`;
 
-             // Confirm the art actually exists before using it
-             const mbArt = await this.validateArtworkUrl(mbArtCandidate);
+                // Confirm the art actually exists before using it
+                const mbArt = await this.validateArtworkUrl(mbArtCandidate);
 
-             if (mbArt) {
-             mbResult = [
-             mbArt,
-             this.applyFilters('album', mbRelease['release-group']?.title) || currentAlbum,
-             this.applyFilters('track', mbRelease?.title) || currentSong,
-             mbRelease['artist-credit'][0]?.name || currentArtist
-             ];
+                if (mbArt) {
+                    mbResult = [
+                        mbArt,
+                        this.applyFilters('album', mbRelease['release-group']?.title) || currentAlbum,
+                        this.applyFilters('track', mbRelease?.title) || currentSong,
+                        mbRelease['artist-credit'][0]?.name || currentArtist
+                    ];
 
-             if ((mbResult[3]!= currentArtist) || (mbResult[2]!= currentSong)) {
-             if ((s => s >= 0.6 && s!== 1)(this.jaccardSimilarity(mbResult[3], currentArtist))) {
-             console.log('this.jaccardSimilarity(mbResult[3], currentArtist)', this.jaccardSimilarity(mbResult[3], currentArtist), mbResult[3], currentArtist);
-             this.songMetadataChanged = true;
-             return this.getLfmMeta(mbResult[2], mbResult[3], mbResult[1], mbResult[0], 'song');
-             }
-             }
+                    if ((mbResult[3] != currentArtist) || (mbResult[2] != currentSong)) {
+                        if ((s => s >= 0.6 && s !== 1)(this.jaccardSimilarity(mbResult[3], currentArtist))) {
+                            console.log('this.jaccardSimilarity(mbResult[3], currentArtist)', this.jaccardSimilarity(mbResult[3], currentArtist), mbResult[3], currentArtist);
+                            this.songMetadataChanged = true;
+                            return this.getLfmMeta(mbResult[2], mbResult[3], mbResult[1], mbResult[0], 'song');
+                        }
+                    }
 
-             if ((mbResult[0]!== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >=.9) && (!currentArt ||!hasLfmArt)) {
-             if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
-             return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount, lfmUserPlaycount];
-             } else {
-             return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount];
-             }
-             }
-             }
-            }
-                if ((mbResult[0] !== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >= .9) && (!currentArt || isLfmArtMissing)) {
-                    if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
-                        // return album art, album, song, artist, lfm listeners & playcount
-                        return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount, lfmUserPlaycount];
-                    } else {
-                        // return album art, album, song, artist, lfm listeners & playcount
-                        return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount];
+                    if ((mbResult[0] !== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >= .9) && (!currentArt || !hasLfmArt)) {
+                        if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
+                            return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount, lfmUserPlaycount];
+                        } else {
+                            return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount];
+                        }
                     }
                 }
-            
+            }
+            if ((mbResult[0] !== '' && this.jaccardSimilarity(mbResult[3], currentArtist) >= .9) && (!currentArt || isLfmArtMissing)) {
+                if ((s => s >= 0.9)(this.jaccardSimilarity(mbResult[2], currentSong))) {
+                    // return album art, album, song, artist, lfm listeners & playcount
+                    return [mbResult[0], mbResult[1], mbResult[2], mbResult[3], lfmListeners, lfmPlaycount, lfmUserPlaycount];
+                } else {
+                    // return album art, album, song, artist, lfm listeners & playcount
+                    return [mbResult[0], mbResult[1], currentSong, currentArtist, lfmListeners, lfmPlaycount, lfmUserPlaycount];
+                }
+            }
+
             const finalAlbumArt = await this.upsizeImgUrl(
-             currentArt &&
-            ![this.stationArt, 'mzstatic.com', 'blankart.jpg', '623304f1', 'b4df49b51c57', '22f378f76b85', urlCoverArt].some(pattern => currentArt.includes(pattern))?
-             currentArt :
-             (lfmResult?.[0] || mbResult?.[0] || this.stationArt)
+                currentArt &&
+                ![this.stationArt, 'mzstatic.com', 'blankart.jpg', '623304f1', 'b4df49b51c57', '22f378f76b85', urlCoverArt].some(pattern => currentArt.includes(pattern)) ?
+                currentArt :
+                (lfmResult?.[0] || mbResult?.[0] || this.stationArt)
             );
             if (lfmData.error !== 6) {
                 // return album art, album, song, artist, lfm listeners & playcount
-                if (lfmResult?.[7] &&!this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) {
+                if (lfmResult?.[7] && !this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) {
                     this.currentTrack.duration = Number(lfmResult[7]);
                     console.log('this.currentTrack.duration', this.currentTrack.duration)
                 }
@@ -871,12 +940,12 @@ export class RadioPlayer {
         return [lfmQueryUrl, mbQueryUrl];
     }
     jaccardSimilarity(str1, str2) {
-     if (!str1 ||!str2) return 0;
-     const set1 = new Set(str1.toLowerCase().split(" "));
-     const set2 = new Set(str2.toLowerCase().split(" "));
-     const intersection = new Set([...set1].filter(word => set2.has(word)));
-     const union = new Set([...set1,...set2]);
-     return intersection.size / union.size;
+        if (!str1 || !str2) return 0;
+        const set1 = new Set(str1.toLowerCase().split(" "));
+        const set2 = new Set(str2.toLowerCase().split(" "));
+        const intersection = new Set([...set1].filter(word => set2.has(word)));
+        const union = new Set([...set1, ...set2]);
+        return intersection.size / union.size;
     }
     validateArtworkUrl(artworkUrl) {
         const isAbsoluteUrl = (url) => {
@@ -930,19 +999,31 @@ export class RadioPlayer {
                         if (contentType && (contentType.includes('application/json') ||
                                 contentType.includes('application/vnd.api+json') ||
                                 (this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)))) {
-                            return response.json().then((data) => ({ data, contentType }));
+                            return response.json().then((data) => ({
+                                data,
+                                contentType
+                            }));
                         } else if (contentType && (contentType.includes('text/html') ||
                                 (this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) && contentType.includes('text/plain') ||
                                 contentType.includes('application/javascript'))) {
-                            return response.text().then((data) => ({ data, contentType }));
+                            return response.text().then((data) => ({
+                                data,
+                                contentType
+                            }));
                         } else if (contentType && (contentType.includes('text/xml'))) {
-                            return response.text().then((data) => ({ data, contentType }));
+                            return response.text().then((data) => ({
+                                data,
+                                contentType
+                            }));
                         } else {
                             return;
                             //throw new Error(`Unsupported content type or missing content-type header: ${contentType}`);
                         }
                     })
-                    .then(({ data, contentType }) => {
+                    .then(({
+                        data,
+                        contentType
+                    }) => {
                         if (contentType && contentType.includes('text/html') &&
                             !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && this.stationKey !== 'cbcmusic') {
                             // Parse the HTML response
@@ -1064,7 +1145,13 @@ export class RadioPlayer {
         entries = xmlDoc.getElementsByTagName(entryTagName);
         if (entries.length === 0) {
             console.log("No entries found in the XML.");
-            return { song: 'No streaming data currently available', artist: '', album: '', albumArt: '', spinUpdated: '' };
+            return {
+                song: 'No streaming data currently available',
+                artist: '',
+                album: '',
+                albumArt: '',
+                spinUpdated: ''
+            };
         }
         // Check if the first entry has attributes (second XML format)
         const isAttributeBased = entries[0].attributes && entries[0].attributes.Title;
@@ -1095,7 +1182,13 @@ export class RadioPlayer {
             return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.timestamp];
         }
         // Return a default value if no entries are found (though we already checked for this)
-        return { song: 'No streaming data currently available', artist: '', album: '', albumArt: '', spinUpdated: '' };
+        return {
+            song: 'No streaming data currently available',
+            artist: '',
+            album: '',
+            albumArt: '',
+            spinUpdated: ''
+        };
     }
     // Function to compare the current data response with the previous one
     isDataSameAsPrevious(data) {
@@ -1169,8 +1262,8 @@ export class RadioPlayer {
             }
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
-                 this.currentPage.showStateMessage('[ Air break ]');
-                 return;
+                this.currentPage.showStateMessage('[ Air break ]');
+                return;
             }
             this.hasLoadedData = true;
             const [song, artist, album, albumArt, spinUpdated, url, queryType, errorMsg] = extractedData;
@@ -1179,9 +1272,9 @@ export class RadioPlayer {
             const isRecentlyUpdated = this.lastKnownUpdatedTime > (now - 5 * 60 * 1000) &&
                 this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
             if (!song) {
-                 const message = isRecentlyUpdated? '[Air Break]' : 'No song data found';
-                 this.currentPage.showStateMessage(message);
-                 return;
+                const message = isRecentlyUpdated ? '[Air Break]' : 'No song data found';
+                this.currentPage.showStateMessage(message);
+                return;
             }
             // Predefined values
             const timezone = this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null);
@@ -1213,12 +1306,14 @@ export class RadioPlayer {
                 }
             }
             // Format and check stale data in a separate function
-            const { staleData } = this.checkStaleData(timezone, this.currentTrack.timestamp, this.currentTrack.spinUpdated, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) || this.currentTrack.duration, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'trackEnd', null)), song);
+            const {
+                staleData
+            } = this.checkStaleData(timezone, this.currentTrack.timestamp, this.currentTrack.spinUpdated, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'duration', null)) || this.currentTrack.duration, this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'trackEnd', null)), song);
             if ((staleData === "Live365 past" || staleData === "Still future") && (song)) {
                 return;
             } else if ([this.stationKey] == 'indie1023' && song == "[Air break]") {
-                 this.currentPage.showStateMessage('[ Air Break ]');
-                 return;
+                this.currentPage.showStateMessage('[ Air Break ]');
+                return;
             } else if (song == "[Air break]" && !staleData) {
                 this.currentPage.showStateMessage('[ Air Break ]');
                 return;
@@ -1251,7 +1346,8 @@ export class RadioPlayer {
                     this.lfmMetaChanged = true;
                     if (!this.currentPage) this.initializePage(this.stationKey);
                     this.currentPage.refreshCurrentData([this.song, this.artist, this.album, this.artworkUrl, this.listeners, this.playcount, this.userPlaycount, this.lfmTrackUrl, this.errorMessage]);
-                    this.currentPage.setupMediaSession(this.song, this.artist, this.artworkUrl, this.errorMessage);                }).catch(error => {
+                    this.currentPage.setupMediaSession(this.song, this.artist, this.artworkUrl, this.errorMessage);
+                }).catch(error => {
                     console.error('Error processing data:', error);
                 });
             }
@@ -1378,14 +1474,23 @@ export class RadioPlayer {
         this.stationApiUrl = null;
         this.handleStationSelect(true, prevStationKey, prevStationDisplayName, true);
     }
-    onTagSelected(tag) {
-        this.currentTag = tag;
-        generateRadioButtons(this.currentTag);
-        this.saveState();
+    onTagsSelected(tags) {
+     const tagArr = (Array.isArray(tags)? tags : tags.split(','))
+    .flatMap(t => t.split(','))
+    .filter(Boolean);
+
+     this.currentTag = tagArr.join(',');
+     generateRadioButtons(tagArr.length? tagArr : ['all'], this.stations, this.radioPlayer);
+     this.saveState();
     }
+
+    onTagSelected(tag) {
+     this.onTagsSelected(tag);
+    }
+
     onAllTagsSelected() {
-        this.currentTag = "all";
-        generateRadioButtons("all");
+     this.currentTag = "all";
+     generateRadioButtons(["all"], this.stations, this.radioPlayer);
     }
     reloadStream() {
         this.shouldReloadStream = true;

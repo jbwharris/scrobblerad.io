@@ -5,7 +5,7 @@ const stationData = {
     stationName: "BTPM - The Bridge",
     webUrl: "https://btpm.org/the-bridge",
     location: "Buffalo, NY 🇺🇸",
-    streamUrl: "https://26423.live.streamtheworld.com/WBFOFM.mp3?uuid=oumkqlfko",
+    streamUrl: "https://29321.live.streamtheworld.com/WBFO_THE_BRIDGEAAC.aac?uuid=vgpk76mn",
     apiUrl: "https://np.tritondigital.com/public/nowplaying?mountName=WBFO_THE_BRIDGE&numberToFetch=1&eventType=track",
     timestamp: 'property[name="cue_time_start"]',
     filter: ["WBFO", "BTPM", "The Bridge"],
