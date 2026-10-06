@@ -88,29 +88,35 @@ img {
    background: var(--user-ui-color);
 }
 
-.sr-rainbow {
-
-   position: absolute;
-   z-index: 10000;
-   width: 100vw;
-   height: 100vh;
-   z-index: 100;
-   min-height: 20rem;
-   top: 0rem;
-   overflow: hidden;
-   &:before {
-      content: "";
-      position: absolute;
-      width: 200%;
-      height: 200%;
-      top: -50%;
-      left: -50%;
-      z-index: -1;
-      background-image: linear-gradient(to bottom, var(--sr-purple) 0%, var(--sr-purple) 14.28%, var(--sr-blue) 14.28%, var(--sr-blue) 28.57%, var(--sr-teal) 28.57%, var(--sr-teal) 42.86%, var(--sr-green) 42.86%, var(--sr-green) 57.14%, var(--sr-yellow) 57.14%, var(--sr-yellow) 71.43%, var(--sr-orange) 71.43%, var(--sr-orange) 85.71%, var(--sr-pink) 85.71%, var(--sr-pink) 100%, );
-      background-size: 400px 400px;
-      transform: rotate(5deg);
+a:not(.iconLink, .wm-station-card, #radioNameLink) {
+      text-decoration: none;
+      color: var(--bs-body-color);
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease-in-out;
+      &::before {
+         content: '';
+         background-color: var(--user-ui-color);
+         position: absolute;
+         left: 0;
+         bottom: 0px;
+         width: 100%;
+         height: 2px;
+         z-index: -1;
+         transition: all 0.3s ease-in-out;
+      }
+      &:hover,
+      &:focus {
+         color: contrast-color(var(--user-ui-color));
+         &::before {
+            bottom: 0;
+            height: 100%;
+         }
+      }
    }
-}
+
+
 
 @keyframes gradient {
   0% {
@@ -125,7 +131,7 @@ img {
 }
 
 .animated-gradient {
-      position: absolute;
+      position: fixed;
    z-index: 10000;
    width: 100vw;
    height: 100vh;
@@ -275,6 +281,10 @@ img {
       position: absolute;
       width: 100vw;
    }
+}
+
+.intro-login-link {
+
 }
 
 .project-info {
@@ -790,6 +800,15 @@ input[type='checkbox']:checked~.menuIconToggle {
          align-content: unset;
       }
    }
+   .avatar-menu {
+      right: 0 !important;
+   }
+   #settings-gear-btn {
+      right: 0;
+   }
+   #panel2 {
+      height: calc(100dvh - 3rem);
+   }
    #webamp {
       top: 0;
       height: fit-content;
@@ -1093,7 +1112,7 @@ rgba(255, 255, 255, 0.85));
    --wm-radius: 12px;
    position: fixed;
    inset: 0;
-   z-index: 9999;
+   z-index: 10001;
    display: flex;
    align-items: center;
    justify-content: center;
@@ -1220,9 +1239,7 @@ img {
    display: flex;
    flex-wrap: wrap;
    gap: 8px;
-}
-
-.wm-tags a {
+ .wm-tag-btn {
    display: inline-block;
    padding: .5rem 1rem;
    background: var(--wm-surface);
@@ -1231,12 +1248,18 @@ img {
    color: var(--wm-text);
    font-size: 0.85rem;
    transition: background 0.15s ease, transform 0.1s ease;
+   border: 0;
+
+   &.wm-tag-active {
+      background: light-dark(oklch(from var(--user-ui-color) calc(l - 0.45) c h), oklch(from var(--user-ui-color) calc(l - 0.45) c h));
+   }
 
 
   &:hover {
    background: var(--wm-accent);
    transform: translateY(-1px);
    color: contrast-color(var(--wm-accent));
+}
 }
 
 &:active {
@@ -1339,12 +1362,6 @@ img {
          opacity: .85;
          background: light-dark(oklch(from var(--user-ui-color) calc(l - 0.2) c h), oklch(from var(--user-ui-color) calc(l - 0.5) c h));
       }
-   }
-}
-
-@media (max-width:640px) {
-   #settings-gear-btn {
-      right: 0;
    }
 }
 
@@ -1523,11 +1540,6 @@ img {
    }
 }
 
-@media (max-width:640px) {
-   .avatar-menu {
-      right: 0;
-   }
-}
 
 .wm-dont-show input[type="checkbox"] {
  appearance: auto;
