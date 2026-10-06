@@ -10,6 +10,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+// Last.fm signed-request relay: the API key and shared secret stay on the
+// server and are never shipped to the browser. The client posts the
+// unsigned method/params; this signs them per Last.fm's spec and forwards.
+if (isset($_GET['action']) && $_GET['action'] === 'lastfm') {
+    $apiKey = getenv('LASTFM_API_KEY') ?: '1eda135bc7d7e3ef4815d11f9990d60c';
+    $secret = getenv('LASTFM_SECRET') ?: 'd006f6c9ede4f8d566110fdd5369dbe6';
+
+    $params = $_POST;
+    $params['api_key'] = $apiKey;
+    ksort($params);
+    $sigBase = '';
+    foreach ($params as $key => $value) {
+        if ($key !== 'format') {
+            $sigBase .= $key . $value;
+        }
+    }
+    $params['api_sig'] = md5($sigBase . $secret);
+    $params['format'] = 'json';
+
+    $ch = curl_init('https://ws.audioscrobbler.com/2.0/');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    header('Content-Type: application/json');
+    echo curl_exec($ch);
+    curl_close($ch);
+    exit();
+}
+
 // Get the target URL
 $url = isset($_GET['url']) ? $_GET['url'] : null;
 
