@@ -14,8 +14,8 @@
    --sr-lightness: 35%;
    --sr-saturation: 0;
    --sidebar-bg: light-dark(rgba(255, 255, 255, 0.35), hsla(0deg, 0%, 0%, 0.35));
-   --sidebar-headers: light-dark(oklch(from var(--user-ui-color) calc(l - 0.6) c h), oklch(from var(--user-ui-color) calc(l + 0.3) c h));
-   --sidebar-gradient: linear-gradient(90deg, var(--user-ui-color), oklch(from var(--user-ui-color) calc(l - 0.35) c h)), linear-gradient(90deg, var(--user-ui-color), oklch(from var(--user-ui-color) calc(l - 0.35) c h));
+   --sidebar-headers: light-dark(oklch(from var(--user-ui-color) calc(l + 0.3) c h), oklch(from var(--user-ui-color) calc(l - 0.6) c h));
+   --sidebar-gradient: light-dark(linear-gradient(90deg, var(--user-ui-color), oklch(from var(--user-ui-color) calc(l + 0.35) c h)), linear-gradient(90deg, var(--user-ui-color), oklch(from var(--user-ui-color) calc(l - 0.35) c h)));
    --btn-border-color: hsla(0deg, 0%, 0%, 0.75) !important;
    --play-button: var(--user-ui-color);
    --play-button-border: light-dark(oklch(from var(--user-ui-color) calc(l - 0.35) c h), oklch(from var(--user-ui-color) calc(l - 0.35) c h));
@@ -24,10 +24,24 @@
    --sr-metadata: 0, var(--sr-saturation), 0;
    --backdrop-filter: blur(1.5em) contrast(50%) brightness(80%);
    --bs-body-color: light-dark(#111, #fff ) !important;
+   --bs-heading-color: light-dark(hsla(50deg, 15%, 15%, 1), hsla(50deg, 15%, 15%, 1)) !important;
+   --wm-bg: light-dark(oklch(from var(--user-ui-color) calc(l - 0.15) c h), oklch(from var(--user-ui-color) calc(l - 0.55) c h));
+   --wm-surface: light-dark(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1) );
+   --wm-text: contrast-color(var(--wm-bg));
+   --wm-muted: #999;
+   --wm-accent: var(--user-ui-color);
+   --wm-radius: 12px;
 }
 
-@media (prefers-color-scheme:light) {
-   body {
+html {
+   height: 100dvh;
+   scroll-behavior: smooth;
+   font-size: clamp(16px, 15.296px + 0.188vw, 18px);
+
+   &[data-bs-theme="light"] {
+      color-scheme: light;
+
+        body {
       --backdrop-filter: blur(2rem) contrast(25%) brightness(155%);
       -webkit-backdrop-filter: blur(2rem) contrast(25%) brightness(140%);
       --sr-lightness: 75%;
@@ -35,37 +49,28 @@
       --sr-saturation: 100%;
       --sidebar-bg: rgba(255, 255, 255, 0.35);
       --bs-heading-color: hsla(50deg, 15%, 15%, 1) !important;
-      --sidebar-headers: oklch(from var(--user-ui-color) calc(l + 0.3) c h);
-      --sidebar-gradient: linear-gradient(90deg, var(--user-ui-color), oklch(from var(--user-ui-color) calc(l + 0.15) c h));
       --btn-border-color: hsla(200deg, 15%, var(--sr-lightness), 1) !important;
       --spinner-border: hsla(303.4, 79.5%, calc(var(--sr-lightness) - 10%), 0.85);
       --sr-metadata: 0, var(--sr-saturation), 100%;
       --backdrop-filter: blur(3.5em) contrast(55%) brightness(125%);
    }
-}
+   }
 
+   &[data-bs-theme="dark"] {
+      color-scheme: dark;
 
-
-@media (prefers-color-scheme:dark) {
-   body {
+         body {
       --backdrop-filter: blur(1.5em) contrast(50%) brightness(80%);
       -webkit-backdrop-filter: blur(1.5em) contrast(50%) brightness(80%);
       --sr-lightness: 35%;
       --sr-saturation: 0;
       --sidebar-bg: hsla(0deg, 0%, 0%, 0.35);
-      --sidebar-headers: oklch(from var(--user-ui-color) calc(l - 0.6) c h);
-      --sidebar-gradient: linear-gradient(90deg, var(--user-ui-color), oklch(from var(--user-ui-color) calc(l - 0.35) c h));
       --play-button: var(--user-ui-color);
       --spinner-bg: oklch(from var(--user-ui-color) calc(l - 0.45) c h);
       --spinner-border: oklch(from var(--user-ui-color) calc(l - 0.6) c h);
       --sr-metadata: 0, var(--sr-saturation), 0;
    }
-}
-
-html {
-   height: 100dvh;
-   scroll-behavior: smooth;
-   font-size: clamp(16px, 15.296px + 0.188vw, 18px);
+   }
 }
 
 body {
@@ -83,6 +88,7 @@ body {
       background-image: var(--stationArt);
    }
 }
+
 
 img {
    background: var(--user-ui-color);
@@ -732,6 +738,7 @@ nav.stationNav {
          &:has(input:checked) {
             background: rgb(36, 27, 196);
             background: var(--sidebar-gradient);
+            color: contrast-color(var(--sidebar-gradient));
             font-weight: 700;
             font-size: clamp(1.2rem, 1.13rem + 0.348vw, 1.4rem);
             min-height: 60px;
@@ -976,14 +983,14 @@ rgba(255, 255, 255, 0.85));
    flex-direction: column;
    gap: 0.5rem;
    padding: 0.75rem;
-   color-scheme: light dark;
    .history-item {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 8px;
       border-radius: 8px;
-      background: light-dark(hsla(71 0% 75% / 0.65), hsla(71 0% 15% / 0.65));
+      background: var(--sidebar-bg);
+      color: var(--bs-body-color);
       box-shadow: 0px 4px 3px -2px rgba(0, 0, 0, 0.75);
       position: relative;
       overflow: hidden;
@@ -1101,12 +1108,6 @@ rgba(255, 255, 255, 0.85));
 /* Welcome Modal */
 
 .wm-overlay {
-   --wm-bg: light-dark(oklch(from var(--user-ui-color) calc(l - 0.1) c h), oklch(from var(--user-ui-color) calc(l - 0.55) c h));
-   --wm-surface: light-dark(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1) );
-   --wm-text: contrast-color(var(--wm-bg));
-   --wm-muted: #999;
-   --wm-accent: var(--user-ui-color);
-   --wm-radius: 12px;
    position: fixed;
    inset: 0;
    z-index: 10001;
@@ -1366,14 +1367,14 @@ img {
    position: absolute;
    right: 0;
    bottom: 100%;
-   background: light-dark(oklch(from var(--user-ui-color) calc(l + 0.2) c h), oklch(from var(--user-ui-color) calc(l - 0.5) c h));
+   background: var(--wm-bg);
+   color: var(--wm-text);
    border: 1px solid var(--btn-border-color);
    border-radius: 0.5rem 0.5rem 0 0;
    padding: 0.5rem;
    min-width: 220px;
    box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.3);
    display: none;
-   color: contrast-color(light-dark(oklch(from var(--user-ui-color) calc(l + 0.2) c h), oklch(from var(--user-ui-color) calc(l - 0.5) c h)));
    &.open {
       display: block;
    }
@@ -1410,11 +1411,10 @@ img {
       padding: 0.5rem 0.75rem;
       border: none;
       background: none;
-      color: var(--bs-body-color);
+      color: var(--wm-text);
       font-size: 0.9rem;
       cursor: pointer;
       border-radius: 0.25rem;
-      color: contrast-color(light-dark(oklch(from var(--user-ui-color) calc(l + 0.2) c h), oklch(from var(--user-ui-color) calc(l - 0.5) c h)));
       &:hover {
          background: var(--sidebar-gradient);
          color: contrast-color(light-dark(oklch(from var(--sidebar-gradient) calc(l - 0.2) c h), oklch(from var(--sidebar-gradient) calc(l - 0.5) c h)));
