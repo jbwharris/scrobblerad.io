@@ -1214,14 +1214,23 @@ history.replaceState(null, '', newUrl);
             }
             this.hasLoadedData = true;
             const [song, artist, album, albumArt, spinUpdated, url, queryType, errorMsg] = extractedData;
-            const safeAlbumArt = (typeof albumArt === 'string') ? albumArt : this.artworkUrl;
+            const safeAlbumArt = (typeof albumArt === 'string')? albumArt : this.artworkUrl;
             const now = Date.now();
             const isRecentlyUpdated = this.lastKnownUpdatedTime > (now - 5 * 60 * 1000) &&
-                this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
-            if (!song) {
-                const message = isRecentlyUpdated ? '[Air Break]' : 'No song data found';
-                this.currentPage.showStateMessage(message);
-                return;
+             this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
+
+            let resolvedSong = song;
+            let resolvedArtist = artist;
+
+            if (!resolvedSong && this.getNestedValue(this.currentStationData, this.stationKey, 'altPath', null)) {
+             resolvedSong = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null)) || '';
+             resolvedArtist = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null)) || artist;
+            }
+
+            if (!resolvedSong) {
+             const message = isRecentlyUpdated? '[Air Break]' : 'No song data found';
+             this.currentPage.showStateMessage(message);
+             return;
             }
             // Predefined values
             const timezone = this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null);
