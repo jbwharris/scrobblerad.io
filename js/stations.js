@@ -747,7 +747,7 @@ const stations = {
   },
   xcsb: {
     stationName: "XCSB",
-    tags: ["hidden"],
+    tags: ["us", "community", "independent", "indie"],
   },
   xpn: {
     stationName: "XPN",

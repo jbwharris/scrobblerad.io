@@ -1,21 +1,15 @@
 const stationData = {
   kutx: {
-    artist: "onNow.song.artistName",
-    song: "onNow.song.trackName",
-    album: "onNow.song.collectionName",
-    artist2: "tracklist.results.0.song.artistName",
-    song2: "tracklist.results.0.song.trackName",
-    album2: "tracklist.results.0.song.collectionName",
-
+    artist: "currentlyPlayingSong.artist.0",
+    song: "currentlyPlayingSong.title",
+    album: "currentlyPlayingSong.album",
+    host: "onNow.program.name",
     location: "Austin, TX 🇺🇸",
     webUrl: "https://kutx.org",
     streamUrl: "https://streams.kut.org/4428_56?aw_0_1st.playerid=kutx-free",
-    nprPath: "50ef24ebe1c8a1369593d032",
-    duration: "onNow.song._duration",
-    duration2: "tracklist.results.0.song._duration",
-    timestamp: "onNow.song._start_time",
-    timestamp2: "tracklist.results.0.song._start_time",
+    apiUrl: "https://cadence.nprstations.org/api/cadence/widget/b90e054f-2565-42b1-aff5-c744bc8fc70d?format=json",
+    duration: "currentlyPlayingSong.duration",
+    timestamp: "currentlyPlayingSong.start.local",
     timezone: "America/Chicago",
-    altPath: true,
   },
 }
