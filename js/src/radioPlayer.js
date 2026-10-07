@@ -1,10 +1,12 @@
 import {
-    debounce,
-    addCacheBuster,
-    hasTag,
-    upsizeImgUrl,
-    getSelectedTags,
-    flattenStations
+ debounce,
+ addCacheBuster,
+ hasTag,
+ upsizeImgUrl,
+ getSelectedTags,
+ flattenStations,
+ replaceSpecialCharacters,
+ filterSongDetails
 } from './utils.js';
 import {
     Page
@@ -582,196 +584,133 @@ history.replaceState(null, '', newUrl);
         return pathParts.join('.');
     }
     extractSongAndArtist(data, stationKey) {
-        const replaceSpecialCharacters = str => {
-            if (str == null) return ''; // Handle null or undefined
-            const strValue = String(str); // Ensure it's a string
-            return strValue
-                .replace(/&apos;|&#039;|’|‘|‚|‛|`|´/g, "'")
-                .replace(/–|—/g, "-")
-                .replace(/[“”„]/g, '"')
-                .replace(/…/g, "...")
-                .replace(/\u00A0/g, " ")
-                .replace(/[\t\n\r]/g, '')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/\s*\[.*?\]/g, '')
-                .replace(/[*/|\\]/g, '')
-                .replace(/--/g, '-')
-                .replace(/\s*\(Current Track\)\s*/gi, '')
-                .replace(/\s-\s.*single.*$/i, '')
-                .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs')
-                .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, match => {
-                    const replacements = {
-                        Lets: "Let's",
-                        Its: "It's",
-                        Ive: "I've",
-                        Dont: "Don't",
-                        Cant: "Can't",
-                        Wont: "Won't",
-                        Aint: "Ain't",
-                        Youve: "You've"
-                    };
-                    return replacements[match] || match;
-                })
-                .replace(/\b(Somethin|Nothin)\b/gi, match => {
-                    const replacements = {
-                        Somethin: "Somethin'",
-                        Nothin: "Nothin'"
-                    };
-                    return replacements[match] || match;
-                })
-                .trim() || '';
-        };
-        const filterSongDetails = song => {
-            if (!song) return ''; // Return an empty string if song is undefined
-            return song
-                .replace(/\s*\(.*?version.*?\)/gi, '') // Removes text in brackets containing "version"
-                .replace(/\s-\s.*version.*$/i, '') // Removes " - Radio Version" or similar
-                .replace(/\s-\s.*kqua.*$/i, '') // Removes " - kqua
-                .replace(/\s-\s.*mix.*$/i, '') // Removes " - Something Mix" or similar
-                .replace(/\s*-\s*\([^)]*\)/g, '') // Removes " - (Anything in brackets)"
-                .replace(/\s*\(.*?edit.*?\)/gi, '') // Removes text in brackets containing "edit"
-                .replace(/\s*\(\s*(feat\.?|ft\.?|featuring).*?\)|\s+(feat\.?|ft\.?|featuring)\s.*$/gi, '') // Removes text in brackets containing "Feat." or "Song Feat. Other Artist"
-                .replace(/\s+(feat\.?|ft\.?|featuring)\s.*$/i, '') // Removes text to the end of the string containing "Feat." or "Song Feat. Other Artist"
-                .replace(/\s*\(.*?clean.*?\)/gi, '') // Removes text in brackets containing "edit"
-                .replace(/\s-\s.*edit.*$/i, '') // Removes " - Radio Edit" or similar
-                .replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '') // Removes text in parentheses or square brackets containing "Mix"
-                .replace(/\s*\(\d{4}\s*-\s*Remaster(ed)?\)/gi, '') // Removes "(1992 - Remaster)" or "(1992 - Remastered)"
-                .replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '') // Removes "(2022 Remaster)" or "(2022 Remastered)"
-                .replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '') // Removes "- 2022 Remaster" or "- 2022 Remastered"
-                .replace(/\s*-\s*Remaster(ed)?/gi, '') // Removes "- Remaster" or "- Remastered" (CASE-INSENSITIVE)
-                .replace(/([\)\]])\s*\d{4}.*/, '') // Removes anything after a closing bracket if followed by a year (e.g., "1972")
-                .replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '') // Removes a year within a brackets (6 Music Session, March 31 2025)
-                .replace(/\s*\(.*?\bofficial\b.*?\)/gi, '') // Removes "(Official)" or variations like "(original & official)"
-                .replace(/\s*\(.*?\bsingle\b.*?\)/gi, '') // Removes "(single)"
-                .replace(/\s*\(.*?\bLOCAL\b.*?\)/gi, '') // Removes "(LOCAL)"
-                .replace(/\s*\(.*?\bsession\b.*?\)/gi, '') // Removes "(909 Session)"
-                .replace(/\s*\(.*?\blive\b.*?\)/gi, '') // Removes "(Live session)"
-                .replace(/\s*\(.*?\bcover\b.*?\)/gi, '') // Removes "(_____ cover)"
-                .replace(/\s-\s.*single.*$/i, '') // Removes " - Single" or similar
-                .replace(/\s*\([^)]*$/gi, '') // remove truncated brackets
-                .trim();
-        };
-        const regexPattern = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex', null) || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
-        const regexPattern2 = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex2', null);
-        const match = regexPattern.exec(replaceSpecialCharacters(data));
-        let dataPath = data.title;
-        this.currentTrack = {
-            ...this.currentTrack,
-            title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song', null)),
-            artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null)),
-            album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album', null)),
-            albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, '', null)),
-            spinUpdated: ''
-        }
-        // CFMU inputs its latest songs at the end of the tracks object, so it needs to figure out what the last item in the array is, then output that
-        if (this.getNestedValue(this.currentStationData, this.stationKey, 'reverseArray', null)) {
-            this.currentTrack = {
-                ...this.currentTrack,
-                title: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].song, data)),
-                artist: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].artist, data)),
-                album: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].album, data)),
-            }
-        }
-        // some APIs have instances where there's a second place you should look for info if the first item is empty
-        if (this.getNestedValue(this.currentStationData, this.stationKey, 'altpath', null) && !this.currentTrack.title) {
-            this.currentTrack = {
-                ...this.currentTrack,
-                title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null)),
-                artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null)),
-                album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album2', null)),
-                albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'albumArt2', null)),
-                spinUpdated: ''
-            }
-        }
-        if (this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null)) {
-            this.currentTrack = {
-                ...this.currentTrack,
-                title: data[0] || '',
-                artist: data[1] || '',
-                album: data[2] || '',
-                albumArt: '',
-                spinUpdated: data[4] || '',
-                timestamp: data[3] || '',
-            }
-        }
-        if (this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
-            //radio.co apis that have a string "song - artist" piggybacking on the orbPath function
-            if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null) == true) {
-                dataPath = data.data.title;
-            } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
-                dataPath = data[`${[this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)]}`];
-            }
-            const match = regexPattern.exec(dataPath);
-            if (match) {
-                [this.currentTrack.artist, this.currentTrack.title, this.currentTrack.album] = match.slice(1, 4).map((str) => str?.trim());
-            } else if (!match && regexPattern2) {
-                const fallbackMatch = regexPattern2.exec(dataPath);
-                [this.currentTrack.artist, this.currentTrack.title, this.currentTrack.album] = fallbackMatch.slice(1, 4).map((str) => str?.trim());
-            } else {
-                console.log('No match found', match);
-            }
-        }
-        if ((this.getNestedValue(this.currentStationData, this.stationKey, 'stringPath', null))) {
-            if (match) {
-                this.currentTrack.title = match[1]?.trim() || '';
-                this.currentTrack.artist = match[2]?.trim() || '';
-                if (this.stationKey !== 'cbcmusic') {
-                    this.currentTrack = {
-                        ...this.currentTrack,
-                        album: match[3]?.trim() || '',
-                        albumArt: match[4]?.trim() || this.stationArt,
-                        spinUpdated: new Date(Number(match[5]?.trim() || '')).getTime()
-                    }
-                }
-            } else { // if it is cbcmusic
-                this.currentTrack.spinUpdated = Number(match[3]?.trim()) || '';
-            }
-        } else {
-            console.log('No match found');
-        }
-        // Helper function to check if a string contains any of the filtered values (case-insensitive)
-        const containsFilteredValue = (text, values) => {
-            if (!text) return false; // Ensure text is defined and not null/undefined
-            const lowerCaseText = text.toLowerCase();
-            return values.some(value =>
-                value && lowerCaseText.includes(value.toLowerCase()) // Ensure value is also defined
-            );
-        };
-        // Helper function to check if any of the provided texts contain invalid content
-        const checkAnyInvalidContent = (...texts) => {
-            const filteredValues = this.getNestedValue(this.currentStationData, this.stationKey, 'filter', null) || [];
-            const stationKeyValue = this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null);
-            const allValuesToCheck = [...filteredValues, stationKeyValue].filter(Boolean); // Remove falsy values
-            return texts.some(text =>
-                text && containsFilteredValue(text, allValuesToCheck)
-            );
-        };
-        if (this.getNestedValue(this.currentStationData, this.stationKey, 'flipMeta', null)) {
-            [this.currentTrack.title, this.currentTrack.artist] = [this.currentTrack.artist, this.currentTrack.title];
-        }
-        // Check the song, artist, and album values for invalid content
-        if (checkAnyInvalidContent(this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album)) {
-            // Returning the message indicating the station may be taking a break
-            return;
-        } else if (!this.currentTrack.artist && this.currentTrack.title !== undefined) {
-            // Returning the message indicating missing data
-            return ['[Air break]', null, null, this.stationArt, '', '', true];
-        }
-        // filter the values after they've been defined above
-        this.currentTrack.title = filterSongDetails(this.currentTrack.title);
-        if (this.currentTrack.artist) {
-            this.currentTrack.artist = this.applyFilters('artist', this.cleanupArtist(this.currentTrack.artist));
-        }
-        this.currentTrack.album = this.applyFilters('album', this.currentTrack.album) || '';
-        // If the album is labeled as "single," set the album to the song title
-        if (/single/i.exec(this.currentTrack.album) || (this.currentTrack.album.toLowerCase().includes('single'))) {
-            this.currentTrack.album = filterSongDetails(this.currentTrack.title);
-        }
-        // If albumArt is empty, assign the fallback URL
-        this.currentTrack.albumArt = this.currentTrack.albumArt || this.stationArt;
-        return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated, this.lastFmUrl || '', '', false];
+        this.extractRawTrack(data, stationKey);
+        return this.cleanTrack();
+    }
+
+    extractRawTrack(data, stationKey) {
+         const regexPattern = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex', null) || /^(.*?)\s+-\s+(.*?)(?:\s+-\s+([^-\n]*))?(?:\s+-\s+(.*))?$/;
+         const regexPattern2 = this.getNestedValue(this.currentStationData, this.stationKey, 'pathRegex2', null);
+         const match = regexPattern.exec(replaceSpecialCharacters(data));
+         let dataPath = data.title;
+
+         this.currentTrack = {
+        ...this.currentTrack,
+         title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song', null)),
+         artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null)),
+         album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album', null)),
+         albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, '', null)),
+         spinUpdated: ''
+         };
+
+         if (this.getNestedValue(this.currentStationData, this.stationKey, 'reverseArray', null)) {
+         this.currentTrack = {
+        ...this.currentTrack,
+         title: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].song, data)),
+         artist: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].artist, data)),
+         album: this.getPath(data, this.getLastJsonPath(this.currentStationData[stationKey].album, data)),
+         };
+         }
+
+         if (this.getNestedValue(this.currentStationData, this.stationKey, 'altpath', null) &&!this.currentTrack.title) {
+         this.currentTrack = {
+        ...this.currentTrack,
+         title: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null)),
+         artist: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null)),
+         album: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'album2', null)),
+         albumArt: this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'albumArt2', null)),
+         spinUpdated: ''
+         };
+         }
+
+         if (this.getNestedValue(this.currentStationData, this.stationKey, 'spinPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null)) {
+         this.currentTrack = {
+        ...this.currentTrack,
+         title: data[0] || '',
+         artist: data[1] || '',
+         album: data[2] || '',
+         albumArt: '',
+         spinUpdated: data[4] || '',
+         timestamp: data[3] || '',
+         };
+         }
+
+         if (this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
+         if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null) == true) {
+         dataPath = data.data.title;
+         } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
+         dataPath = data[`${[this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)]}`];
+         }
+         const match = regexPattern.exec(dataPath);
+         if (match) {
+         [this.currentTrack.artist, this.currentTrack.title, this.currentTrack.album] = match.slice(1, 4).map((str) => str?.trim());
+         } else if (!match && regexPattern2) {
+         const fallbackMatch = regexPattern2.exec(dataPath);
+         [this.currentTrack.artist, this.currentTrack.title, this.currentTrack.album] = fallbackMatch.slice(1, 4).map((str) => str?.trim());
+         } else {
+         console.log('No match found', match);
+         }
+         }
+
+         if ((this.getNestedValue(this.currentStationData, this.stationKey, 'stringPath', null))) {
+         if (match) {
+         this.currentTrack.title = match[1]?.trim() || '';
+         this.currentTrack.artist = match[2]?.trim() || '';
+         if (this.stationKey!== 'cbcmusic') {
+         this.currentTrack = {
+        ...this.currentTrack,
+         album: match[3]?.trim() || '',
+         albumArt: match[4]?.trim() || this.stationArt,
+         spinUpdated: new Date(Number(match[5]?.trim() || '')).getTime()
+         };
+         }
+         } else {
+         this.currentTrack.spinUpdated = Number(match[3]?.trim()) || '';
+         }
+         }
+
+         if (this.getNestedValue(this.currentStationData, this.stationKey, 'flipMeta', null)) {
+         [this.currentTrack.title, this.currentTrack.artist] = [this.currentTrack.artist, this.currentTrack.title];
+         }
+    }
+
+    cleanTrack() {
+     const containsFilteredValue = (text, values) => {
+     if (!text) return false;
+     const lowerCaseText = text.toLowerCase();
+     return values.some(value =>
+     value && lowerCaseText.includes(value.toLowerCase())
+     );
+     };
+
+     const checkAnyInvalidContent = (...texts) => {
+     const filteredValues = this.getNestedValue(this.currentStationData, this.stationKey, 'filter', null) || [];
+     const stationKeyValue = this.getNestedValue(this.currentStationData, this.stationKey, 'stationName', null);
+     const allValuesToCheck = [...filteredValues, stationKeyValue].filter(Boolean);
+     return texts.some(text =>
+     text && containsFilteredValue(text, allValuesToCheck)
+     );
+     };
+
+     if (checkAnyInvalidContent(this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album)) {
+     return;
+     } else if (!this.currentTrack.artist && this.currentTrack.title!== undefined) {
+     return ['[Air break]', null, null, this.stationArt, '', '', true];
+     }
+
+     this.currentTrack.title = filterSongDetails(this.currentTrack.title);
+     if (this.currentTrack.artist) {
+     this.currentTrack.artist = this.applyFilters('artist', this.cleanupArtist(this.currentTrack.artist));
+     }
+     this.currentTrack.album = this.applyFilters('album', this.currentTrack.album) || '';
+
+     if (/single/i.exec(this.currentTrack.album) || (this.currentTrack.album.toLowerCase().includes('single'))) {
+     this.currentTrack.album = filterSongDetails(this.currentTrack.title);
+     }
+
+     this.currentTrack.albumArt = this.currentTrack.albumArt || this.stationArt;
+
+     return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated, this.lastFmUrl || '', '', false];
     }
     async getLfmMeta(currentSong, currentArtist, currentAlbum, currentArt, queryType) {
         try {
@@ -1120,7 +1059,10 @@ history.replaceState(null, '', newUrl);
         const replaceEnDashWithEmDash = str => str.replace(/—/g, '—');
         const replaceHyphenWithEmDash = str => str.replace(/—/g, '—');
         let targetSelector;
-        if (this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) {
+        
+        if (this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null) && this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null)) {
+            targetSelector = ['', this.getNestedValue(this.currentStationData, this.stationKey, 'song', null), this.getNestedValue(this.currentStationData, this.stationKey, 'artist', null), this.getNestedValue(this.currentStationData, this.stationKey, 'album', null), ' .album-art', '.time'];
+        } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'htmlString', null)) {
             targetSelector = ['div.song-details:first-child', '.radio-song-title', ' p:first-child', ' .album-title', ' .album-art', ' p:last-child']
         } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'xmlString', null)) {
             targetSelector = ['Entry', '[Title]', '[Artist]', '[Album]', '[MusicId]', '[StartTime]']
@@ -1135,6 +1077,7 @@ history.replaceState(null, '', newUrl);
             albumArt: doc.querySelector(`${targetSelector[4]}`)?.src || '',
             spinUpdated: doc.querySelector(`${targetSelector[0]}${targetSelector[5]}`)?.textContent.trim() || '',
         }
+
         // Return the extracted data in the format expected by processData
         return [this.currentTrack.title, this.currentTrack.artist, this.currentTrack.album, this.currentTrack.albumArt, this.currentTrack.spinUpdated];
     }

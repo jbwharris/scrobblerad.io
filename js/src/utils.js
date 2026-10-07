@@ -88,3 +88,76 @@ export function flattenStations(stationsObj, prefix = '') {
 
 
 export const isHidden = (station) => station.tags && station.tags.includes('hidden');
+
+export function replaceSpecialCharacters(str) {
+ if (str == null) return '';
+ const strValue = String(str);
+ return strValue
+.replace(/&apos;|&#039;|'|'|‚|‛|`|´/g, "'")
+.replace(/–|—/g, "-")
+.replace(/[“”„]/g, '"')
+.replace(/…/g, "...")
+.replace(/\u00A0/g, " ")
+.replace(/[\t\n\r]/g, '')
+.replace(/&amp;/g, '&')
+.replace(/&lt;/g, '<')
+.replace(/&gt;/g, '>')
+.replace(/\s*\[.*?\]/g, '')
+.replace(/[*/|\\]/g, '')
+.replace(/--/g, '-')
+.replace(/\s*\(Current Track\)\s*/gi, '')
+.replace(/\s-\s.*single.*$/i, '')
+.replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs')
+.replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, match => {
+ const replacements = {
+ Lets: "Let's",
+ Its: "It's",
+ Ive: "I've",
+ Dont: "Don't",
+ Cant: "Can't",
+ Wont: "Won't",
+ Aint: "Ain't",
+ Youve: "You've"
+ };
+ return replacements[match] || match;
+ })
+.replace(/\b(Somethin|Nothin)\b/gi, match => {
+ const replacements = {
+ Somethin: "Somethin'",
+ Nothin: "Nothin'"
+ };
+ return replacements[match] || match;
+ })
+.trim() || '';
+}
+
+export function filterSongDetails(song) {
+ if (!song) return '';
+ return song
+.replace(/\s*\(.*?version.*?\)/gi, '')
+.replace(/\s-\s.*version.*$/i, '')
+.replace(/\s-\s.*kqua.*$/i, '')
+.replace(/\s-\s.*mix.*$/i, '')
+.replace(/\s*-\s*\([^)]*\)/g, '')
+.replace(/\s*\(.*?edit.*?\)/gi, '')
+.replace(/\s*\(\s*(feat\.?|ft\.?|featuring).*?\)|\s+(feat\.?|ft\.?|featuring)\s.*$/gi, '')
+.replace(/\s+(feat\.?|ft\.?|featuring)\s.*$/i, '')
+.replace(/\s*\(.*?clean.*?\)/gi, '')
+.replace(/\s-\s.*edit.*$/i, '')
+.replace(/[\(\[]\d{4}\s*Mix[\)\]]/gi, '')
+.replace(/\s*\(\d{4}\s*-\s*Remaster(ed)?\)/gi, '')
+.replace(/\s*\([\d]{4}\s*Remaster(ed)?\)/gi, '')
+.replace(/\s*-\s*[\d]{4}\s*Remaster(ed)?/gi, '')
+.replace(/\s*-\s*Remaster(ed)?/gi, '')
+.replace(/([\)\]])\s*\d{4}.*/, '')
+.replace(/\s*[\(\[].*?\b\d{4}\b.*?[\)\]]\s*/g, '')
+.replace(/\s*\(.*?\bofficial\b.*?\)/gi, '')
+.replace(/\s*\(.*?\bsingle\b.*?\)/gi, '')
+.replace(/\s*\(.*?\bLOCAL\b.*?\)/gi, '')
+.replace(/\s*\(.*?\bsession\b.*?\)/gi, '')
+.replace(/\s*\(.*?\blive\b.*?\)/gi, '')
+.replace(/\s*\(.*?\bcover\b.*?\)/gi, '')
+.replace(/\s-\s.*single.*$/i, '')
+.replace(/\s*\([^)]*$/gi, '')
+.trim();
+}
