@@ -168,6 +168,8 @@ a:not(.iconLink, .wm-station-card, #radioNameLink) {
   & img {
    background:transparent;
    width:15rem;
+   position: relative;
+   top: -12%;
   }
 }
 
