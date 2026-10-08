@@ -333,22 +333,37 @@ history.replaceState(null, '', newUrl);
     }
     // Method to destroy HLS instance and reset audio
     destroyHLSAndResetAudio() {
-        if (this.hls) {
-            this.hls.destroy();
-            this.hls = null;
-        }
-        if (this.audio) {
-            this.audio.removeAttribute('src');
-            this.audio.load();
-        }
+     if (this.hls) {
+     this.hls.detachMedia(); // ← detach before destroy
+     this.hls.destroy();
+     this.hls = null;
+     }
+     if (this.audio) {
+     this.audio.removeAttribute('src');
+     this.audio.load();
+     }
     }
     async handleStationSelect(direction, stationKey, stationDisplayName, firstRun) {
-        if (!stationKey || stationKey === 'undefined') return;
-        if (this.isLoadingStation && this.stationKey === stationKey) return;
-        this.isLoadingStation = true;
-        this.stationKey = stationKey;
-        this.firstRun = firstRun;
-        this.saveState();
+     if (!stationKey || stationKey === 'undefined') return;
+     if (this.isLoadingStation && this.stationKey === stationKey) return;
+     this.isLoadingStation = true;
+const previousKey = this.stationKey;
+this.stationKey = stationKey;
+this.firstRun = firstRun;
+this.saveState();
+
+if (this.shouldReloadStream && this.stationKey === previousKey) {
+ document.getElementById("playermeta").classList.remove("opacity-50");
+ this.audio.load();
+ if (this.hls) {
+ this.destroyHLSAndResetAudio();
+ }
+ this.shouldReloadStream = false;
+ return;
+}
+
+this.shouldReloadStream = false;
+
         // Clear existing scrobble timeout
         if (this.currentPage && this.currentPage.scrobbleTimeout) {
             clearTimeout(this.currentPage.scrobbleTimeout);
@@ -356,12 +371,7 @@ history.replaceState(null, '', newUrl);
             this.currentPage.scrobbleTimeout = null;
         }
         if (this.shouldReloadStream && this.stationKey === stationKey) {
-         document.getElementById("playermeta").classList.remove("opacity-50");
-         this.audio.load();
-         if (this.hls) {
-         this.destroyHLSAndResetAudio();
-         }
-         this.shouldReloadStream = false;
+
          return;
         }
         // Destroy the previous Page instance if it exists
@@ -656,16 +666,16 @@ history.replaceState(null, '', newUrl);
          if (match) {
          this.currentTrack.title = match[1]?.trim() || '';
          this.currentTrack.artist = match[2]?.trim() || '';
-         if (this.stationKey!== 'cbcmusic') {
-         this.currentTrack = {
-        ...this.currentTrack,
-         album: match[3]?.trim() || '',
-         albumArt: match[4]?.trim() || this.stationArt,
-         spinUpdated: new Date(Number(match[5]?.trim() || '')).getTime()
-         };
-         }
+             if (this.stationKey!== 'cbcmusic') {
+                 this.currentTrack = {
+                    ...this.currentTrack,
+                    album: match[3]?.trim() || '',
+                    albumArt: match[4]?.trim() || this.stationArt,
+                    spinUpdated: new Date(Number(match[5]?.trim() || '')).getTime()
+                 };
+             }
          } else {
-         this.currentTrack.spinUpdated = Number(match[3]?.trim()) || '';
+            this.currentTrack.spinUpdated = Number(match[3]?.trim()) || '';
          }
          }
 
@@ -680,10 +690,6 @@ history.replaceState(null, '', newUrl);
              this.currentTrack.title = altSong;
              if (altArtist) this.currentTrack.artist = altArtist;
              }
-             }
-
-             if (this.getNestedValue(this.currentStationData, this.stationKey, 'flipMeta', null)) {
-             [this.currentTrack.title, this.currentTrack.artist] = [this.currentTrack.artist, this.currentTrack.title];
              }
     }
 
@@ -941,6 +947,9 @@ history.replaceState(null, '', newUrl);
                         stationApiUrl = `https://scraper2.onlineradiobox.com/${this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null)}?l=0`;
                     } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'nprPath', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
                         stationApiUrl = `https://api.composer.nprstations.org/v1/widget/${this.getNestedValue(this.currentStationData, this.stationKey, 'nprPath', null)}/tracks?format=json&limit=2&hide_amazon=false&hide_itunes=false&hide_arkiv=false&share_format=false`;
+                    } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'cadencePath', null)) {
+                         stationApiUrl = `https://cadence.nprstations.org//api/cadence/widget/${this.getNestedValue(this.currentStationData, this.stationKey, 'cadencePath', null)}/songs`;
+                         this.usePost = true;
                     } else {
                         if (this.getNestedValue(this.currentStationData, this.stationKey, 'proxyApi', null)) {
                             stationApiUrl = `https://scrobblerad.io/proxy.php?url=${this.getNestedValue(this.currentStationData, this.stationKey, 'apiUrl', null)}`;
@@ -950,7 +959,10 @@ history.replaceState(null, '', newUrl);
                     }
                     this.stationApiUrl = stationApiUrl;
                 }
-                fetch(this.addCacheBuster(this.stationApiUrl))
+                const fetchOpts = this.usePost
+                ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }
+                : {};
+                fetch(this.addCacheBuster(this.stationApiUrl), fetchOpts)
                     .then((response) => {
                         const contentType = response.headers.get('content-type');
                         // Check if contentType exists before calling includes
@@ -983,11 +995,14 @@ history.replaceState(null, '', newUrl);
                         contentType
                     }) => {
                         if (contentType && contentType.includes('text/html') &&
-                            !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && this.stationKey !== 'cbcmusic') {
+                            !this.getNestedValue(this.currentStationData, this.stationKey, 'phpString', null) && !this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null) && this.stationKey !== 'cbcmusic') {
                             // Parse the HTML response
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(data, 'text/html');
                             data = this.extractDataFromHTML(doc);
+                        } else if (contentType && contentType.includes('text/html') &&
+                             this.getNestedValue(this.currentStationData, this.stationKey, 'jsonString', null)) {
+                             try { data = JSON.parse(data); } catch (e) { console.error('jsonString: failed to parse', e); return; }
                         } else if (contentType && contentType.includes('text/html') && this.stationKey == 'cbcmusic' && window.mytuner_scripts.mytunerMeta !== '') {
                             console.log("window.mytuner_scripts.mytunerMeta", window.mytuner_scripts.mytunerMeta)
                             if (window.mytuner_scripts.mytunerMeta !== null) {
@@ -1055,19 +1070,17 @@ history.replaceState(null, '', newUrl);
         }
     }
     extractJsonFromJS(js) {
-        // Match the JSON payload inside the jsonpcallback function
-        const match = js.match(/jsonpcallback\((.*)\);/);
-        if (match && match[1]) {
-            try {
-                // Parse the matched JSON string
-                const jsonData = JSON.parse(match[1]);
-                return jsonData;
-            } catch (error) {
-                throw new Error('Failed to parse JSON from the response: ' + error.message);
-            }
-        } else {
-            throw new Error('Unable to extract JSON content from the response');
-        }
+     // Try plain JSON first
+     try {
+     return JSON.parse(js);
+     } catch (e) {}
+     // Fall back to JSONP extraction
+     const match = js.match(/jsonpcallback\((.*)\);/);
+     if (match && match[1]) {
+     return JSON.parse(match[1]);
+     }
+     console.log('raw response:', js.substring(0, 500));
+     throw new Error('Unable to extract JSON content from the response');
     }
     // Helper function to extract necessary data from HTML response
     extractDataFromHTML(doc) {

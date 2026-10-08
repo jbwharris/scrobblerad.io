@@ -107,6 +107,7 @@ export function replaceSpecialCharacters(str) {
 .replace(/--/g, '-')
 .replace(/\s*\(Current Track\)\s*/gi, '')
 .replace(/\s-\s.*single.*$/i, '')
+.replace(/\s*-\s*Radio\s*-\s*/gi, ' - ')
 .replace(/\b(tUnE yArDs|tune-yards|tuneyards)\b/gi, 'tUnE-yArDs')
 .replace(/\b(Lets|Its|Ive|Dont|Cant|Wont|Aint)\b/gi, match => {
  const replacements = {

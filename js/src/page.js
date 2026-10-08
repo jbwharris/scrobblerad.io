@@ -7,6 +7,12 @@ document.addEventListener('scrobblerad:splashDismiss', function () {
  if (splash) splash.remove();
 });
 
+window.addEventListener('unhandledrejection', (e) => {
+ if (e.reason?.name === 'DOMException' && e.reason?.message?.includes('not usable')) {
+ e.preventDefault();
+ }
+});
+
 export class Page {
     constructor(stationKey, radioPlayer, handleStationClick) {
         this.stationKey = stationKey;
