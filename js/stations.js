@@ -95,10 +95,6 @@ const stations = {
     stationName: "CFRC",
     tags: ["ca", "college", "variety"],
   },
-  chillfiltr: {
-    stationName: "CHILLFILTR",
-    tags: ["ca", "chill", "electronic"],
-  },
   chirpradio: {
     stationName: "CHIRP Radio",
     tags: ["us", "community", "indie", "top"],
@@ -409,14 +405,6 @@ const stations = {
     stationName: "Mountain Chill",
     tags: ["us", "chill", "electronic"],
   },
-  tmm1: {
-    stationName: "The Music Machine 1",
-    tags: ["uk", "variety", "justmusic"],
-  },
-  tmm2: {
-    stationName: "The Music Machine 2",
-    tags: ["uk", "variety", "justmusic"],
-  },
   newsounds: {
     stationName: "New Sounds",
     tags: ["us", "public", "experimental"],
@@ -518,6 +506,10 @@ const stations = {
   radiox: {
     stationName: "Radio X",
     tags: ["uk", "corp", "rock"],
+  },
+  rovr: {
+    stationName: "ROVR",
+    tags: ["uk", "community", "independent"],
   },
   sabotage: {
     stationName: "Sabotage Radio",
