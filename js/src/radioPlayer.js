@@ -672,6 +672,19 @@ history.replaceState(null, '', newUrl);
          if (this.getNestedValue(this.currentStationData, this.stationKey, 'flipMeta', null)) {
          [this.currentTrack.title, this.currentTrack.artist] = [this.currentTrack.artist, this.currentTrack.title];
          }
+
+          if (this.getNestedValue(this.currentStationData, this.stationKey, 'altPath', null) &&!this.currentTrack.title) {
+             const altSong = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null));
+             const altArtist = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null));
+             if (altSong) {
+             this.currentTrack.title = altSong;
+             if (altArtist) this.currentTrack.artist = altArtist;
+             }
+             }
+
+             if (this.getNestedValue(this.currentStationData, this.stationKey, 'flipMeta', null)) {
+             [this.currentTrack.title, this.currentTrack.artist] = [this.currentTrack.artist, this.currentTrack.title];
+             }
     }
 
     cleanTrack() {
@@ -703,6 +716,8 @@ history.replaceState(null, '', newUrl);
      this.currentTrack.artist = this.applyFilters('artist', this.cleanupArtist(this.currentTrack.artist));
      }
      this.currentTrack.album = this.applyFilters('album', this.currentTrack.album) || '';
+
+     this.currentTrack.album = filterSongDetails(this.applyFilters('album', this.currentTrack.album)) || '';
 
      if (/single/i.exec(this.currentTrack.album) || (this.currentTrack.album.toLowerCase().includes('single'))) {
      this.currentTrack.album = filterSongDetails(this.currentTrack.title);
@@ -1214,23 +1229,14 @@ history.replaceState(null, '', newUrl);
             }
             this.hasLoadedData = true;
             const [song, artist, album, albumArt, spinUpdated, url, queryType, errorMsg] = extractedData;
-            const safeAlbumArt = (typeof albumArt === 'string')? albumArt : this.artworkUrl;
+            const safeAlbumArt = (typeof albumArt === 'string') ? albumArt : this.artworkUrl;
             const now = Date.now();
             const isRecentlyUpdated = this.lastKnownUpdatedTime > (now - 5 * 60 * 1000) &&
-             this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
-
-            let resolvedSong = song;
-            let resolvedArtist = artist;
-
-            if (!resolvedSong && this.getNestedValue(this.currentStationData, this.stationKey, 'altPath', null)) {
-             resolvedSong = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'song2', null)) || '';
-             resolvedArtist = this.getPath(data, this.getNestedValue(this.currentStationData, this.stationKey, 'artist2', null)) || artist;
-            }
-
-            if (!resolvedSong) {
-             const message = isRecentlyUpdated? '[Air Break]' : 'No song data found';
-             this.currentPage.showStateMessage(message);
-             return;
+                this.lastKnownUpdatedTime < (now + 3 * 60 * 1000);
+            if (!song) {
+                const message = isRecentlyUpdated ? '[Air Break]' : 'No song data found';
+                this.currentPage.showStateMessage(message);
+                return;
             }
             // Predefined values
             const timezone = this.getNestedValue(this.currentStationData, this.stationKey, 'timezone', null);
