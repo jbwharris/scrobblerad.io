@@ -33,6 +33,19 @@
    --wm-radius: 12px;
 }
 
+@media (prefers-color-scheme: light) { 
+   html {
+      --backdrop-filter: blur(2rem) contrast(25%) brightness(155%) !important;
+   }
+}
+
+@media (prefers-color-scheme: dark) { 
+   html{
+      --backdrop-filter: blur(1.5em) contrast(50%) brightness(80%) !important;
+   }
+}
+
+
 html {
    height: 100dvh;
    scroll-behavior: smooth;
@@ -54,6 +67,7 @@ html {
       --sr-metadata: 0, var(--sr-saturation), 100%;
       --backdrop-filter: blur(3.5em) contrast(55%) brightness(125%);
    }
+
    }
 
    &[data-bs-theme="dark"] {
