@@ -15,7 +15,10 @@ const stationData = {
       "92.9",
       "NPR News",
       "PSA",
-      "kpcr.org"
+      "kpcr.org",
+      "Matt Munoz",
+      "Pledge",
+      "Democracy Now"
     ],
   },
 }

@@ -1,12 +1,10 @@
 const stationData = {
   wmfo: {
-
-    location: "Medford, MS 🇺🇸",
+    location: "Medford, MA 🇺🇸",
     webUrl: "https://www.wmfo.org/",
     streamUrl: "http://webstream.wmfo.org/;?type=http",
-    orbPath: "us.wmfo",
-    timestamp: "updated",
-    timezone: "America/Chicago",
+    spinPath: "wmfo",
+    timezone: "America/New_York",
     filter: ["WMFO"],
   },
 }

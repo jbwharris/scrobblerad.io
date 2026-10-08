@@ -1,6 +1,5 @@
 const stationData = {
   wfuv: {
-
     location: "New York, NY 🇺🇸",
     webUrl: "https://wfuv.org",
     streamUrl: "https://music.wfuv.org/music-hi",
@@ -8,5 +7,6 @@ const stationData = {
     timestamp: "updated",
     timezone: "America/New_York",
     filter: ["Nic Nemisz"],
+    proxyApi: true,
   }
 };

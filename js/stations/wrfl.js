@@ -1,6 +1,5 @@
 const stationData = {
   wrfl: {
-
     artist: "artist",
     song: "track",
     album: "album",

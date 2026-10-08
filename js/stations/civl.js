@@ -1,12 +1,12 @@
 const stationData = {
   civl: {
-
     location: "Abbotsford, BC 🇨🇦",
     webUrl: "https://www.chly.ca/",
     streamUrl: "https://live.civl.ca:8000/live.mp3",
     spinPath: "civl",
     timezone: "America/Vancouver",
     filter: ["CIVL"],
-    proxyStream: true,
+    quietStream: true,
+    gainBoost: 3,
   }
 };

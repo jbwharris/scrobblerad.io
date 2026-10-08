@@ -9,5 +9,7 @@ const stationData = {
     apiUrl: "https://bff.fm/api/data/onair/now.json",
     timezone: "America/Los_Angeles",
     filter: ["BFF"],
+    quietStream: true,
+    gainBoost: 5
   }
 };

@@ -1,20 +1,14 @@
 const stationData = {
   wyep: {
-    artist: "onNow.song.artistName",
-    song: "onNow.song.trackName",
-    album: "onNow.song.collectionName",
-    artist2: "tracklist.results.0.song.artistName",
-    song2: "tracklist.results.0.song.trackName",
-    album2: "tracklist.results.0.song.collectionName",
-
+    artist: "songs.99.song.artist.0",
+    song: "songs.99.song.title",
+    album: "songs.99.song.album",
     location: "Pittsburgh, PA 🇺🇸",
     webUrl: "https://wyep.org/",
     streamUrl: "https://ais-sa3.cdnstream1.com/2557_128.mp3",
-    nprPath: "50e451b6a93e91ee0a00028e",
+    cadencePath: "d969d497-6e65-4dba-9da9-637bb8006c44",
     filter: ["WYEP"],
-    timestamp: "onNow.song._end_time",
-    timestamp2: "tracklist.results.0.song._end_time",
-    altPath: true,
+    timestamp: "songs.99.start.local",
     timezone: "America/New_York",
   }
 };

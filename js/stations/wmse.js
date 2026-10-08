@@ -1,6 +1,5 @@
 const stationData = {
   wmse: {
-
     location: "Milwaukee, WI 🇺🇸",
     webUrl: "https://wmse.org",
     streamUrl: "https://wmse.streamguys1.com/wmselivemp3",

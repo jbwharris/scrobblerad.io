@@ -1,12 +1,11 @@
 const stationData = {
   megashuffle: {
-
-    location: "Toronto, ON 🇨🇦",
+    location: "Bristol, PA 🇺🇸",
     webUrl: "https://megashuffle.com",
     streamUrl: "https://das-edge13-live365-dal02.cdnstream.com/a18329",
-    orbPath: "ca.alternativerockvariety",
+    orbPath: "us.alternativerockvariety",
     timestamp: "updated",
-    timezone: "America/Toronto",
+    timezone: "America/New_York",
     filter: ["MegaShuffle", "Live365", "Advertisement"],
   }
 };

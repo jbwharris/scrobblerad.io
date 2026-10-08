@@ -1,19 +1,15 @@
 const stationData = {
   wext: {
-    artist: "onNow.song.artistName",
-    song: "onNow.song.trackName",
-    album: "onNow.song.collectionName",
-    artist2: "tracklist.results.0.song.artistName",
-    song2: "tracklist.results.0.song.trackName",
-    album2: "tracklist.results.0.song.collectionName",
-
+    artist: "songs.99.song.artist.0",
+    song: "songs.99.song.title",
+    album: "songs.99.song.album",
+    host: "songs.99.programName",
     location: "Troy, NY 🇺🇸",
     webUrl: "https://wext.drupal.publicbroadcasting.net/  ",
     streamUrl: "https://wmht.streamguys1.com/wext1",
-    nprPath: "5182cfc4e1c891fe553a5b52",
-    timestamp: "onNow.song._end_time",
-    timestamp2: "tracklist.results.0.song._end_time",
-    altPath: true,
+    cadencePath: "40a54b80-8f93-418b-8141-44ad19daf42e",
+    duration: "songs.99.song.duration",
+    timestamp: "songs.99.start.local",
     timezone: "America/New_York",
   },
 }

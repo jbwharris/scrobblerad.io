@@ -1,23 +1,16 @@
 const stationData = {
   novaphonicfm: {
-    artist: "onNow.song.artistName",
-    song: "onNow.song.trackName",
-    album: "onNow.song.collectionName",
-    artist2: "tracklist.results.0.song.artistName",
-    song2: "tracklist.results.0.song.trackName",
-    album2: "tracklist.results.0.song.collectionName",
-
+    artist: "songs.99.song.artist.0",
+    song: "songs.99.song.title",
+    album: "songs.99.song.album",
     location: "Dayton, OH 🇺🇸",
     webUrl: "https://www.wyso.org/novaphonic-fm",
     streamUrl:
       "https://playerservices.streamtheworld.com/api/livestream-redirect/WYSOHD2.mp3",
-    nprPath: "67081a247c0601352fda18e1",
+    cadencePath: "37eddaf1-2cab-432f-bb19-f7bf15729400",
     filter: ["WYSO"],
-    duration: "onNow.song._duration",
-    duration2: "tracklist.results.0.song._duration",
-    timestamp: "onNow.song._start_time",
-    timestamp2: "tracklist.results.0.song._start_time",
+    duration: "songs.99.song.duration",
+    timestamp: "songs.99.start.local",
     timezone: "America/New_York",
-    altPath: true,
   },
 }

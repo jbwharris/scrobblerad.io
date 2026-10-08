@@ -1,6 +1,5 @@
 const stationData = {
   cjuc: {
-
     location: "Whitehorse, Yukon 🇨🇦",
     webUrl: "https://cjucfm.com",
     streamUrl: "https://stream.cjucfm.com/cjuc",
@@ -12,6 +11,6 @@ const stationData = {
     proxyApi: true,
     pathRegex: /^(.*)-(.*)$/,
     flipMeta: true,
-    filter: ["CJUC", "podcast"]
+    filter: ["CJUC", "podcast"],
   }
 };

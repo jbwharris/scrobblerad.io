@@ -8,5 +8,6 @@ const stationData = {
     flipMeta: true,
     timestamp: "updated",
     timezone: "America/Denver",
+    proxyStream: true,
   }
 };
