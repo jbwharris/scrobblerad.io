@@ -488,43 +488,45 @@ this.shouldReloadStream = false;
         debouncedSetupAudio();
     }
     hlsStreamLoad(streamUrl, audioElement) {
-        // Check for native HLS support (Safari)
-        if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
-            audioElement.src = streamUrl;
-            audioElement.play().catch(error => {
-                console.error('Failed to play HLS natively:', error);
-            });
-        } else if (Hls.isSupported()) { // Fallback to HLS.js for other browsers
-            const hls = new Hls();
-            hls.loadSource(streamUrl);
-            hls.attachMedia(audioElement);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                audioElement.play().catch(error => {
-                    console.error('Failed to play HLS via HLS.js:', error);
-                });
-            });
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            console.error('Fatal network error encountered, try to recover');
-                            hls.startLoad();
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.error('Fatal media error encountered, try to recover');
-                            hls.recoverMediaError();
-                            break;
-                        default:
-                            hls.destroy();
-                            console.error('Unrecoverable error, destroy HLS instance');
-                            break;
-                    }
-                }
-            });
-            this.hls = hls; // Store HLS instance in the class
-        } else {
-            console.error('HLS is not supported in this browser and cannot be played.');
-        }
+     if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
+     audioElement.src = streamUrl;
+     audioElement.play().catch(error => {
+     console.error('Failed to play HLS natively:', error);
+     });
+     } else if (Hls.isSupported()) {
+     const hls = new Hls();
+     hls.loadSource(streamUrl);
+     hls.attachMedia(audioElement);
+     hls.on(Hls.Events.MANIFEST_PARSED, () => {
+     audioElement.play().catch(error => {
+     console.error('Failed to play HLS via HLS.js:', error);
+     });
+     });
+     hls.on(Hls.Events.ERROR, (event, data) => {
+     if (data.details === 'bufferStalledError' || data.details === 'bufferAddCodecError') {
+     return;
+     }
+     if (data.fatal) {
+     switch (data.type) {
+     case Hls.ErrorTypes.NETWORK_ERROR:
+     console.error('Fatal network error encountered, try to recover');
+     hls.startLoad();
+     break;
+     case Hls.ErrorTypes.MEDIA_ERROR:
+     console.error('Fatal media error encountered, try to recover');
+     hls.recoverMediaError();
+     break;
+     default:
+     hls.destroy();
+     console.error('Unrecoverable error, destroy HLS instance');
+     break;
+     }
+     }
+     });
+     this.hls = hls;
+     } else {
+     console.error('HLS is not supported in this browser and cannot be played.');
+     }
     }
     cleanupArtist(artist) {
         // Define patterns to find additional artists or features.
@@ -644,6 +646,24 @@ this.shouldReloadStream = false;
          timestamp: data[3] || '',
          };
          }
+
+        if (this.stationKey === 'rovr') {
+         const track = this.parseRovrResponse(data);
+         if (!track) {
+         this.currentTrack = { title: '', artist: '', album: '', albumArt: '', spinUpdated: '' };
+         return;
+         }
+         this.currentTrack = {
+         title: track.title,
+         artist: track.artist,
+         album: track.album,
+         albumArt: track.albumCover || '',
+         duration: track.duration,
+         timestamp: new Date().getTime()
+         };
+         return;
+        }
+
 
          if (this.getNestedValue(this.currentStationData, this.stationKey, 'orbPath', null) || this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null)) {
          if (this.getNestedValue(this.currentStationData, this.stationKey, 'dataPath', null) == true) {
@@ -950,6 +970,8 @@ this.shouldReloadStream = false;
                     } else if (this.getNestedValue(this.currentStationData, this.stationKey, 'cadencePath', null)) {
                          stationApiUrl = `https://cadence.nprstations.org//api/cadence/widget/${this.getNestedValue(this.currentStationData, this.stationKey, 'cadencePath', null)}/songs`;
                          this.usePost = true;
+                    } else if (this.stationKey === 'rovr') {
+                        stationApiUrl = this.buildRovrUrl();
                     } else {
                         if (this.getNestedValue(this.currentStationData, this.stationKey, 'proxyApi', null)) {
                             stationApiUrl = `https://scrobblerad.io/proxy.php?url=${this.getNestedValue(this.currentStationData, this.stationKey, 'apiUrl', null)}`;
@@ -1059,6 +1081,43 @@ this.shouldReloadStream = false;
                     });
             }
         }
+    }
+    buildRovrUrl() {
+     const now = new Date();
+     const pad = n => String(n).padStart(2, '0');
+     const dateStr = now.getFullYear() + '-' +
+     pad(now.getMonth() + 1) + '-' +
+     pad(now.getDate()) + ' ' +
+     pad(now.getHours()) + ':' +
+     pad(now.getMinutes()) + ':' +
+     pad(now.getSeconds());
+     return 'https://strapi.rovr.live/api/schedules/radio/public?date=' + encodeURIComponent(dateStr);
+    }
+    parseRovrResponse(data) {
+     const show = data?.data?.[0];
+     if (!show) return null;
+
+     const showStart = new Date(show.startTime.replace(' ', 'T'));
+     const elapsed = (Date.now() - showStart.getTime()) / 1000;
+
+     const cues = show.playlist?.stitchedTracksMetadata?.tracks_cues;
+     if (!cues) return null;
+
+     const match = cues.find(c => elapsed >= c.start && elapsed < c.end);
+     if (!match) return null;
+
+     const track = show.playlist.tracks[match.track_index];
+     if (!track) return null;
+
+     return {
+     title: track.title,
+     artist: track.artist,
+     album: track.album,
+     albumCover: track.albumCoverUrl,
+     duration: track.duration,
+     showTitle: show.show?.title,
+     curator: show.show?.curators?.[0]?.name
+     };
     }
     // Helper function to extract HTML content from a JavaScript response
     extractHTMLFromJS(js) {
@@ -1226,6 +1285,7 @@ this.shouldReloadStream = false;
             } else {
                 console.log("this.lastKnownUpdatedTime is less", this.lastKnownUpdatedTime, Date.now())
             }
+
             const extractedData = this.extractSongAndArtist(data, this.stationKey);
             const shouldUpdateNow = this.calculateShouldUpdateNow();
             // Compare the extractedData response with the previous one
@@ -1235,6 +1295,7 @@ this.shouldReloadStream = false;
             } else {
                 this.prevExtractedData = extractedData;
             }
+
             // Ensure extractedData is valid and handle cases where no song or artist is found
             if (!extractedData || extractedData.length === 0) {
                 this.currentPage.showStateMessage('[ Air break ]');
