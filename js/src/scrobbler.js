@@ -1,8 +1,12 @@
 import { updateHistory, renderScrobbleHistory, setTrackLiked } from './history.js';
 
 let lastFmBaseScrobbleUrl = "https://ws.audioscrobbler.com/2.0/";
+// Public app identifier only — required client-side for the Last.fm OAuth
+// redirect (it is already visible in that browser URL by design).
 const APIKEY = "1eda135bc7d7e3ef4815d11f9990d60c";
-const SECRET = "d006f6c9ede4f8d566110fdd5369dbe6";
+// The shared secret must never ship to the browser: all signed requests are
+// now signed server-side by proxy.php, which holds it instead.
+const LASTFM_PROXY_URL = "proxy.php?action=lastfm";
 
 export function startLastFmAuth() {
  const authUrl = `https://www.last.fm/api/auth/?api_key=${APIKEY}&cb=${encodeURIComponent(window.location.href)}`;
@@ -63,16 +67,9 @@ export function authenticateFM(callback) {
     window.location.href = authUrl;
     return;
   }
-  // Exchange token for session key + username
-  const sig = md5(`api_key${APIKEY}methodauth.getSessiontoken${token}${SECRET}`);
-  const body = new URLSearchParams({
-    method: "auth.getSession",
-    api_key: APIKEY,
-    token: token,
-    api_sig: sig,
-    format: "json"
-  });
-  fetch(lastFmBaseScrobbleUrl, {
+  // Exchange token for session key + username (signed server-side by proxy.php)
+  const body = new URLSearchParams({ method: "auth.getSession", token: token });
+  fetch(LASTFM_PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: body
@@ -82,16 +79,9 @@ export function authenticateFM(callback) {
       if (data?.session?.key) {
         const userKey = data.session.key;
         const username = data.session.name;
-        // Fetch user info (including avatar)
-        const userInfoSig = md5(`api_key${APIKEY}methoduser.getInfouser${username}${SECRET}`);
-        const userInfoBody = new URLSearchParams({
-          method: "user.getInfo",
-          api_key: APIKEY,
-          user: username,
-          api_sig: userInfoSig,
-          format: "json"
-        });
-        return fetch(lastFmBaseScrobbleUrl, {
+        // Fetch user info (including avatar), also signed server-side
+        const userInfoBody = new URLSearchParams({ method: "user.getInfo", user: username });
+        return fetch(LASTFM_PROXY_URL, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: userInfoBody
@@ -134,28 +124,15 @@ export function updateNowPlaying(track) {
   const userData = JSON.parse(userCookie);
   const userKey = userData.key;
   if (!userKey) return;
-  const sigBase =
-    "album" + track.trackAlbum +
-    "albumArtist" + track.trackArtist +
-    "api_key" + APIKEY +
-    "artist" + track.trackArtist +
-    "methodtrack.updateNowPlaying" +
-    "sk" + userKey +
-    "track" + track.trackTitle +
-    SECRET;
-  const sig = md5(sigBase);
   const body = new URLSearchParams({
     method: "track.updateNowPlaying",
-    api_key: APIKEY,
     artist: track.trackArtist,
     track: track.trackTitle,
     album: track.trackAlbum,
     albumArtist: track.trackArtist,
-    sk: userKey,
-    api_sig: sig,
-    format: "json"
+    sk: userKey
   });
-  fetch(lastFmBaseScrobbleUrl, {
+  fetch(LASTFM_PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: body
@@ -231,24 +208,11 @@ export async function scrobbleIt(track) {
     return;
   }
   // 3. Proceed with Scrobbling (Existing logic follows...)
-  let sigParts = "";
-  if (track.trackAlbum) {
-    sigParts += "album" + track.trackAlbum;
-    sigParts += "albumArtist" + track.trackArtist;
-  }
-  sigParts += "api_key" + APIKEY;
-  sigParts += "artist" + track.trackArtist;
-  sigParts += "methodtrack.scrobble";
-  sigParts += "sk" + userKey;
-  sigParts += "timestamp" + track.trackTimestamp;
-  sigParts += "track" + track.trackTitle;
-  sigParts += SECRET;
-  const sig = md5(sigParts);
-  let data = `method=track.scrobble&api_key=${APIKEY}&artist=${encodeURIComponent(track.trackArtist)}&track=${encodeURIComponent(track.trackTitle)}&timestamp=${track.trackTimestamp}&sk=${userKey}&api_sig=${sig}&format=json`;
+  let data = `method=track.scrobble&artist=${encodeURIComponent(track.trackArtist)}&track=${encodeURIComponent(track.trackTitle)}&timestamp=${track.trackTimestamp}&sk=${userKey}`;
   if (track.trackAlbum) {
     data += `&album=${encodeURIComponent(track.trackAlbum)}&albumArtist=${encodeURIComponent(track.trackArtist)}`;
   }
-  fetch(lastFmBaseScrobbleUrl, {
+  fetch(LASTFM_PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: data,
@@ -276,19 +240,13 @@ export function loveOrUnloveTrack(track, shouldLove) {
   const userKey = userData.key;
   if (!userKey || !track.trackArtist || !track.trackTitle) return Promise.resolve(false);
   const method = shouldLove ? "track.love" : "track.unlove";
-  const sig = md5(
-    `api_key${APIKEY}artist${track.trackArtist}method${method}sk${userKey}track${track.trackTitle}${SECRET}`
-  );
   const body = new URLSearchParams({
     method,
-    api_key: APIKEY,
     artist: track.trackArtist,
     track: track.trackTitle,
-    sk: userKey,
-    api_sig: sig,
-    format: "json"
+    sk: userKey
   });
-  return fetch(lastFmBaseScrobbleUrl, {
+  return fetch(LASTFM_PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
